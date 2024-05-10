@@ -2,7 +2,7 @@
 
 ## Description
 
-Provides 2-client game-play of Tic-Tac-Toe.
+Provides 2-client Tic-Tac-Toe game play.
 
 NOTE: This is sample code, part of the RustMadeEasy.com course: Intro to Rust. This code is not suitable for
 production. For example, the end-points are not secured and the game state is not persisted in a centralized fashion.
@@ -54,22 +54,49 @@ Roadmap:
    this visually and disallow further game play.
 8. The first client calls End Game (DELETE /v1/games/{game_id}).
 
+## Running the Service
+
+From the source root folder:
+
+`cargo run --release`
+
+With the service already built and installed in your system's path:
+
+`tic-tac-toe-service`
+
+## Open API 3
+
+This service generates an OpenAPI3 specification document, used to create the Swagger UI and to create PostMan collections, client SDKs, etc.
+
+## Viewing Swagger UI
+
+With the service running, point your browser to:  
+
+`http://localhost:50020/v1/swagger-ui`
+
 ## Generating a Client SDK
 
+1. Run the service.
+
+2. Download the OpenAPI3 spec file: 
+`curl -o "api-docs.json" "http://localhost:50020/v1/api-docs"`
+
+3. Run openapi-generator to create the desired client SDK. Some examples follow:
+
 ### Kotlin
-`openapi-generator generate -i "api-docs.txt" -g kotlin -o ./sdks/kotlin/tic-tac-toe-kotlin-client-sdk`
+`openapi-generator generate -i "api-docs.json" -g kotlin -o ./sdks/kotlin/tic-tac-toe-kotlin-client-sdk`
 
 ### Rust
-`openapi-generator generate -i "api-docs.txt" -g rust -o ./sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true`
-`openapi-generator generate -i "api-docs.txt" -g rust -o ./sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true,supportAsync=false`
+`openapi-generator generate -i "api-docs.json" -g rust -o ./sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true`
+`openapi-generator generate -i "api-docs.json" -g rust -o ./sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true,supportAsync=false`
 
 ### Swift
-`openapi-generator generate -i "api-docs.txt" -g swift5 -o ./sdks/tic-tac-toe-swift-client-sdk`
+`openapi-generator generate -i "api-docs.json" -g swift5 -o ./sdks/tic-tac-toe-swift-client-sdk`
 
 ## Port
 
 50020
 
-## API Documentation
+## Source code and additional documentation
 
-https://github.com/RustMadeEasy/course-work.git
+https://github.com/RustMadeEasy/course-work/tree/master/TicTacToe/tic-tac-toe-service

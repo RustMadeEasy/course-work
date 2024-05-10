@@ -1,4 +1,4 @@
-# Rust Made Easy Course Source Code 
+# Source Code for the Rust Made Easy Courses 
 
 ## Description
 
