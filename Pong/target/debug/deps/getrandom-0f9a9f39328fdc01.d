@@ -1,0 +1,11 @@
+/Users/studio/projects/RustMadeEasy/course-work/Pong/target/debug/deps/libgetrandom-0f9a9f39328fdc01.rmeta: /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/lib.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/error.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util_libc.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/macos.rs
+
+/Users/studio/projects/RustMadeEasy/course-work/Pong/target/debug/deps/libgetrandom-0f9a9f39328fdc01.rlib: /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/lib.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/error.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util_libc.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/macos.rs
+
+/Users/studio/projects/RustMadeEasy/course-work/Pong/target/debug/deps/getrandom-0f9a9f39328fdc01.d: /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/lib.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/error.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util_libc.rs /Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/macos.rs
+
+/Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/lib.rs:
+/Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/error.rs:
+/Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util.rs:
+/Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/util_libc.rs:
+/Users/studio/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.14/src/macos.rs:
