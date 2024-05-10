@@ -1,0 +1,19 @@
+[package]
+name = "tic_tac_toe_bevy"
+version = "0.1.0"
+edition = "2021"
+description = "Tic-Tac-Toe"
+
+[package.metadata.bundle]
+icon = [ "icons/app_icon.png" ]
+
+[dependencies]
+
+# *** Rust Made Easy dependencies ***
+helpers-for-bevy = { path = "../../../RustLibs/helpers-for-bevy" }
+tic_tac_toe_rust_client_sdk = { path = "../../client-sdks/tic-tac-toe-rust-client-sdk" }
+
+# *** Outside dependencies ***
+bevy = "0.13.2"
+lazy_static = "1.4.0"
+uuid = { version = "1.8.0", features = ["v4"] }

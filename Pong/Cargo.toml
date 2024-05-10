@@ -1,0 +1,18 @@
+[package]
+name = "pong"
+version = "0.2.2"
+edition = "2021"
+
+description = "Pong Game Demo"
+authors = ["Joel Davis <Joel@RustMadeEasy.com>"]
+license = "GPL-3"
+
+[dependencies]
+
+# *** Rust Made Easy dependencies ***
+helpers-for-bevy = { path = "../RustLibs/helpers-for-bevy" }
+
+# *** Outside dependencies ***
+bevy = "0.13.2"
+lazy_static = "1.4.0"
+rand = "0.8.5"
