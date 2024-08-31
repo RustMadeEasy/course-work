@@ -72,7 +72,7 @@ This service generates an OpenAPI3 specification document that can be used to cr
 
 With the service running, point your browser to:  
 
-`http://localhost:50020/v1/swagger-ui/`
+http://localhost:50020/v1/swagger-ui/
 
 ## Generating a Client SDK
 
