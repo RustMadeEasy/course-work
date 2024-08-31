@@ -7,6 +7,9 @@ description = "Pong Game Demo"
 authors = ["Joel Davis <Joel@RustMadeEasy.com>"]
 license = "GPL-3"
 
+[package.metadata.bundle]
+icon = [ "icons/app_icon.png" ]
+
 [dependencies]
 
 # *** Rust Made Easy dependencies ***

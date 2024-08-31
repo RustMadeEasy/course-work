@@ -3,6 +3,7 @@
 
 # Rust
 target/
+debug/
 
 # JetBrains IDE
 .idea/

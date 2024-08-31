@@ -66,13 +66,13 @@ With the service already built and installed in your system's path:
 
 ## Open API 3
 
-This service generates an OpenAPI3 specification document, used to create the Swagger UI and to create PostMan collections, client SDKs, etc.
+This service generates an OpenAPI3 specification document that can be used to create the Swagger UI and to create PostMan collections, client SDKs, etc.
 
 ## Viewing Swagger UI
 
 With the service running, point your browser to:  
 
-`http://localhost:50020/v1/swagger-ui`
+`http://localhost:50020/v1/swagger-ui/`
 
 ## Generating a Client SDK
 
