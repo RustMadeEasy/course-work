@@ -13,8 +13,8 @@ and scalable.
 Roadmap:
 
 1. Validation for request parameters.
-2. Auth.
-3. Sockets for Game state changes so that the clients do not have to poll.
+2. Authentication.
+3. MQTT for Game state changes so that the clients do not have to poll.
 4. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new invitation is no longer required for rematches within a Gaming Session.
 5. Central persistence, e.g. Surreal DB.
 6. Automatic cleanup of older or abandoned Games.
