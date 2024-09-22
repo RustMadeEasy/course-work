@@ -1,6 +1,5 @@
 //
 //  Tic_Tac_ToeApp.swift
-//  Tic-Tac-Toe
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author Joel@RustMadeEasy.com
@@ -8,6 +7,7 @@
 
 import SwiftUI
 import OpenAPIClient
+import MQTTNIO
 
 @main
 struct Tic_Tac_ToeApp: App {

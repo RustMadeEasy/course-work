@@ -1,6 +1,5 @@
 //
 //  GameInfoService.swift
-//  Tic Tac Toe
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author Joel@RustMadeEasy.com
@@ -9,11 +8,14 @@
 import Foundation
 import OpenAPIClient
 
+/// The data set returned by the GameInfoService methods.
 struct GameInfoServiceResult {
+    var newGameInfo: GameCreationResult?
     var gameInfo: GameInfo?
     var error: Error?
 }
 
+/// Enumerates the errors potentially returned by the GameInfoService methods.
 enum GameInfoManagerError: Error {
     case emptyData
 }
@@ -25,23 +27,23 @@ class GameInfoService {
     static func createGame(playerName: String) async -> GameInfoServiceResult {
 
         do {
-            
+
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
                 let params = NewGameParams(playerOneDisplayName: playerName)
-                TicTacToeAPI.createGame(newGameParams: params) { gameInfo, error in
+                TicTacToeAPI.createGame(newGameParams: params) { data, error in
                     if error == nil {
-                        if gameInfo != nil {
+                        if data != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(gameInfo: gameInfo!, error: nil) )
+                                continuation.resume(returning: GameInfoServiceResult(newGameInfo: data) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
                             print("createGame() error: \(String(describing: error))")
-                            continuation.resume(returning: GameInfoServiceResult(gameInfo: nil, error: error))
+                            continuation.resume(returning: GameInfoServiceResult(error: error))
                         }
                     } else {
                         print("createGame() error: \(String(describing: error))")
-                        continuation.resume(returning: GameInfoServiceResult(gameInfo: nil, error: error))
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
                     }
                 }
             }
@@ -70,11 +72,11 @@ class GameInfoService {
                     }
                 }
             }
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
             
         } catch {
             print("endGame() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
     
@@ -85,20 +87,20 @@ class GameInfoService {
             
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
                 let params = AddPlayerParams(gameInvitationCode: invitationCode, playerDisplayName: playerName)
-                TicTacToeAPI.addPlayer(addPlayerParams: params) { gameInfo, error in
+                TicTacToeAPI.addPlayer(addPlayerParams: params) { data, error in
                     if error == nil {
-                        if gameInfo != nil {
+                        if data != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(gameInfo: gameInfo!, error: nil) )
+                                continuation.resume(returning: GameInfoServiceResult(newGameInfo: data) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
                             print("joinGame() error: \(String(describing: error))")
-                            continuation.resume(returning: GameInfoServiceResult(gameInfo: nil, error: error))
+                            continuation.resume(returning: GameInfoServiceResult(error: error))
                         }
                     } else {
                         print("joinGame() error: \(String(describing: error))")
-                        continuation.resume(returning: GameInfoServiceResult(gameInfo: nil, error: error))
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
                     }
                 }
             }
@@ -120,16 +122,16 @@ class GameInfoService {
                     if error == nil {
                         if gameInfo != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(gameInfo: gameInfo!, error: nil) )
+                                continuation.resume(returning: GameInfoServiceResult(gameInfo: gameInfo!) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
                             print("retrieveGameInfo() error: \(String(describing: error))")
-                            continuation.resume(returning: GameInfoServiceResult(gameInfo: nil, error: error))
+                            continuation.resume(returning: GameInfoServiceResult(error: error))
                         }
                     } else {
                         print("retrieveGameInfo() error: \(String(describing: error))")
-                        continuation.resume(returning: GameInfoServiceResult(gameInfo: nil, error: error))
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
                     }
                 }
             }
@@ -151,7 +153,7 @@ class GameInfoService {
                 TicTacToeAPI.takeTurn(gameId: gameId, gameTurnInfo: turnInfo) { data, error in
                     if error == nil {
                         DispatchQueue.main.async {
-                            continuation.resume(returning: nil )
+                            continuation.resume(returning: nil)
                         }
                     } else {
                         print("takeTurn() error: \(String(describing: error))")
@@ -159,11 +161,11 @@ class GameInfoService {
                     }
                 }
             }
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
             
         } catch {
             print("takeTurn() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
 }

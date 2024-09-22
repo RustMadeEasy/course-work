@@ -1,6 +1,5 @@
 //
 //  GameInfoViewModel.swift
-//  Tic-Tac-Toe
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author Joel@RustMadeEasy.com
@@ -16,21 +15,21 @@ struct Position {
     var column: Int
 }
 
-/// Provides control over a Tic-Tac-Toe Game as well as near-realtime Game info.
+/// Provides control over a Tic-Tac-Toe Game.
 class GameInfoViewModel: ObservableObject {
-
+    
     /// Specifies the locations of the Game pieces
     @Published private var gameBoard: [[GamePiece]] = []
-
+    
     /// Indicates whether the Game has ended.
     @Published var gameEnded: Bool = false
     
     /// Remembers the ID of the Game. This is used for subsequent cals to the GameInfoService.
     @Published private var gameId: String = ""
-
+    
     /// When the game has ended, gameResults contains localized messaging that details the result of the Game.
     @Published var gameResults: String = ""
-
+    
     /// Indicates whether the Game has been started.
     @Published var hasGameStarted: Bool = false
     
@@ -39,7 +38,7 @@ class GameInfoViewModel: ObservableObject {
     
     /// The code used to invite a new player to the Game.
     @Published var invitationCode: String = ""
-
+    
     /// Indicates whether Player One is the current player.
     @Published var isPlayerOneCurrentPlayer: Bool = false
     
@@ -61,28 +60,39 @@ class GameInfoViewModel: ObservableObject {
     /// Display name of Player Two.
     @Published var playerTwoDisplayName: String = ""
     
-    /// Timer that is used to regularly retrieve the latest Game info.
-    @State private var updateTimer: Timer? = nil
-    
     /// If/when the Game has been won, winningPlayerName contains the name of the player who won the Game.
     @Published private var winningPlayerName: String?
     
     /// If/when the Game has been won, winningLocations lists the locations of the winning Game pieces.
     @Published private var winningLocations: [Position]?
+    
+    /// Informs this instance when our Tic Tac Toe service has updated the game state.
+    private var gameInfoReceiver: GameInfoReceiver?
 
+    init(localPlayerName: String, invitationCode: String = "") {
+        self.gameInfoReceiver = nil
+        self._localPlayerName = Published(initialValue: localPlayerName)
+        self._invitationCode = Published(initialValue: invitationCode)
+    }
+}
+
+extension GameInfoViewModel {
+    
     /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
     func createGame() async -> Error? {
         
         let result = await GameInfoService.createGame(playerName: self.localPlayerName)
         
-        if let gameInfo = result.gameInfo {
+        if let newGameInfo = result.newGameInfo {
+            
             DispatchQueue.main.async {
+                self.invitationCode = newGameInfo.gameInvitationCode
                 self._initiatedGame = Published(wrappedValue: true)
-                self._gameId = Published(wrappedValue: gameInfo.id)
-                self.update(gameInfo: gameInfo)
-                self._localPlayerId = Published(wrappedValue: gameInfo.players.first!.playerId)
-                self._localPlayerName = Published(wrappedValue: gameInfo.players.first!.displayName)
-                self.startAutoUpdates()
+                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
+                self.update(gameInfo: newGameInfo.gameInfo)
+                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+                self._localPlayerName = Published(wrappedValue: newGameInfo.gameInfo.players.first!.displayName)
+                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGameInfo.eventPlaneConfig, delegate: self)
             }
         }
 
@@ -91,8 +101,6 @@ class GameInfoViewModel: ObservableObject {
 
     /// Ends the current game and stops the auto updating of the game info.
     func endGame() async -> Error? {
-
-        self.stopAutoUpdates()
 
         var result: Error? = nil
         
@@ -122,11 +130,6 @@ class GameInfoViewModel: ObservableObject {
         }
     }
 
-    init(localPlayerName: String, invitationCode: String = "") {
-        self._localPlayerName = Published(initialValue: localPlayerName)
-        self._invitationCode = Published(initialValue: invitationCode)
-    }
-
     /// When a Game has been won, this function determines whether the specified position (block) represents a position that won the Game.
     func isWinningPosition(pos: Position) -> Bool {
         if let winningLocations = self.winningLocations {
@@ -143,13 +146,13 @@ class GameInfoViewModel: ObservableObject {
         
         let result = await GameInfoService.joinGame(invitationCode: invitationCode, playerName: self.localPlayerName)
         
-        if let gameInfo = result.gameInfo {
+        if let newGameInfo = result.newGameInfo {
             DispatchQueue.main.async {
-                self._gameId = Published(wrappedValue: gameInfo.id)
-                self.update(gameInfo: gameInfo)
-                self._localPlayerId = Published(wrappedValue: gameInfo.players.last!.playerId)
-                self._localPlayerName = Published(wrappedValue: gameInfo.players.last!.displayName)
-                self.startAutoUpdates()
+                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
+                self.update(gameInfo: newGameInfo.gameInfo)
+                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.last!.playerId)
+                self._localPlayerName = Published(wrappedValue: newGameInfo.gameInfo.players.last!.displayName)
+                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGameInfo.eventPlaneConfig, delegate: self)
             }
         }
 
@@ -170,34 +173,10 @@ class GameInfoViewModel: ObservableObject {
         localPlayerId = ""
         playerOneDisplayName = ""
         playerTwoDisplayName = ""
-        updateTimer = nil
         winningPlayerName = nil
         winningLocations = nil
     }
     
-    /// Performs a periodic updates of this instance to reflect the latest Game state on our Tic-Tac-Toe
-    /// service. This function is needed because our Tic-Tac-Toe service does not support Sockets quite yet.
-    private func startAutoUpdates() {
-        if self.updateTimer == nil {
-            let updateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-                Task {
-                    let result = await GameInfoService.retrieveGameInfo(gameId: self.gameId)
-                    if result.error == nil && result.gameInfo != nil {
-                        self.update(gameInfo: result.gameInfo!)
-                    }
-                }
-            }
-            self._updateTimer = State(initialValue: updateTimer)
-        } else {
-            self.updateTimer?.fire()
-        }
-    }
-    
-    /// Stops the automatic Game Info updates.
-    private func stopAutoUpdates() {
-        self.updateTimer?.invalidate()
-    }
-
     /// Performs a Game move for the specified Player.
     func takeTurn(pos: Position) async -> Error? {
         
@@ -232,6 +211,16 @@ class GameInfoViewModel: ObservableObject {
         }
     }
     
+    /// Retrieves new game state info from our Tic Tac Toe service.
+    private func refreshGameInfo() {
+        Task {
+            let result = await GameInfoService.retrieveGameInfo(gameId: self.gameId)
+            if result.error == nil && result.gameInfo != nil {
+                self.update(gameInfo: result.gameInfo!)
+            }
+        }
+    }
+    
     /// Updates this instance with the values of the passed in GameInfo.
     private func update(gameInfo: GameInfo) {
         
@@ -242,9 +231,7 @@ class GameInfoViewModel: ObservableObject {
             self.gameEnded = gameInfo.gameState.playStatus == .endedInStalemate || gameInfo.gameState.playStatus == .endedInWin
             
             self.hasGameStarted = gameInfo.gameState.playStatus != .notStarted
-            
-            self.invitationCode = gameInfo.gameInvitationCode
-            
+
             // isPlayerOneCurrentPlayer
             if gameInfo.gameState.playStatus == .inProgress {
                 self.isPlayerOneCurrentPlayer = gameInfo.players.first?.playerId == gameInfo.currentPlayer?.playerId ?? ""
@@ -296,5 +283,25 @@ class GameInfoViewModel: ObservableObject {
             
             self.gameResults = self.getGameResults(gameInfo: gameInfo, winningPlayerName: self.winningPlayerName ?? "")
         }
+    }
+}
+
+/// GameInfoReceiverDelegate implementation
+extension GameInfoViewModel: GameInfoReceiverDelegate {
+    
+    func onGameEndedInStalemate() {
+        refreshGameInfo()
+    }
+    
+    func onGameEndedInWin() {
+        refreshGameInfo()
+    }
+    
+    func onPlayerAdded() {
+        refreshGameInfo()
+    }
+    
+    func onTurnTaken() {
+        refreshGameInfo()
     }
 }
