@@ -27,7 +27,7 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*TicTacToeApi* | [**add_player**](docs/TicTacToeApi.md#add_player) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
+*TicTacToeApi* | [**add_player**](docs/TicTacToeApi.md#add_player) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com
 *TicTacToeApi* | [**create_game**](docs/TicTacToeApi.md#create_game) | **POST** /v1/games | Creates a new Game. Returns the Game Info.
 *TicTacToeApi* | [**end_game**](docs/TicTacToeApi.md#end_game) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 *TicTacToeApi* | [**get_game_history**](docs/TicTacToeApi.md#get_game_history) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial creation to the current

@@ -38,7 +38,7 @@ const PORT: u16 = 50020;
 // Provides 2-client game-play of Tic-Tac-Toe.
 //
 // © 2024 Rust Made Easy. All rights reserved.
-// @author Joel@RustMadeEasy.com
+// @author Info@RustMadeEasy.com
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

@@ -9,7 +9,7 @@ pub(crate) mod local_service_client;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Joel@RustMadeEasy.com
+//  @author Info@RustMadeEasy.com
 
 lazy_static! {
     pub(crate) static ref BACKGROUND_COLOR: Color = Color::hex("521c93").unwrap_or_default();

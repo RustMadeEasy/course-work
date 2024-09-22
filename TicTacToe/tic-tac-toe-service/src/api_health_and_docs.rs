@@ -20,7 +20,7 @@ use crate::play_status::PlayStatus;
  * Defines and implements the public Health and Docs contracts for this service.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Joel@RustMadeEasy.com
+ * @author Info@RustMadeEasy.com
  */
 
 /// Generates the OpenAPI3 docs.

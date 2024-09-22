@@ -12,7 +12,7 @@ use crate::shared::BACKGROUND_COLOR;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Joel@RustMadeEasy.com
+//  @author Info@RustMadeEasy.com
 
 // Our set_camera_zoom() function will animate the zoom from 2.0 down to TARGET_SCALE.
 const TARGET_SCALE: f32 = 0.52;

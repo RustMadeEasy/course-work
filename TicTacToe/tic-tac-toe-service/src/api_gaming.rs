@@ -2,7 +2,7 @@
  * Defines and implements the public Gaming contract for this service.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Joel@RustMadeEasy.com
+ * @author Info@RustMadeEasy.com
  */
 
 use std::sync::Mutex;

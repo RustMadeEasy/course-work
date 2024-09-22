@@ -7,7 +7,7 @@ use crate::status_text::status_text_resource::StatusTextSettingsResource;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Joel@RustMadeEasy.com
+//  @author Info@RustMadeEasy.com
 
 /// StatusTextPlugin displays text for a specified (or indefinite) period of time. By default, the
 /// text is centered along the bottom of the window. The text style and view style are configurable.

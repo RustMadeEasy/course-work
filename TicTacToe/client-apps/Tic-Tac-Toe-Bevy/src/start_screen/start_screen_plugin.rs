@@ -6,7 +6,7 @@ use crate::shared::despawn;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Joel@RustMadeEasy.com
+//  @author Info@RustMadeEasy.com
 
 /// Defines the purposes of the Start Screen buttons.
 #[derive(Clone)]

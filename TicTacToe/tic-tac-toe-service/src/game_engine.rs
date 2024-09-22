@@ -17,7 +17,7 @@ use crate::play_status::PlayStatus;
  * Provides Tic-Tac-Toe game play functionality.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Joel@RustMadeEasy.com
+ * @author Info@RustMadeEasy.com
  */
 
 /// Provides Tic-Tac-Toe game play functionality.

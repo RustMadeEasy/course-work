@@ -15,7 +15,7 @@ pub(super) mod tiles_plugin;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Joel@RustMadeEasy.com
+//  @author Info@RustMadeEasy.com
 
 pub(super) const GRID_ROWS: usize = 3;
 pub(super) const GRID_COLUMNS: usize = 3;

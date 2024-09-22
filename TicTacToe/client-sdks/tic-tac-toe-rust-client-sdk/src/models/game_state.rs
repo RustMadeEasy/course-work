@@ -10,7 +10,7 @@
 
 use crate::models;
 
-/// GameState : * Defines Game State related structs and enums.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Models the state of a game at a particular move.
+/// GameState : * Defines Game State related structs and enums.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com Models the state of a game at a particular move.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameState {
     #[serde(rename = "game_board")]
@@ -37,7 +37,7 @@ pub struct GameState {
 }
 
 impl GameState {
-    /// * Defines Game State related structs and enums.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Models the state of a game at a particular move.
+    /// * Defines Game State related structs and enums.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com Models the state of a game at a particular move.
     pub fn new(
         game_board: Vec<Vec<models::GamePiece>>,
         id_of_player_who_made_move: String,

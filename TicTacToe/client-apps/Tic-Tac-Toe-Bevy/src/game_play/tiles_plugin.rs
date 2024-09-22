@@ -24,7 +24,7 @@ use crate::shared::{BACKGROUND_COLOR, FOREGROUND_COLOR};
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Joel@RustMadeEasy.com
+//  @author Info@RustMadeEasy.com
 
 const TILE_FONT_SIZE: f32 = 44_f32;
 const TILE_SIDE: f32 = 100_f32;

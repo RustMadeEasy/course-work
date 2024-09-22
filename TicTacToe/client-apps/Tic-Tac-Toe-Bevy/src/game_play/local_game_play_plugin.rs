@@ -23,7 +23,7 @@ use crate::shared::local_service_client::service_client::LocalServiceClient;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Joel@RustMadeEasy.com
+//  @author Info@RustMadeEasy.com
 
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
 pub(super) struct LocalGamePlayPlugin;

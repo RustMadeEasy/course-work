@@ -7,7 +7,7 @@ use derive_more::{Display, Error};
  * Defines the errors used throughout the service.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Joel@RustMadeEasy.com
+ * @author Info@RustMadeEasy.com
  */
 
 /// Defines the errors used throughout the service.

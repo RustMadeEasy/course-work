@@ -65,7 +65,7 @@ pub enum TakeTurnError {
     UnknownValue(serde_json::Value),
 }
 
-/// * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Adds a Player to the Game. Returns the Game Info.
+/// * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com Adds a Player to the Game. Returns the Game Info.
 pub fn add_player(
     configuration: &configuration::Configuration,
     add_player_params: models::AddPlayerParams,

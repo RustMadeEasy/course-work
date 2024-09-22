@@ -10,7 +10,7 @@
 
 use crate::models;
 
-/// PlayerInfo : * Models a Tic-Tac-Toe game Player.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Models a Tic-Tac-Toe game Player.
+/// PlayerInfo : * Models a Tic-Tac-Toe game Player.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com Models a Tic-Tac-Toe game Player.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PlayerInfo {
     #[serde(rename = "display_name")]
@@ -22,7 +22,7 @@ pub struct PlayerInfo {
 }
 
 impl PlayerInfo {
-    /// * Models a Tic-Tac-Toe game Player.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Models a Tic-Tac-Toe game Player.
+    /// * Models a Tic-Tac-Toe game Player.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com Models a Tic-Tac-Toe game Player.
     pub fn new(
         display_name: String,
         game_piece: models::GamePiece,

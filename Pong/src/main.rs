@@ -23,7 +23,7 @@ mod sound_player;
 //
 // © 2024 Rust Made Easy. All rights reserved.
 //
-// @author Joel@RustMadeEasy.com
+// @author Info@RustMadeEasy.com
 
 lazy_static! {
     static ref BACKGROUND_COLOR: Color = Color::hex("6d2abc").unwrap();

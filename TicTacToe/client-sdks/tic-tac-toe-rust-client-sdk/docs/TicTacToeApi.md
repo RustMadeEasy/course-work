@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**add_player**](TicTacToeApi.md#add_player) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
+[**add_player**](TicTacToeApi.md#add_player) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com
 [**create_game**](TicTacToeApi.md#create_game) | **POST** /v1/games | Creates a new Game. Returns the Game Info.
 [**end_game**](TicTacToeApi.md#end_game) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**get_game_history**](TicTacToeApi.md#get_game_history) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial creation to the current
@@ -16,9 +16,9 @@ Method | HTTP request | Description
 ## add_player
 
 > models::GameInfo add_player(add_player_params)
-* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
+* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com
 
-* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Adds a Player to the Game. Returns the Game Info.
+* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Info@RustMadeEasy.com Adds a Player to the Game. Returns the Game Info.
 
 ### Parameters
 
