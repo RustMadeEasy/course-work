@@ -1,31 +1,13 @@
-# Tic-Tac-Toe Game Service
+# MQTT Publisher Library
 
 ## Description
 
-Provides support for publishing MQTT messages. Versions 3.1.1 and 5 of the protocol are supported. NOTE: Most brokers do not support messaging between clients using different versions of the protocol.
+Provides MQTT message publishing functionality, including _simulcast_ to multiple brokers of differing versions.
 
-### Why MQTT?
+Simulcast can be helpful because most brokers do not support messaging between clients using different versions of the protocol.  
 
-does not require elaborate discovery
+Versions 3.1.1 and 5 of the MQTT protocol are supported.
 
-well-supported, from embedded environments to web clients to native mobile and desktop.
+## Usage Notes
 
-performant
-
-light-weight
-
-
-#### Which Broker to Choose?
-
-Self-hosted
-EMQX, Mosquitto, etc.
-
-Testing
-Mosquitto:
-test.mosquitto.org
-
-PaaS
-
-AWS IoT, Google Cloud IoT, or Microsoft Azure IoT Hub, HiveMq, etc.
-
-## Usage
+This library does not support connections to a bare IP address with a self-signed certificate. One workaround, which only works under *nix/BSD-like systems, is to add an entry to wherever your DNS resolver looks (e.g. /etc/hosts) for the bare IP address and use that name in your code.

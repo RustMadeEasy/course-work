@@ -1,7 +1,16 @@
 [package]
-name = "mqtt-publisher"
-version = "0.1.0"
+name = "mqtt-publisher-lib"
+version = "0.1.1"
 edition = "2021"
 
+description = "MQTT Publisher Library"
+authors = ["Joel Davis <JoelDavisEngineering@Gmail.com>"]
+
 [dependencies]
+derive_more = { version = "1.0.0", features = ["full"] }
+env_logger = "0.11.2"
+log = "0.4.21"
 rumqttc = "0.24.0"
+serde = { version = "1.0.209", features = ["derive"] }
+tokio = "1.40.0"
+uuid = { version = "1.10.0", features = ["v4"] }
