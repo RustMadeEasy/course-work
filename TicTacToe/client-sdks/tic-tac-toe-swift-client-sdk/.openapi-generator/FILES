@@ -14,6 +14,9 @@ OpenAPIClient/Classes/OpenAPIs/JSONEncodingHelper.swift
 OpenAPIClient/Classes/OpenAPIs/Models.swift
 OpenAPIClient/Classes/OpenAPIs/Models/AddPlayerParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/BoardPosition.swift
+OpenAPIClient/Classes/OpenAPIs/Models/EventPlaneConfig.swift
+OpenAPIClient/Classes/OpenAPIs/Models/EventTopicNames.swift
+OpenAPIClient/Classes/OpenAPIs/Models/GameCreationResult.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GameInfo.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GamePiece.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GameState.swift
@@ -29,6 +32,9 @@ Package.swift
 README.md
 docs/AddPlayerParams.md
 docs/BoardPosition.md
+docs/EventPlaneConfig.md
+docs/EventTopicNames.md
+docs/GameCreationResult.md
 docs/GameInfo.md
 docs/GamePiece.md
 docs/GameState.md

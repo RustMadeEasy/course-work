@@ -14,17 +14,14 @@ import AnyCodable
 public struct GameInfo: Codable, JSONEncodable, Hashable {
 
     public var currentPlayer: PlayerInfo?
-    /** Code used to invite the second player to the game */
-    public var gameInvitationCode: String
     public var gameState: GameState
     /** Unique ID of the Game Engine */
     public var id: String
     /** List of Players */
     public var players: [PlayerInfo]
 
-    public init(currentPlayer: PlayerInfo? = nil, gameInvitationCode: String, gameState: GameState, id: String, players: [PlayerInfo]) {
+    public init(currentPlayer: PlayerInfo? = nil, gameState: GameState, id: String, players: [PlayerInfo]) {
         self.currentPlayer = currentPlayer
-        self.gameInvitationCode = gameInvitationCode
         self.gameState = gameState
         self.id = id
         self.players = players
@@ -32,7 +29,6 @@ public struct GameInfo: Codable, JSONEncodable, Hashable {
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case currentPlayer = "current_player"
-        case gameInvitationCode = "game_invitation_code"
         case gameState = "game_state"
         case id
         case players
@@ -43,7 +39,6 @@ public struct GameInfo: Codable, JSONEncodable, Hashable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(currentPlayer, forKey: .currentPlayer)
-        try container.encode(gameInvitationCode, forKey: .gameInvitationCode)
         try container.encode(gameState, forKey: .gameState)
         try container.encode(id, forKey: .id)
         try container.encode(players, forKey: .players)

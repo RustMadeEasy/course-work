@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** * Defines Game State related structs and enums.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Models the state of a game at a particular move. */
+/** Models the state of a game at a particular move. */
 public struct GameState: Codable, JSONEncodable, Hashable {
 
     public var gameBoard: [[GamePiece]]

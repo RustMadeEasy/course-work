@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** * Models a Tic-Tac-Toe game Player.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Models a Tic-Tac-Toe game Player. */
+/** Models a Tic-Tac-Toe game Player. */
 public struct PlayerInfo: Codable, JSONEncodable, Hashable {
 
     public var displayName: String

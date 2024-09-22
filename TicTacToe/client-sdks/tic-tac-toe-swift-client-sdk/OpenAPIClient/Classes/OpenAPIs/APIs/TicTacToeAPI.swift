@@ -13,14 +13,14 @@ import AnyCodable
 open class TicTacToeAPI {
 
     /**
-     * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
+     Adds a Player to the Game. Returns Game Creation Result.
      
      - parameter addPlayerParams: (body)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func addPlayer(addPlayerParams: AddPlayerParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameInfo?, _ error: Error?) -> Void)) -> RequestTask {
+    open class func addPlayer(addPlayerParams: AddPlayerParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
         return addPlayerWithRequestBuilder(addPlayerParams: addPlayerParams).execute(apiResponseQueue) { result in
             switch result {
             case let .success(response):
@@ -32,13 +32,13 @@ open class TicTacToeAPI {
     }
 
     /**
-     * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
+     Adds a Player to the Game. Returns Game Creation Result.
      - POST /v1/games/players
-     - * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Adds a Player to the Game. Returns the Game Info.
+     - Adds a Player to the Game. Returns Game Creation Result.
      - parameter addPlayerParams: (body)  
-     - returns: RequestBuilder<GameInfo> 
+     - returns: RequestBuilder<GameCreationResult> 
      */
-    open class func addPlayerWithRequestBuilder(addPlayerParams: AddPlayerParams) -> RequestBuilder<GameInfo> {
+    open class func addPlayerWithRequestBuilder(addPlayerParams: AddPlayerParams) -> RequestBuilder<GameCreationResult> {
         let localVariablePath = "/v1/games/players"
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
         let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: addPlayerParams)
@@ -51,20 +51,20 @@ open class TicTacToeAPI {
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
-        let localVariableRequestBuilder: RequestBuilder<GameInfo>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+        let localVariableRequestBuilder: RequestBuilder<GameCreationResult>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
 
         return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
     }
 
     /**
-     Creates a new Game. Returns the Game Info.
+     Creates a new Game. Returns Game Creation Result.
      
      - parameter newGameParams: (body)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func createGame(newGameParams: NewGameParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameInfo?, _ error: Error?) -> Void)) -> RequestTask {
+    open class func createGame(newGameParams: NewGameParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
         return createGameWithRequestBuilder(newGameParams: newGameParams).execute(apiResponseQueue) { result in
             switch result {
             case let .success(response):
@@ -76,13 +76,13 @@ open class TicTacToeAPI {
     }
 
     /**
-     Creates a new Game. Returns the Game Info.
+     Creates a new Game. Returns Game Creation Result.
      - POST /v1/games
-     - Creates a new Game. Returns the Game Info.
+     - Creates a new Game. Returns Game Creation Result.
      - parameter newGameParams: (body)  
-     - returns: RequestBuilder<GameInfo> 
+     - returns: RequestBuilder<GameCreationResult> 
      */
-    open class func createGameWithRequestBuilder(newGameParams: NewGameParams) -> RequestBuilder<GameInfo> {
+    open class func createGameWithRequestBuilder(newGameParams: NewGameParams) -> RequestBuilder<GameCreationResult> {
         let localVariablePath = "/v1/games"
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
         let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: newGameParams)
@@ -95,7 +95,7 @@ open class TicTacToeAPI {
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
-        let localVariableRequestBuilder: RequestBuilder<GameInfo>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+        let localVariableRequestBuilder: RequestBuilder<GameCreationResult>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
 
         return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
     }
@@ -148,7 +148,7 @@ open class TicTacToeAPI {
     }
 
     /**
-     Retrieves the history of the Game States from the initial creation to the current
+     Retrieves the history of the Game States from the initial move (turn) to the latest.
      
      - parameter gameId: (path)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
@@ -167,9 +167,9 @@ open class TicTacToeAPI {
     }
 
     /**
-     Retrieves the history of the Game States from the initial creation to the current
+     Retrieves the history of the Game States from the initial move (turn) to the latest.
      - GET /v1/games/{game_id}/turns
-     - Retrieves the history of the Game States from the initial creation to the current Game State. This can be used, for instance, for the client to provide an animation that shows a time-lapse of the game play.
+     - Retrieves the history of the Game States from the initial move (turn) to the latest. Game State. This can be used, for instance, for the client to provide an animation that shows a time-lapse of the game play.
      - parameter gameId: (path)  
      - returns: RequestBuilder<[GameState]> 
      */
@@ -242,7 +242,7 @@ open class TicTacToeAPI {
     }
 
     /**
-     Make a game move for the specified Player.
+     Make a game move (turn) for the specified Player.
      
      - parameter gameId: (path)  
      - parameter gameTurnInfo: (body)  
@@ -262,9 +262,9 @@ open class TicTacToeAPI {
     }
 
     /**
-     Make a game move for the specified Player.
+     Make a game move (turn) for the specified Player.
      - POST /v1/games/{game_id}/turns
-     - Make a game move for the specified Player.
+     - Make a game move (turn) for the specified Player.
      - parameter gameId: (path)  
      - parameter gameTurnInfo: (body)  
      - returns: RequestBuilder<Void> 

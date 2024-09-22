@@ -4,22 +4,22 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**addPlayer**](TicTacToeAPI.md#addplayer) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
-[**createGame**](TicTacToeAPI.md#creategame) | **POST** /v1/games | Creates a new Game. Returns the Game Info.
+[**addPlayer**](TicTacToeAPI.md#addplayer) | **POST** /v1/games/players | Adds a Player to the Game. Returns Game Creation Result.
+[**createGame**](TicTacToeAPI.md#creategame) | **POST** /v1/games | Creates a new Game. Returns Game Creation Result.
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
-[**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial creation to the current
+[**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest.
 [**getGameInfo**](TicTacToeAPI.md#getgameinfo) | **GET** /v1/games/{game_id} | Retrieves the specified Game info.
-[**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a game move for the specified Player.
+[**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a game move (turn) for the specified Player.
 
 
 # **addPlayer**
 ```swift
-    open class func addPlayer(addPlayerParams: AddPlayerParams, completion: @escaping (_ data: GameInfo?, _ error: Error?) -> Void)
+    open class func addPlayer(addPlayerParams: AddPlayerParams, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
 ```
 
-* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
+Adds a Player to the Game. Returns Game Creation Result.
 
-* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com Adds a Player to the Game. Returns the Game Info.
+Adds a Player to the Game. Returns Game Creation Result.
 
 ### Example
 ```swift
@@ -28,7 +28,7 @@ import OpenAPIClient
 
 let addPlayerParams = AddPlayerParams(gameInvitationCode: "gameInvitationCode_example", playerDisplayName: "playerDisplayName_example") // AddPlayerParams | 
 
-// * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author Joel@RustMadeEasy.com
+// Adds a Player to the Game. Returns Game Creation Result.
 TicTacToeAPI.addPlayer(addPlayerParams: addPlayerParams) { (response, error) in
     guard error == nil else {
         print(error)
@@ -49,7 +49,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**GameInfo**](GameInfo.md)
+[**GameCreationResult**](GameCreationResult.md)
 
 ### Authorization
 
@@ -64,12 +64,12 @@ No authorization required
 
 # **createGame**
 ```swift
-    open class func createGame(newGameParams: NewGameParams, completion: @escaping (_ data: GameInfo?, _ error: Error?) -> Void)
+    open class func createGame(newGameParams: NewGameParams, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
 ```
 
-Creates a new Game. Returns the Game Info.
+Creates a new Game. Returns Game Creation Result.
 
-Creates a new Game. Returns the Game Info.
+Creates a new Game. Returns Game Creation Result.
 
 ### Example
 ```swift
@@ -78,7 +78,7 @@ import OpenAPIClient
 
 let newGameParams = NewGameParams(playerOneDisplayName: "playerOneDisplayName_example") // NewGameParams | 
 
-// Creates a new Game. Returns the Game Info.
+// Creates a new Game. Returns Game Creation Result.
 TicTacToeAPI.createGame(newGameParams: newGameParams) { (response, error) in
     guard error == nil else {
         print(error)
@@ -99,7 +99,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**GameInfo**](GameInfo.md)
+[**GameCreationResult**](GameCreationResult.md)
 
 ### Authorization
 
@@ -167,9 +167,9 @@ No authorization required
     open class func getGameHistory(gameId: String, completion: @escaping (_ data: [GameState]?, _ error: Error?) -> Void)
 ```
 
-Retrieves the history of the Game States from the initial creation to the current
+Retrieves the history of the Game States from the initial move (turn) to the latest.
 
-Retrieves the history of the Game States from the initial creation to the current Game State. This can be used, for instance, for the client to provide an animation that shows a time-lapse of the game play.
+Retrieves the history of the Game States from the initial move (turn) to the latest. Game State. This can be used, for instance, for the client to provide an animation that shows a time-lapse of the game play.
 
 ### Example
 ```swift
@@ -178,7 +178,7 @@ import OpenAPIClient
 
 let gameId = "gameId_example" // String | 
 
-// Retrieves the history of the Game States from the initial creation to the current
+// Retrieves the history of the Game States from the initial move (turn) to the latest.
 TicTacToeAPI.getGameHistory(gameId: gameId) { (response, error) in
     guard error == nil else {
         print(error)
@@ -267,9 +267,9 @@ No authorization required
     open class func takeTurn(gameId: String, gameTurnInfo: GameTurnInfo, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
 ```
 
-Make a game move for the specified Player.
+Make a game move (turn) for the specified Player.
 
-Make a game move for the specified Player.
+Make a game move (turn) for the specified Player.
 
 ### Example
 ```swift
@@ -279,7 +279,7 @@ import OpenAPIClient
 let gameId = "gameId_example" // String | 
 let gameTurnInfo = GameTurnInfo(destination: BoardPosition(column: 123, row: 123), playerId: "playerId_example") // GameTurnInfo | 
 
-// Make a game move for the specified Player.
+// Make a game move (turn) for the specified Player.
 TicTacToeAPI.takeTurn(gameId: gameId, gameTurnInfo: gameTurnInfo) { (response, error) in
     guard error == nil else {
         print(error)
