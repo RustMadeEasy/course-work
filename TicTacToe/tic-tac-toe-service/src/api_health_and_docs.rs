@@ -61,7 +61,7 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
         ContactBuilder::new()
             .name(Some("Support"))
             .url(Some("https://RustMadeEasy.com"))
-            .email(Some("Support@RustMadeEasy.com"))
+            .email(Some("Info@RustMadeEasy.com"))
             .build(),
     );
     let json = doc.to_json().unwrap().to_string();
