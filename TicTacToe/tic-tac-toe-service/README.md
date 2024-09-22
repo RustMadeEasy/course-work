@@ -4,37 +4,35 @@
 
 Provides 2-client Tic-Tac-Toe game play.
 
-NOTE: This is sample code, part of the RustMadeEasy.com course: Intro to Rust. This code is not suitable for
+_NOTE: This sample code is part of the RustMadeEasy.com course: Intro to Rust. This code is not suitable for
 production. For example, the end-points are not secured and the game state is not persisted in a centralized fashion.
 Lack of central persistence means that only a single instance can be run (preventing resilience and
 scalability). Future courses will enhance the service so that it goes from sample-quality code to being highly secure 
-and scalable.
+and scalable._
 
 Roadmap:
 
 1. Validation for request parameters.
 2. Authentication.
-3. MQTT for Game state changes so that the clients do not have to poll.
-4. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new invitation is no longer required for rematches within a Gaming Session.
-5. Central persistence, e.g. Surreal DB.
-6. Automatic cleanup of older or abandoned Games.
-7. AI model so that users can play against the service.
+3. Docker deployment.
+3. Automatic cleanup of older or abandoned Games.
+4. Central persistence, e.g. Surreal DB, Redis, etc.
+5. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new invitation is no longer required for rematches within a Gaming Session.
+6. AI model so that users can play against the service.
 
-## Supported End-Points
+## API Documentation
 
-| Name             | Method | Path                      | Description                        |
-|------------------|--------|---------------------------|------------------------------------|
-| Health           | GET    | /v1/health                | Provides the status of the Service |
-| Open API Spec    | GET    | /v1/api-docs              | Generates an OpenAPI and document  |
-|                  |        |                           |                                    |
-| Add Player       | POST   | /v1/games/players         | Adds a player to a Game            |
-| Create Game      | POST   | /v1/games                 | Creates a new Game                 |
-| End Game         | DELETE | /v1/games/{game_id}       | Ends a Game                        |
-| Get Game History | GET    | /v1/games/{game_id}/turns | Retrieves the history of a Game    |
-| Get Game Info    | GET    | /v1/games/{game_id}       | Gets the info for a Game           |
-| Take Turn        | PUT    | /v1/games/{game_id}/turns | Performs a new Game move           |
+### Swagger UI
 
-## Usage
+This service supports automatically generated Swagger UI documentation. To view, run the service and point your browser to:
+
+http://localhost:50020/v1/swagger-ui/
+
+Here is a screenshot:
+
+![](./SwaggerUI-Screenshot.png)
+
+### Usage
 
 ![](./Tic-Tac-Toe_Call_Sequence.png)
 
@@ -68,34 +66,33 @@ With the service already built and installed in your system's path:
 
 This service generates an OpenAPI3 specification document that can be used to create the Swagger UI and to create PostMan collections, client SDKs, etc.
 
-## Viewing Swagger UI
-
-With the service running, point your browser to:  
-
-http://localhost:50020/v1/swagger-ui/
-
-## Generating a Client SDK
+### Generating a Client SDK
 
 1. Run the service.
 
-2. Download the OpenAPI3 spec file: 
-`curl -o "api-docs.json" "http://localhost:50020/v1/api-docs"`
+2. Run [openapi-generator](https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#1---installation) to create the desired client SDK. Some examples follow:
 
-3. Run openapi-generator to create the desired client SDK. Some examples follow:
+#### Kotlin
+`openapi-generator generate -i "http://localhost:50020/v1/api-docs" -g kotlin -o ./client-sdks/kotlin/tic-tac-toe-kotlin-client-sdk`
 
-### Kotlin
-`openapi-generator generate -i "api-docs.json" -g kotlin -o ./sdks/kotlin/tic-tac-toe-kotlin-client-sdk`
+#### Rust
+`openapi-generator generate -i "http://localhost:50020/v1/api-docs" -g rust -o ./client-sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true`
+`openapi-generator generate -i "http://localhost:50020/v1/api-docs" -g rust -o ./client-sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true,supportAsync=false`
 
-### Rust
-`openapi-generator generate -i "api-docs.json" -g rust -o ./sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true`
-`openapi-generator generate -i "api-docs.json" -g rust -o ./sdks/tic-tac-toe-rust-client-sdk --package-name tic_tac_toe_rust_client_sdk --additional-properties=avoidBoxedModels=true,supportAsync=false`
+#### Swift
+`openapi-generator generate -i "http://localhost:50020/v1/api-docs" -g swift5 -o ./client-sdks/tic-tac-toe-swift-client-sdk`
 
-### Swift
-`openapi-generator generate -i "api-docs.json" -g swift5 -o ./sdks/tic-tac-toe-swift-client-sdk`
+### Generating a Postman Collection
+
+1. Run the service.
+
+2. Run openapi-generator to create the Postman Collection. An example follows:
+
+`openapi-generator generate -i "http://localhost:50020/v1/api-docs" -g postman-collection -o ./postman-collections/tic-tac-toe-swift`
 
 ## Port
 
-50020
+`50020`
 
 ## Source code and additional documentation
 

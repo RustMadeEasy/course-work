@@ -27,8 +27,8 @@ mod games_manager;
 mod models;
 mod play_outcome;
 mod play_status;
-mod player_info;
 mod tests;
+mod verification_code_generator;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;

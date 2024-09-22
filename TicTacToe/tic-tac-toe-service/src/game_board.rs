@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use validator::Validate;
 
 /**
  * Defines Game Board related structs, types, enums, and constants.
@@ -70,9 +71,11 @@ pub(crate) const THREE_ACROSS_DIAGONAL_2: &[BoardPosition] = &[
 ];
 
 /// Models a position on the game board.
-#[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Default, Deserialize, Serialize, ToSchema, Validate)]
 pub struct BoardPosition {
+    #[validate(range(min = 0, max = 2))]
     pub(crate) row: usize,
+    #[validate(range(min = 0, max = 2))]
     pub(crate) column: usize,
 }
 

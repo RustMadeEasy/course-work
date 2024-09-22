@@ -8,9 +8,10 @@ use crate::errors::GameError::BoardLocationAlreadyOccupied;
 use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
+use crate::models::event_plane::EventPlaneConfig;
+use crate::models::PlayerInfo;
 use crate::models::requests::{GameTurnInfo, NewGameParams};
 use crate::play_status::PlayStatus;
-use crate::player_info::PlayerInfo;
 
 /**
  * Provides Tic-Tac-Toe game play functionality.
@@ -23,14 +24,18 @@ use crate::player_info::PlayerInfo;
 #[derive(Clone, Serialize)]
 pub(crate) struct GameEngine {
     //
+
     /// The Player who can currently make a game move.
     pub(crate) current_player: Option<PlayerInfo>,
 
-    /// Unique ID of the Game Engine
-    pub(crate) id: String,
+    /// Provide the configuration required for clients subscribe to game updates via MQTT.
+    pub(crate) event_plane_config: EventPlaneConfig,
 
     /// Code used to invite the second player to the game
     pub(crate) game_invitation_code: String,
+
+    /// Unique ID of the Game Engine
+    pub(crate) id: String,
 
     /// Helps ensures this struct can only be instantiated via new()
     #[serde(skip)]
@@ -96,7 +101,7 @@ impl GameTrait for GameEngine {
     }
 
     /// Determines whether the specified Player can take a turn.
-    fn can_player_take_turn(&self, player: &PlayerInfo) -> bool {
+    fn _can_player_take_turn(&self, player: &PlayerInfo) -> bool {
         //
 
         // We can only begin Game Play when both players have been added to the Game.
@@ -130,6 +135,9 @@ impl GameTrait for GameEngine {
         }
     }
 
+    /// Returns the Event Channel ID of this Game.
+    fn get_event_channel_id(&self) -> String { self.event_plane_config.topic_prefix.clone() }
+
     /// Returns the ID of this Game.
     fn get_id(&self) -> String {
         self.id.clone()
@@ -155,7 +163,10 @@ impl GameTrait for GameEngine {
     }
 
     /// Creates a new GameEngine instance.
-    fn new(params: &NewGameParams, invitation_code: impl Into<String>) -> Result<Self, GameError> {
+    fn new(params: &NewGameParams,
+           mqtt_broker_address: impl Into<String>,
+           mqtt_port: u16,
+           invitation_code: impl Into<String>) -> Result<Self, GameError> {
         //
 
         let mut engine = Self {
@@ -165,6 +176,7 @@ impl GameTrait for GameEngine {
             players: vec![],
             play_history: vec![],
             game_invitation_code: invitation_code.into(),
+            event_plane_config: EventPlaneConfig::new(mqtt_broker_address.into(), mqtt_port),
         };
 
         engine.add_player(&params.player_one_display_name)?;

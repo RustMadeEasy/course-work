@@ -6,12 +6,15 @@ use crate::api_gaming::*;
 use crate::game_board::BoardPosition;
 use crate::game_board::GamePiece;
 use crate::game_state::GameState;
+use crate::models::event_plane::EventPlaneConfig;
+use crate::models::event_plane::EventPlaneTopicNames;
+use crate::models::PlayerInfo;
 use crate::models::requests::AddPlayerParams;
 use crate::models::requests::GameTurnInfo;
 use crate::models::requests::NewGameParams;
+use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
 use crate::play_status::PlayStatus;
-use crate::player_info::PlayerInfo;
 
 /**
  * Defines and implements the public Health and Docs contracts for this service.
@@ -34,6 +37,9 @@ use crate::player_info::PlayerInfo;
     components(schemas(
         AddPlayerParams,
         BoardPosition,
+        EventPlaneConfig,
+        EventPlaneTopicNames,
+        GameCreationResult,
         GameInfo,
         GamePiece,
         GameState,

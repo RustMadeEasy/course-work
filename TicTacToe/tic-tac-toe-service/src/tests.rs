@@ -236,11 +236,13 @@ mod game_engine_tests {
         let params = NewGameParams {
             player_one_display_name: "Player One".to_string(),
         };
-        let mut game_engine = GameEngine::new(&params, Uuid::new_v4()).unwrap();
+        let mqtt_broker_address = "test.mosquitto.org";
+        let mqtt_port = 1883;
+        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
         let player_one = game_engine.players.first().unwrap().clone();
 
         // Must not be able to take a turn before the Second Player has been added
-        assert!(!game_engine.can_player_take_turn(&player_one));
+        assert!(!game_engine._can_player_take_turn(&player_one));
 
         // Add the Second Player
         match game_engine.add_player("Player Two") {
@@ -253,8 +255,8 @@ mod game_engine_tests {
         let player_two = game_engine.players.last().unwrap().clone();
 
         // Now, Player One should be able to take their turn while Player Two should not be able to.
-        assert!(game_engine.can_player_take_turn(&player_one));
-        assert!(!game_engine.can_player_take_turn(&player_two));
+        assert!(game_engine._can_player_take_turn(&player_one));
+        assert!(!game_engine._can_player_take_turn(&player_two));
 
         // Have Player One take their turn...
         let turn_info = GameTurnInfo {
@@ -269,8 +271,8 @@ mod game_engine_tests {
         }
 
         // Now, Player Two should be able to take their turn while Player One should not be able to.
-        assert!(!game_engine.can_player_take_turn(&player_one));
-        assert!(game_engine.can_player_take_turn(&player_two));
+        assert!(!game_engine._can_player_take_turn(&player_one));
+        assert!(game_engine._can_player_take_turn(&player_two));
     }
 
     #[test]
@@ -281,7 +283,9 @@ mod game_engine_tests {
         let params = NewGameParams {
             player_one_display_name: "Player One".to_string(),
         };
-        let mut game_engine = GameEngine::new(&params, Uuid::new_v4()).unwrap();
+        let mqtt_broker_address = "test.mosquitto.org";
+        let mqtt_port = 1883;
+        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
         let player_one_id = game_engine.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -336,7 +340,9 @@ mod game_engine_tests {
         let params = NewGameParams {
             player_one_display_name: "Player One".to_string(),
         };
-        let mut game_engine = GameEngine::new(&params, Uuid::new_v4()).unwrap();
+        let mqtt_broker_address = "test.mosquitto.org";
+        let mqtt_port = 1883;
+        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
         let player_one_id = game_engine.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -390,7 +396,9 @@ mod game_engine_tests {
         let params = NewGameParams {
             player_one_display_name: "Player One".to_string(),
         };
-        let mut game_engine = GameEngine::new(&params, Uuid::new_v4()).unwrap();
+        let mqtt_broker_address = "test.mosquitto.org";
+        let mqtt_port = 1883;
+        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
         let player_one_id = game_engine.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -442,5 +450,203 @@ mod game_engine_tests {
                 [player_two_destination.column],
             GamePiece::O
         );
+    }
+}
+
+#[cfg(test)]
+mod game_manager_tests {
+    use uuid::Uuid;
+
+    use crate::errors::GameError;
+    use crate::games_manager::TicTacToeGamesManager;
+    use crate::models::requests::{AddPlayerParams, NewGameParams};
+
+    #[tokio::test]
+    async fn test_add_second_player() {
+        //
+
+        let display_name = Uuid::new_v4().to_string();
+        let params = NewGameParams {
+            player_one_display_name: display_name.clone(),
+        };
+        let mut manager = TicTacToeGamesManager::new();
+        let game_engine = match manager.create_game_engine(&params) {
+            Ok(game_engine) => game_engine,
+            Err(_) => {
+                panic!()
+            }
+        };
+
+        let second_player_params = AddPlayerParams {
+            game_invitation_code: game_engine.game_invitation_code,
+            player_display_name: Uuid::new_v4().to_string(),
+        };
+        match manager.add_player(&second_player_params).await {
+            Ok(new_game_engine) => {
+                match new_game_engine.players.last() {
+                    None => {
+                        panic!()
+                    }
+                    Some(player_info) => {
+                        // Make sure the game piece is different from that of Player One
+                        assert_ne!(
+                            game_engine.players.first().unwrap().game_piece,
+                            player_info.game_piece
+                        );
+                    }
+                }
+            }
+            Err(_) => {
+                panic!()
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_add_second_player_with_invalid_invitation_code() {
+        //
+
+        let display_name = Uuid::new_v4().to_string();
+        let params = NewGameParams {
+            player_one_display_name: display_name.clone(),
+        };
+        let mut manager = TicTacToeGamesManager::new();
+        let game_engine = match manager.create_game_engine(&params) {
+            Ok(game_engine) => game_engine,
+            Err(_) => {
+                panic!()
+            }
+        };
+
+        let second_player_params = AddPlayerParams {
+            game_invitation_code: Uuid::new_v4().to_string(),
+            player_display_name: Uuid::new_v4().to_string(),
+        };
+        match manager.add_player(&second_player_params).await {
+            Ok(new_game_engine) => {
+                match new_game_engine.players.last() {
+                    None => {
+                        panic!()
+                    }
+                    Some(player_info) => {
+                        // Make sure the game piece is different from that of Player One
+                        assert_ne!(
+                            game_engine.players.first().unwrap().game_piece,
+                            player_info.game_piece
+                        );
+                    }
+                }
+            }
+            Err(error) => {
+                assert_eq!(error, GameError::InvitationCodeNotFound)
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_add_second_player_twice() {
+        //
+
+        let display_name = Uuid::new_v4().to_string();
+        let params = NewGameParams {
+            player_one_display_name: display_name.clone(),
+        };
+        let mut manager = TicTacToeGamesManager::new();
+        let game_engine = match manager.create_game_engine(&params) {
+            Ok(game_engine) => game_engine,
+            Err(_) => {
+                panic!()
+            }
+        };
+
+        let second_player_params = AddPlayerParams {
+            game_invitation_code: game_engine.game_invitation_code.clone(),
+            player_display_name: Uuid::new_v4().to_string(),
+        };
+        match manager.add_player(&second_player_params).await {
+            Ok(new_game_engine) => {
+                match new_game_engine.players.last() {
+                    None => {
+                        panic!()
+                    }
+                    Some(player_info) => {
+                        // Make sure the game piece is different from that of Player One
+                        assert_ne!(
+                            game_engine.players.first().unwrap().game_piece,
+                            player_info.game_piece
+                        );
+                    }
+                }
+            }
+            Err(_) => {
+                panic!()
+            }
+        }
+
+        // This attempt should fail
+        let second_player_params = AddPlayerParams {
+            game_invitation_code: game_engine.game_invitation_code,
+            player_display_name: Uuid::new_v4().to_string(),
+        };
+        match manager.add_player(&second_player_params).await {
+            Ok(new_game_engine) => {
+                match new_game_engine.players.last() {
+                    None => {
+                        panic!()
+                    }
+                    Some(player_info) => {
+                        // Make sure the game piece is different from that of Player One
+                        assert_ne!(
+                            game_engine.players.first().unwrap().game_piece,
+                            player_info.game_piece
+                        );
+                    }
+                }
+            }
+            Err(error) => {
+                assert_eq!(error, GameError::MaximumPlayersAlreadyAdded)
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_add_second_player_using_player_one_name() {
+        //
+
+        let player_one_display_name = Uuid::new_v4().to_string();
+        let params = NewGameParams {
+            player_one_display_name: player_one_display_name.clone(),
+        };
+        let mut manager = TicTacToeGamesManager::new();
+        let game_engine = match manager.create_game_engine(&params) {
+            Ok(game_engine) => game_engine,
+            Err(_) => {
+                panic!()
+            }
+        };
+
+        let second_player_params = AddPlayerParams {
+            game_invitation_code: game_engine.game_invitation_code,
+            player_display_name: player_one_display_name,
+        };
+        match manager.add_player(&second_player_params).await {
+            Ok(new_game_engine) => {
+                match new_game_engine.players.last() {
+                    None => {
+                        panic!()
+                    }
+                    Some(player_info) => {
+                        // Make sure the game piece is different from that of Player One
+                        assert_ne!(
+                            game_engine.players.first().unwrap().game_piece,
+                            player_info.game_piece
+                        );
+                    }
+                }
+            }
+            Err(error) => {
+                assert_eq!(error, GameError::DisplayNameAlreadyInUseInGame)
+            }
+        }
     }
 }

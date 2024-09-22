@@ -1,3 +1,10 @@
+/**
+ * Defines Game State related structs and enums.
+ *
+ * © 2024 Rust Made Easy. All rights reserved.
+ * @author Joel@RustMadeEasy.com
+ */
+
 use std::marker::PhantomData;
 
 use log::error;
@@ -18,16 +25,9 @@ use crate::game_board::{
     THREE_ACROSS_HORIZONTAL_TOP, THREE_ACROSS_VERTICAL_CENTER, THREE_ACROSS_VERTICAL_LEFT,
     THREE_ACROSS_VERTICAL_RIGHT,
 };
+use crate::models::PlayerInfo;
 use crate::play_outcome::PlayOutcome;
 use crate::play_status::PlayStatus;
-use crate::player_info::PlayerInfo;
-
-/**
- * Defines Game State related structs and enums.
- *
- * © 2024 Rust Made Easy. All rights reserved.
- * @author Joel@RustMadeEasy.com
- */
 
 /// Models the state of a game at a particular move.
 #[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
