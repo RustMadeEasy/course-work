@@ -5,6 +5,9 @@ Cargo.toml
 README.md
 docs/AddPlayerParams.md
 docs/BoardPosition.md
+docs/EventPlaneConfig.md
+docs/EventPlaneTopicNames.md
+docs/GameCreationResult.md
 docs/GameInfo.md
 docs/GamePiece.md
 docs/GameState.md
@@ -20,6 +23,9 @@ src/apis/tic_tac_toe_api.rs
 src/lib.rs
 src/models/add_player_params.rs
 src/models/board_position.rs
+src/models/event_plane_config.rs
+src/models/event_plane_topic_names.rs
+src/models/game_creation_result.rs
 src/models/game_info.rs
 src/models/game_piece.rs
 src/models/game_state.rs
