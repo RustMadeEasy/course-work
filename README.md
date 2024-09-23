@@ -6,8 +6,7 @@ The purpose of Rust Made Easy is to help engineers overcome the steep learning c
 
 ### What Is Rust?
 
-Rust is a programming language designed to mitigate several classes of programming errors often encountered in C and C++ 
-programming.
+Rust is a programming language designed to mitigate several classes of programming errors often encountered when using many other languages.
 
 Per Wikipedia:
 

@@ -10,6 +10,24 @@ Lack of central persistence means that only a single instance can be run (preven
 scalability). Future courses will enhance the service so that it goes from sample-quality code to being highly secure
 and scalable._
 
+## Why Rust?
+
+### Performance
+
+Services written in Rust typically have 1/10th the container size and 1/10th the memory footprint of comparable services written, for example, in SpringBoot. Rust services also, generally, have a lower latency and can process more request per second.
+
+These attributes can be leveraged to substantially lower operating costs and/or achieve greater platform performance.
+
+See the latest [Tech Empower benchmarks here](https://www.techempower.com/benchmarks/#hw=ph&test=fortune&section=data-r22).
+
+### Code Correctness
+
+Rust is a programming language designed to mitigate several classes of programming errors often encountered when using many other languages.
+
+Per Wikipedia:
+
+"Rust is a general-purpose programming language emphasizing performance, type safety, and concurrency. It enforces memory safety, meaning that all references point to valid memory. It does so without a traditional garbage collector; instead, both memory safety errors and data races are prevented by the "borrow checker", which tracks the object lifetime of references at compile time."
+
 ## API Documentation
 
 ### Swagger UI
@@ -80,10 +98,6 @@ This service generates an OpenAPI3 specification document that can be used to cr
 ## Port
 
 This service is accessible on the following port: `50020`
-
-## Source code and additional documentation
-
-https://github.com/RustMadeEasy/course-work/tree/master/TicTacToe/tic-tac-toe-service
 
 ## Future Roadmap
 
