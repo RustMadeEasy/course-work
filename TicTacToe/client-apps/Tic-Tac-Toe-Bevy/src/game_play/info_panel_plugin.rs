@@ -13,7 +13,7 @@ use crate::shared::app_mode::AppMode;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Info@RustMadeEasy.com
+//  @author JoelDavisEngineering@Gmail.com
 
 /// Displays relevant Game info along the top of the screen.
 pub(super) struct InfoPanelPlugin;

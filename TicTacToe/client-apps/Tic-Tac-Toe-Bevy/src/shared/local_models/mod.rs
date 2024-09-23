@@ -7,7 +7,7 @@ pub(crate) mod local_player_status;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Info@RustMadeEasy.com
+//  @author JoelDavisEngineering@Gmail.com
 
 // This module contains the local, Bevy-client-specific renditions of the TicTacToe client SDK's
 // local_models. It seems to be redundant. But, we don't want the major body of the app tied

@@ -24,7 +24,7 @@ const MQTT_PORT: u16 = 1883;
  * Manages all the Game instances played on this service.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Info@RustMadeEasy.com
+ * @author JoelDavisEngineering@Gmail.com
  */
 
 /// Manages all the Game instances played on this service.

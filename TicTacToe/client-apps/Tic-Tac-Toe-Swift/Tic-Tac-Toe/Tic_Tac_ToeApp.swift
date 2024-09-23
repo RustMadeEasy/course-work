@@ -2,7 +2,7 @@
 //  Tic_Tac_ToeApp.swift
 //
 // © 2024 Rust Made Easy. All rights reserved.
-// @author Info@RustMadeEasy.com
+// @author JoelDavisEngineering@Gmail.com
 //
 
 import SwiftUI

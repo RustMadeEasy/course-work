@@ -59,5 +59,5 @@ cargo doc --open
 
 ## Author
 
-Info@RustMadeEasy.com
+JoelDavisEngineering@Gmail.com
 

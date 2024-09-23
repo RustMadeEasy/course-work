@@ -11,7 +11,7 @@ use crate::shared::despawn;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Info@RustMadeEasy.com
+//  @author JoelDavisEngineering@Gmail.com
 
 const INVITATION_CODE_LENGTH: usize = 6;
 

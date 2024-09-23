@@ -6,7 +6,7 @@ use validator::Validate;
  * Defines Game Board related structs, types, enums, and constants.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Info@RustMadeEasy.com
+ * @author JoelDavisEngineering@Gmail.com
  */
 
 /// Tic-Tac-Toe is played on a 3 by 3 grid.

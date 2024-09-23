@@ -20,7 +20,7 @@ use crate::play_status::PlayStatus;
  * Defines and implements the public Health and Docs contracts for this service.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Info@RustMadeEasy.com
+ * @author JoelDavisEngineering@Gmail.com
  */
 
 /// Generates the OpenAPI3 docs.
@@ -61,7 +61,7 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
         ContactBuilder::new()
             .name(Some("Support"))
             .url(Some("https://RustMadeEasy.com"))
-            .email(Some("Info@RustMadeEasy.com"))
+            .email(Some("JoelDavisEngineering@Gmail.com"))
             .build(),
     );
     let json = doc.to_json().unwrap().to_string();

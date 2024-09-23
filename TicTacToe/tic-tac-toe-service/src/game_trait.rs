@@ -7,7 +7,7 @@ use crate::models::requests::{GameTurnInfo, NewGameParams};
  * Defines the behavior of a Game.
  *
  * © 2024 Rust Made Easy. All rights reserved.
- * @author Info@RustMadeEasy.com
+ * @author JoelDavisEngineering@Gmail.com
  */
 
 /// Defines the behavior of a Game.

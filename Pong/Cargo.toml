@@ -4,7 +4,7 @@ version = "0.2.2"
 edition = "2021"
 
 description = "Pong Game Demo"
-authors = ["Joel Davis <Info@RustMadeEasy.com>"]
+authors = ["Joel Davis <JoelDavisEngineering@Gmail.com>"]
 license = "GPL-3"
 
 [package.metadata.bundle]

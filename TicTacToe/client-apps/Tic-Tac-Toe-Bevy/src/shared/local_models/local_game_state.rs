@@ -9,7 +9,7 @@ use crate::shared::local_models::local_player_status::LocalPlayStatus;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Info@RustMadeEasy.com
+//  @author JoelDavisEngineering@Gmail.com
 
 /// Holds the local rendition of the remote Game Play state.
 #[derive(Clone, Default, Resource)]

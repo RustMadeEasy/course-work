@@ -13,5 +13,5 @@ Per Wikipedia:
 
 "Rust is a general-purpose programming language emphasizing performance, type safety, and concurrency. It enforces memory safety, meaning that all references point to valid memory. It does so without a traditional garbage collector; instead, both memory safety errors and data races are prevented by the "borrow checker", which tracks the object lifetime of references at compile time."
 
-_NOTE: This is sample code is part of the RustMadeEasy.com courses and is not meant for use in
+_NOTE: This sample code is part of the RustMadeEasy.com courses and is not meant for use in
 production._

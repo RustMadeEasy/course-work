@@ -19,7 +19,7 @@ use crate::shared::local_service_client::helper_functions::remote_players_to_loc
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Info@RustMadeEasy.com
+//  @author JoelDavisEngineering@Gmail.com
 
 lazy_static! {
     //

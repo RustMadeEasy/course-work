@@ -5,7 +5,7 @@ pub(crate) mod invite_screen_plugin;
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
-//  @author Info@RustMadeEasy.com
+//  @author JoelDavisEngineering@Gmail.com
 
 /// Marker to indicate that an entity was spawned on the Invitation Screen.
 #[derive(Component)]

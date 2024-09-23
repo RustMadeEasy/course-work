@@ -59,5 +59,5 @@ Endpoints do not require authorization.
 
 ## Author
 
-Info@RustMadeEasy.com
+JoelDavisEngineering@Gmail.com
 
