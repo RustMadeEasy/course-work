@@ -5,6 +5,11 @@ use crate::shared::local_models::local_player_info::LocalPlayerInfo;
 /// Houses the application state variables.
 #[derive(Default, Resource)]
 pub(crate) struct AppStateResource {
+    //
+
+    /// The code used to invite a new Player to the Game.
+    pub(crate) invitation_code: String,
+
     /// The local Player, i.e. the Player using this app instance.
     pub(crate) local_player: LocalPlayerInfo,
 
@@ -36,9 +41,9 @@ impl AppStateResource {
         }
 
         self.local_player = if self.local_player_initiated_game {
-            players.first().unwrap().clone().into()
+            players.first().unwrap().clone()
         } else {
-            players.last().unwrap().clone().into()
+            players.last().unwrap().clone()
         };
     }
 }

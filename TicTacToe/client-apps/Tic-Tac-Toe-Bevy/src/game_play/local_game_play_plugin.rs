@@ -164,7 +164,7 @@ impl LocalGamePlayPlugin {
             // Start a New Game on the server.
             match LocalServiceClient::create_game(&app_state.local_player.display_name) {
                 Ok(result) => {
-                    local_game_state.invitation_code = result.0.invitation_code.clone();
+                    app_state.invitation_code = result.2.clone();
                     (result.0, vec![result.1])
                 }
                 Err(_error) => {
@@ -181,7 +181,7 @@ impl LocalGamePlayPlugin {
 
             // Join the specified Game on the server.
             match LocalServiceClient::join_game(
-                &local_game_state.invitation_code,
+                &app_state.invitation_code,
                 &app_state.local_player.display_name,
             ) {
                 Ok(result) => (result.0, result.1),
@@ -190,11 +190,11 @@ impl LocalGamePlayPlugin {
                         Error::ResponseError(error) => {
                             // NOTE: In each case, we, firstly, create the message because the Game state info we need in the messaging gets cleared as a result of changing screens.
                             if error.status == 400 {
-                                let message = format!("The Invitation Code {} is has expired. Please verify the Invitation Code with the other player.", local_game_state.invitation_code.clone());
+                                let message = format!("The Invitation Code {} is has expired. Please verify the Invitation Code with the other player.", app_state.invitation_code.clone());
                                 next_state.set(AppMode::EnterInvitation); // Go back to the Invitation Screen
                                 message
                             } else if error.status == 404 {
-                                let message = format!("The Invitation Code {} is invalid. Please verify the Invitation Code with the other player.", local_game_state.invitation_code.clone());
+                                let message = format!("The Invitation Code {} is invalid. Please verify the Invitation Code with the other player.", app_state.invitation_code.clone());
                                 next_state.set(AppMode::EnterInvitation); // Go back to the Invitation Screen
                                 message
                             } else if error.status == 409 {
@@ -252,18 +252,12 @@ impl LocalGamePlayPlugin {
             Ok(remote_game_info) => remote_game_info,
             Err(error) => {
                 let message = match error {
-                    // Error::ResponseError(error) => {
-                    //     if error.status == 404 {
-                    //
-                    //     } else {
-                    //
-                    //     }
-                    // }
-                    // _ => "Problem contacting the TicTacToe server.",
-                    GetGameInfoError::Status404() => "The game already ended.",
+                    GetGameInfoError::Status404() => "Game not found.",
                     GetGameInfoError::UnknownValue(_) => {
                         "An unexpected error was returned from the TicTacToe server."
                     }
+                    GetGameInfoError::Status400() => "Bad request - Malformed Game ID",
+                    GetGameInfoError::Status500() => "Internal server error"
                 };
                 event_writer.send(SetStatusTextEvent::new_with_duration(
                     message,

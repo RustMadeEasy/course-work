@@ -1,4 +1,4 @@
-use rumqttc::QoS as QoSV3;
+use rumqttc::{QoS as QoSV3};
 use rumqttc::v5::mqttbytes::QoS as QoSV5;
 
 /// Enumerates the Quality of Service options for message publishing. These options correspond
@@ -11,9 +11,9 @@ pub enum PublisherQoS {
     ExactlyOnce = 2,
 }
 
-impl Into<QoSV3> for PublisherQoS {
-    fn into(self) -> QoSV3 {
-        match self {
+impl From<PublisherQoS> for QoSV3 {
+    fn from(value: PublisherQoS) -> Self {
+        match value {
             PublisherQoS::AtMostOnce => QoSV3::AtLeastOnce,
             PublisherQoS::AtLeastOnce => QoSV3::AtLeastOnce,
             PublisherQoS::ExactlyOnce => QoSV3::ExactlyOnce,
@@ -21,9 +21,9 @@ impl Into<QoSV3> for PublisherQoS {
     }
 }
 
-impl Into<QoSV5> for PublisherQoS {
-    fn into(self) -> QoSV5 {
-        match self {
+impl From<PublisherQoS> for QoSV5 {
+    fn from(value: PublisherQoS) -> Self {
+        match value {
             PublisherQoS::AtMostOnce => QoSV5::AtLeastOnce,
             PublisherQoS::AtLeastOnce => QoSV5::AtLeastOnce,
             PublisherQoS::ExactlyOnce => QoSV5::ExactlyOnce,

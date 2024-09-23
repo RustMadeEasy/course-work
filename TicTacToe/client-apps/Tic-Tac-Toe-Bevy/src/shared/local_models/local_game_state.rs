@@ -1,4 +1,4 @@
-use bevy::prelude::{Component, Resource};
+use bevy::prelude::Resource;
 
 use crate::game_play::{GRID_COLUMNS, GRID_ROWS};
 use crate::shared::local_models::local_game_piece::LocalGamePiece;
@@ -29,9 +29,6 @@ pub(crate) struct LocalGameStateResource {
 
     /// Indicates whether the Game has been started.
     pub(crate) game_has_started: bool,
-
-    /// The code used to invite a new Player to the Game.
-    pub(crate) invitation_code: String,
 
     pub(crate) play_status: LocalPlayStatus,
 
@@ -116,5 +113,5 @@ impl Into<String> for LocalGamePiece {
     }
 }
 
-#[derive(Component)]
-pub(crate) struct Player {}
+// #[derive(Component)]
+// pub(crate) struct Player {}

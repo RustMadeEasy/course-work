@@ -70,9 +70,7 @@ impl From<GameInfo> for LocalGameStateResource {
             PlayStatus::InProgress => LocalPlayStatus::InProgress,
             PlayStatus::NotStarted => LocalPlayStatus::NotStarted,
         };
-
-        local_game_state.invitation_code = value.game_invitation_code.clone();
-
+        
         let id_of_player_who_made_move = value.game_state.id_of_player_who_made_move.clone();
         local_game_state.id_of_player_who_made_the_last_move = id_of_player_who_made_move.clone();
 

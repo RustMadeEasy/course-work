@@ -100,7 +100,7 @@ impl AsyncMqttClient {
 
     /// Publishes a message with the specified payload to the specified topic.
     pub(crate) async fn publish_with_payload(&self, payload: String, topic: String, qos: PublisherQoS) -> Result<(), PublisherError> {
-        return if let Some(client_v3) = self.client_v3.clone() {
+        if let Some(client_v3) = self.client_v3.clone() {
             match client_v3.publish(topic, qos.clone().into(), false, payload.clone()).await {
                 Ok(_) => {
                     trace!("Message published over v3 protocol");
@@ -126,6 +126,6 @@ impl AsyncMqttClient {
             }
         } else {
             Err(PublisherError::ClientNotConfigured)
-        };
+        }
     }
 }

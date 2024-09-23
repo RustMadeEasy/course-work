@@ -57,24 +57,28 @@ impl LocalServiceClient {
     // TODO: JD: REFACTOR: make sure that none of the methods return errors from tic_tac_toe_api
     // SDK. We want a separation between the app code and the client SDK code.
 
-    /// Starts a new Tic-Tac-Toe Game and returns the initial Game state.
+    /// Starts a new Tic-Tac-Toe Game and returns the initial Game state. Returns a tuple containing
+    /// the game state, player info, and invitation code.
     pub(crate) fn create_game(
         local_player_display_name: &str,
-    ) -> Result<(LocalGameStateResource, LocalPlayerInfo), Error<CreateGameError>> {
+    ) -> Result<(LocalGameStateResource, LocalPlayerInfo, String), Error<CreateGameError>> {
         //
 
         let params = NewGameParams {
             player_one_display_name: local_player_display_name.to_string(),
         };
 
-        let game_info = match tic_tac_toe_api::create_game(&SDK_CONFIG, params) {
+        let creation_result = match tic_tac_toe_api::create_game(&SDK_CONFIG, params) {
             Ok(game_info) => game_info,
             Err(error) => return Err(error),
         };
 
+        let game_state: LocalGameStateResource = creation_result.game_info.clone().into();
+
         Ok((
-            game_info.clone().into(),
-            game_info.players.first().unwrap().clone().into(),
+            game_state,
+            creation_result.game_info.players.first().unwrap().clone().into(),
+            creation_result.game_invitation_code,
         ))
     }
 
@@ -129,14 +133,14 @@ impl LocalServiceClient {
             player_display_name: player_display_name.to_string(),
         };
 
-        let game_info = match tic_tac_toe_api::add_player(&SDK_CONFIG, params) {
+        let game_creation_result = match tic_tac_toe_api::add_player(&SDK_CONFIG, params) {
             Ok(game_info) => game_info,
             Err(error) => return Err(error),
         };
 
         Ok((
-            game_info.clone().into(),
-            remote_players_to_local_players(&game_info.players),
+            game_creation_result.game_info.clone().into(),
+            remote_players_to_local_players(&game_creation_result.game_info.players),
         ))
     }
 

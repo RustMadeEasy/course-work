@@ -123,7 +123,7 @@ mod functionality {
                 if app_state.local_player_initiated_game && !local_game_state.has_game_started() {
                     text_sections.sections[0].value = format!(
                         "Hi {}. Please send the Invitation Code: {} to another player so they can join...",
-                        app_state.local_player.display_name, local_game_state.invitation_code.clone()
+                        app_state.local_player.display_name, app_state.invitation_code.clone()
                     );
                 } else {
                     text_sections.sections[0].value = app_state.local_player.display_name.clone();

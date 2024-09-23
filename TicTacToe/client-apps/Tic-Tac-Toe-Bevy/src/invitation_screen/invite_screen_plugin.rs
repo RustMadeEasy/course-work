@@ -52,14 +52,14 @@ mod functionality {
     };
     use crate::invitation_screen::ButtonPurpose;
     use crate::shared::app_mode::AppMode;
-    use crate::shared::local_models::local_game_state::LocalGameStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
+    use crate::shared::app_state::AppStateResource;
 
     /// Provides button functionality, including state changes as well as response when clicked.
     #[allow(clippy::type_complexity)] // The query is complex by necessity.
     pub(super) fn button_interaction(
         mut event_writer: EventWriter<SetStatusTextEvent>,
-        local_game_state: ResMut<LocalGameStateResource>,
+        app_state: Res<AppStateResource>,
         mut interactions: Query<
             (
                 &Interaction,
@@ -86,7 +86,7 @@ mod functionality {
                     match button_info.get_purpose() {
                         ButtonPurpose::BackToStartScreen => next_state.set(AppMode::StartMenu),
                         ButtonPurpose::BeginGame => {
-                            if local_game_state.invitation_code.trim().len()
+                            if app_state.invitation_code.trim().len()
                                 == INVITATION_CODE_LENGTH
                             {
                                 next_state.set(AppMode::GamePlay);
@@ -107,7 +107,7 @@ mod functionality {
     pub(super) fn text_input(
         keyboard_input: Res<ButtonInput<KeyCode>>,
         mut evr_char: EventReader<ReceivedCharacter>,
-        mut local_game_state: ResMut<LocalGameStateResource>,
+        mut app_state: ResMut<AppStateResource>,
         mut invitation_code_label_text: Query<&mut Text, With<InvitationCodeLabelComponent>>,
     ) {
         let mut skip_character_capture = false;
@@ -116,9 +116,9 @@ mod functionality {
         if keyboard_input.just_pressed(KeyCode::Backspace)
             || keyboard_input.just_pressed(KeyCode::Delete)
         {
-            let len = local_game_state.invitation_code.len();
+            let len = app_state.invitation_code.len();
             if len > 0 {
-                local_game_state.invitation_code.pop();
+                app_state.invitation_code.pop();
                 skip_character_capture = true;
             }
         }
@@ -132,10 +132,10 @@ mod functionality {
                     .chars()
                     .next()
                     .unwrap_or_default();
-                if local_game_state.invitation_code.len() < INVITATION_CODE_LENGTH
+                if app_state.invitation_code.len() < INVITATION_CODE_LENGTH
                     && received_char.is_numeric()
                 {
-                    local_game_state.invitation_code.push(received_char);
+                    app_state.invitation_code.push(received_char);
                 } else {
                     return;
                 }
@@ -144,7 +144,7 @@ mod functionality {
 
         // Update the UI
         if let Ok(mut label) = invitation_code_label_text.get_single_mut() {
-            label.sections[0].value = local_game_state.invitation_code.clone();
+            label.sections[0].value = app_state.invitation_code.clone();
         }
     }
 }
@@ -160,19 +160,17 @@ mod ui {
     use crate::invitation_screen::invite_screen_plugin::InvitationCodeLabelComponent;
     use crate::invitation_screen::{ButtonPurpose, OnInvitationScreen};
     use crate::shared::app_state::AppStateResource;
-    use crate::shared::local_models::local_game_state::LocalGameStateResource;
     use crate::shared::{BUTTON_COLOR_NORMAL, FONT_SIZE, TEXT_COLOR};
 
     pub(super) fn spawn_ui(
         mut commands: Commands,
         mut app_state: ResMut<AppStateResource>,
-        mut local_game_state: ResMut<LocalGameStateResource>,
     ) {
         //
 
         // Ensure a good state from which to set the Invitation Code
         app_state.local_player_initiated_game = false;
-        local_game_state.invitation_code = "".to_string();
+        app_state.invitation_code = "".to_string();
 
         // TODO: JD: localize the text
         let title_back = "Go Back";

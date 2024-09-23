@@ -47,7 +47,7 @@ impl Publisher {
         let mut failed_results: Vec<PublisherError> = vec!();
 
         for client in self.clients.clone() {
-            match client.publish_with_payload(payload.to_string(), topic.to_string(), qos.clone().into()).await {
+            match client.publish_with_payload(payload.to_string(), topic.to_string(), qos.clone()).await {
                 Ok(_) => {}
                 Err(error) => {
                     failed_results.push(error)
