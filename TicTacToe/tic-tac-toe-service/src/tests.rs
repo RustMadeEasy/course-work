@@ -4,8 +4,8 @@ mod game_board_tests {
 
     use crate::game_board::{BoardPosition, GamePiece};
     use crate::game_state::GameState;
+    use crate::models::PlayerInfo;
     use crate::play_status::PlayStatus;
-    use crate::player_info::PlayerInfo;
 
     #[test]
     fn test_valid_piece_placement() {

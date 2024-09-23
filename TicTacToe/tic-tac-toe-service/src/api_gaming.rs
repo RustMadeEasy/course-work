@@ -209,7 +209,7 @@ pub(crate) async fn take_turn(
     } else if game_id.len() as u64 > ID_LENGTH_MAX {
         return HttpResponse::BadRequest().body("Game ID exceeds maximum length");
     } else if let Err(e) = game_turn_info.validate() {
-        return HttpResponse::BadRequest().body(format!("{}", e.to_string()));
+        return HttpResponse::BadRequest().body(e.to_string());
     }
 
     match games_manager
