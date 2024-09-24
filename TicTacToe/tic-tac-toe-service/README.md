@@ -40,6 +40,20 @@ Here is a screenshot:
 
 ![](./SwaggerUI-Screenshot.png)
 
+### Code-Level Documentation
+
+From the source root folder (tic-tac-toe-service) run the following command:
+
+`cargo doc`
+
+Then open the resulting JavaDoc style documentation. For example, in macOS you can run the following command:
+
+`open ./target/doc/tic_tac_toe_service/index.html`
+
+Here is a screenshot:
+
+![](./RustCodeDocs-Screenshot.png)
+
 ### Usage Overview
 
 ![](./Tic-Tac-Toe_Call_Sequence.png)
@@ -57,9 +71,17 @@ Here is a screenshot:
 7. When the game state indicates the that is won or stalemated, the clients show this visually and disallow further game play.
 8. The first client calls End Game (DELETE /v1/games/{game_id}).
 
-## Running the Service
+## Project Prerequisites
 
-From the source root folder:
+Install the latest stable version of the [Rust toolchain](https://www.rust-lang.org/tools/install):
+
+`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+
+Then, you can browse the code using your favorite IDE such [RustRover](https://www.jetbrains.com/rust/download/#section=mac) or [Visual Code](https://code.visualstudio.com/download), etc.
+
+## Building and Running the Service
+
+From the source root folder (tic-tac-toe-service) run the following command:
 
 `cargo run --release`
 
