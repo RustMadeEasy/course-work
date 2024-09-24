@@ -8,7 +8,6 @@
 use std::marker::PhantomData;
 
 
-use log::error;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -51,7 +50,7 @@ impl GameState {
     /// Returns a tuple wherein the first element is the binary representation of placements for
     /// game_piece_one and the second element is the binary representation of placements for
     /// game_piece_two.
-    fn binary_representation_for_piece_placement(
+    pub(crate) fn binary_representation_for_piece_placement(
         grid: &GameBoard,
         game_piece_one: &GamePiece,
         game_piece_two: &GamePiece,
@@ -62,33 +61,20 @@ impl GameState {
             return (0, 0);
         }
 
-        let mut binary_string_one: String = Default::default();
-        let mut binary_string_two: String = Default::default();
-        for col in grid {
-            for game_piece in col {
-                if game_piece != game_piece_one {
-                    binary_string_one.push('0');
-                } else {
-                    binary_string_one.push('1');
+        let mut position: i16 = 0b_100_000_000;
+        let mut binary_representation_one: i16 = 0;
+        let mut binary_representation_two: i16 = 0;
+
+        for row in grid {
+            for game_piece in row {
+                if game_piece == game_piece_one {
+                    binary_representation_one |= position;
+                } else if game_piece == game_piece_two {
+                    binary_representation_two |= position;
                 }
-                if game_piece != game_piece_two {
-                    binary_string_two.push('0');
-                } else {
-                    binary_string_two.push('1');
-                }
+                position >>= 1;
             }
         }
-
-        let binary_representation_one =
-            i16::from_str_radix(&binary_string_one, 2).unwrap_or_else(|error| {
-                error!("Failed to create binary view of board. Error: {}", error);
-                0
-            });
-        let binary_representation_two =
-            i16::from_str_radix(&binary_string_two, 2).unwrap_or_else(|error| {
-                error!("Failed to create binary view of board. Error: {}", error);
-                0
-            });
 
         (binary_representation_one, binary_representation_two)
     }
@@ -97,8 +83,7 @@ impl GameState {
     /// status and, if the game has been won, returns the board positions that indicate the winning
     /// move.
     ///
-    /// Returns the following tuple:
-    ///     (Play Status, Optional Winning Board Positions, Optional Winning Player ID)
+    /// Returns PlayOutcome.
     fn determine_outcome_of_play(
         grid: &GameBoard,
         current_player_id: &str,
