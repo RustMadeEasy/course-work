@@ -1,7 +1,7 @@
 use crate::errors::GameError;
 use crate::game_state::GameState;
-use crate::models::PlayerInfo;
 use crate::models::requests::{GameTurnInfo, NewGameParams};
+use crate::models::PlayerInfo;
 
 /**
  * Defines the behavior of a Game.

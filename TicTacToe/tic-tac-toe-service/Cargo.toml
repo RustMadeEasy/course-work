@@ -15,7 +15,7 @@ mqtt-publisher-lib = { path = "../../RustLibs/mqtt-publisher" }
 # *** Outside dependencies ***
 actix-web = "4.5.1"
 chrono = "0.4.37"
-derive_more = {version =  "1.0.0", features = ["full"]}
+derive_more = { version = "1.0.0", features = ["full"] }
 env_logger = "0.11.2"
 log = "0.4.21"
 rand = "0.8.5"
@@ -25,4 +25,4 @@ tokio = "1.40.0"
 utoipa = { version = "4.0.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "7.1.0", features = ["actix-web"] }
 uuid = { version = "1.7.0", features = ["v4"] }
-validator = { version = "0.18.1", features = ["derive"]}
+validator = { version = "0.18.1", features = ["derive"] }

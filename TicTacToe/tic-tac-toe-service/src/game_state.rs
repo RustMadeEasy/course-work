@@ -7,6 +7,7 @@
 
 use std::marker::PhantomData;
 
+
 use log::error;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -16,11 +17,11 @@ use crate::errors::GameError::{
     BoardLocationAlreadyOccupied, InvalidBoardPosition, WrongPlayerTakingTurn,
 };
 use crate::game_board::{
-    BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1, BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM, BIN_THREE_ACROSS_HORIZONTAL_MIDDLE,
-    BIN_THREE_ACROSS_HORIZONTAL_TOP, BIN_THREE_ACROSS_VERTICAL_CENTER,
-    BIN_THREE_ACROSS_VERTICAL_LEFT, BIN_THREE_ACROSS_VERTICAL_RIGHT,
-    BoardPosition, GameBoard,
-    GamePiece, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS, THREE_ACROSS_DIAGONAL_1,
+    BoardPosition, GameBoard, GamePiece, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1,
+    BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM,
+    BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP,
+    BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT,
+    BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS, THREE_ACROSS_DIAGONAL_1,
     THREE_ACROSS_DIAGONAL_2, THREE_ACROSS_HORIZONTAL_BOTTOM, THREE_ACROSS_HORIZONTAL_MIDDLE,
     THREE_ACROSS_HORIZONTAL_TOP, THREE_ACROSS_VERTICAL_CENTER, THREE_ACROSS_VERTICAL_LEFT,
     THREE_ACROSS_VERTICAL_RIGHT,
@@ -168,19 +169,19 @@ impl GameState {
         if (current_player_binary_representation & BIN_THREE_ACROSS_HORIZONTAL_TOP)
             == BIN_THREE_ACROSS_HORIZONTAL_TOP
             || (current_player_binary_representation & BIN_THREE_ACROSS_HORIZONTAL_MIDDLE)
-                == BIN_THREE_ACROSS_HORIZONTAL_MIDDLE
+            == BIN_THREE_ACROSS_HORIZONTAL_MIDDLE
             || (current_player_binary_representation & BIN_THREE_ACROSS_HORIZONTAL_BOTTOM)
-                == BIN_THREE_ACROSS_HORIZONTAL_BOTTOM
+            == BIN_THREE_ACROSS_HORIZONTAL_BOTTOM
             || (current_player_binary_representation & BIN_THREE_ACROSS_VERTICAL_LEFT)
-                == BIN_THREE_ACROSS_VERTICAL_LEFT
+            == BIN_THREE_ACROSS_VERTICAL_LEFT
             || (current_player_binary_representation & BIN_THREE_ACROSS_VERTICAL_CENTER)
-                == BIN_THREE_ACROSS_VERTICAL_CENTER
+            == BIN_THREE_ACROSS_VERTICAL_CENTER
             || (current_player_binary_representation & BIN_THREE_ACROSS_VERTICAL_RIGHT)
-                == BIN_THREE_ACROSS_VERTICAL_RIGHT
+            == BIN_THREE_ACROSS_VERTICAL_RIGHT
             || (current_player_binary_representation & BIN_THREE_ACROSS_DIAGONAL_1)
-                == BIN_THREE_ACROSS_DIAGONAL_1
+            == BIN_THREE_ACROSS_DIAGONAL_1
             || (current_player_binary_representation & BIN_THREE_ACROSS_DIAGONAL_2)
-                == BIN_THREE_ACROSS_DIAGONAL_2
+            == BIN_THREE_ACROSS_DIAGONAL_2
         {
             PlayOutcome::new_with_win_details(
                 &PlayStatus::EndedInWin,

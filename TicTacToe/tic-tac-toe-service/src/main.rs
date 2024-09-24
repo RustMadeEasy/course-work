@@ -3,8 +3,8 @@ extern crate core;
 use std::net::Ipv4Addr;
 use std::sync::Mutex;
 
-use actix_web::{App, HttpServer, web};
 use actix_web::web::Data;
+use actix_web::{web, App, HttpServer};
 use chrono::{Datelike, Utc};
 use log::info;
 use utoipa::OpenApi;
@@ -13,7 +13,7 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::api_gaming::{
     add_player, create_game, end_game, get_game_history, get_game_info, take_turn,
 };
-use crate::api_health_and_docs::{api_docs, ApiDoc, health};
+use crate::api_health_and_docs::{api_docs, health, ApiDoc};
 use crate::games_manager::TicTacToeGamesManager;
 
 mod api_gaming;
@@ -44,12 +44,16 @@ const PORT: u16 = 50020;
 async fn main() -> std::io::Result<()> {
     //
 
+    // Get the logger setup
     env_logger::init();
 
+    // Nothing wrong with a fun startup banner
     print_startup_banner();
+
     info!("Launched on port: {PORT}");
 
-    // This is our global Games Manager instance
+    // This is our global Games Manager instance. Below, we add the Game Manager to the Actix app
+    // data storage so that it is accessible to service methods.
     let games_manager = Data::new(Mutex::new(TicTacToeGamesManager::new()));
 
     HttpServer::new(move || {
@@ -71,13 +75,13 @@ async fn main() -> std::io::Result<()> {
                 ),
         )
     })
-    .bind((Ipv4Addr::UNSPECIFIED, PORT))?
-    .run()
-    .await
+        .bind((Ipv4Addr::UNSPECIFIED, PORT))?
+        .run()
+        .await
 }
 
+/// Prints a cool startup banner to the logging facility.
 fn print_startup_banner() {
-    let now = Utc::now();
     info!(
         "
   _______ _   _______      _______                _____                 _
@@ -88,7 +92,5 @@ fn print_startup_banner() {
     |_|  |_|\\___|_|\\__,_|\\___|_|\\___/ \\___|     |_____/ \\___|_|    \\_/ |_|\\___\\___|\
     \r\n
     © {} Rust Made Easy. All rights reserved.\r\n
-",
-        now.year()
-    );
+", Utc::now().year() );
 }

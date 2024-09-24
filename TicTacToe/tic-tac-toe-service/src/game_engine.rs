@@ -9,8 +9,8 @@ use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneConfig;
-use crate::models::PlayerInfo;
 use crate::models::requests::{GameTurnInfo, NewGameParams};
+use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
 
 /**
