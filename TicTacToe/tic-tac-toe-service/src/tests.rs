@@ -1,4 +1,58 @@
 #[cfg(test)]
+mod game_state_tests {
+    use crate::game_board::{BoardPosition, GamePiece};
+    use crate::game_state::GameState;
+    use crate::models::PlayerInfo;
+    use uuid::Uuid;
+
+    #[test]
+    fn test_binary_representation_for_piece_placement() {
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+
+        /*
+        X  -  -
+        -  -  -
+        -  -  -     */
+        let board_state = GameState::new()
+            .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
+            .unwrap();
+        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        assert_eq!(binary_representation.0, 0b_100_000_000);
+
+        /*
+        X  -  X
+        -  X  O
+        O  O  X     */
+        let mut board_state = GameState::new()
+            .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .unwrap();
+
+        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        assert_eq!(binary_representation.0, 0b_101_010_001);
+        assert_eq!(binary_representation.1, 0b_000_001_110);
+    }
+}
+
+#[cfg(test)]
 mod game_board_tests {
     use uuid::Uuid;
 

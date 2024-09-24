@@ -64,7 +64,7 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
             .email(Some("JoelDavisEngineering@Gmail.com"))
             .build(),
     );
-    let json = doc.to_json().unwrap().to_string();
+    let json = doc.to_json()?.to_string();
     Ok(json)
 }
 

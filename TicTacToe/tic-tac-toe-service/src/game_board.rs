@@ -9,9 +9,9 @@ use validator::Validate;
  * @author JoelDavisEngineering@Gmail.com
  */
 
-/// Tic-Tac-Toe is played on a 3 by 3 grid.
-pub(crate) const MAX_BOARD_ROWS: usize = 3;
+/// Tic-Tac-Toe is played on a 3-by-3 grid.
 pub(crate) const MAX_BOARD_COLUMNS: usize = 3;
+pub(crate) const MAX_BOARD_ROWS: usize = 3;
 
 /// Specifies the locations of the game pieces in Row/Column grid format.
 pub(crate) type GameBoard = [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS];
