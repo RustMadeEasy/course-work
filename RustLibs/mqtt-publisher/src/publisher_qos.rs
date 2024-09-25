@@ -1,5 +1,5 @@
-use rumqttc::{QoS as QoSV3};
 use rumqttc::v5::mqttbytes::QoS as QoSV5;
+use rumqttc::QoS as QoSV3;
 
 /// Enumerates the Quality of Service options for message publishing. These options correspond
 /// 1-to-1 with those of MQTT. IMPORTANT NOTE: This redundant enum exists so that users of this

@@ -1,11 +1,11 @@
 use std::collections::HashSet;
 use std::time::Duration;
 
-use log::trace;
-use crate::broker_config::PublisherConfig;
 use crate::async_mqtt_client::AsyncMqttClient;
+use crate::broker_config::PublisherConfig;
 use crate::publisher_error::PublisherError;
 use crate::publisher_qos::PublisherQoS;
+use log::trace;
 
 /// Provides MQTT message publishing functionality, including simulcast to disparate brokers and
 /// different version of the MQTT protocol.

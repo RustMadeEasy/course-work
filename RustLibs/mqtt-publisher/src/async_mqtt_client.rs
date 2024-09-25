@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use log::{debug, error, trace};
-use rumqttc::{AsyncClient as AsyncClientV3, EventLoop as EventLoopV3, MqttOptions as MqttOptionsV3};
 use rumqttc::v5::{AsyncClient as AsyncClientV5, EventLoop as EventLoopV5, MqttOptions as MqttOptionsV5};
+use rumqttc::{AsyncClient as AsyncClientV3, EventLoop as EventLoopV3, MqttOptions as MqttOptionsV3};
 use uuid::Uuid;
 
 use crate::broker_config::{MqttProtocolVersion, PublisherConfig};
@@ -19,11 +19,12 @@ pub(crate) struct AsyncMqttClient {
 impl AsyncMqttClient {
     //
 
-    /// Constructs a new ClientWrapper instance.
+    /// Constructs a new AsyncMqttClient instance.
     pub fn new(config: PublisherConfig, keep_alive: Duration, capacity: usize) -> Self {
         //
 
-        return match config.protocol_version {
+        // Which version of the client is being requested?
+        match config.protocol_version {
             //
 
             // Setup a V3 client
@@ -63,7 +64,7 @@ impl AsyncMqttClient {
                     client_v5: Some(client),
                 }
             }
-        };
+        }
     }
 
     /// Begins the background event loop required for the rumqttc V3 Client to publish MQTT messages.
