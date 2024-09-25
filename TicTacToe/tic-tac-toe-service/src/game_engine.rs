@@ -101,22 +101,6 @@ impl GameTrait for GameEngine {
         Ok(())
     }
 
-    /// Determines whether the specified Player can take a turn.
-    #[cfg(test)]
-    fn can_player_take_turn(&self, player: &PlayerInfo) -> bool {
-        //
-
-        // We can only begin Game Play when both players have been added to the Game.
-        if self.players.len() < 2 {
-            return false;
-        }
-
-        match self.current_player.clone() {
-            None => false,
-            Some(current_player) => player.player_id == current_player.player_id,
-        }
-    }
-
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState {
         //

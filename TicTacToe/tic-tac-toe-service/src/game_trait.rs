@@ -19,10 +19,6 @@ pub(crate) trait GameTrait: Sized {
     /// Adds a Player to the Game.
     fn add_player(&mut self, display_name: impl Into<String> + Copy) -> Result<(), GameError>;
 
-    /// Determines whether the specified Player can take a turn.
-    #[cfg(test)]
-    fn can_player_take_turn(&self, player: &PlayerInfo) -> bool;
-
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;
 

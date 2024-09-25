@@ -284,52 +284,6 @@ mod game_engine_tests {
     use crate::play_status::PlayStatus;
 
     #[test]
-    fn test_can_player_take_turn() {
-        //
-
-        let params = NewGameParams {
-            player_one_display_name: "Player One".to_string(),
-        };
-        let mqtt_broker_address = "test.mosquitto.org";
-        let mqtt_port = 1883;
-        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
-        let player_one = game_engine.players.first().unwrap().clone();
-
-        // Must not be able to take a turn before the Second Player has been added
-        assert!(!game_engine.can_player_take_turn(&player_one));
-
-        // Add the Second Player
-        match game_engine.add_player("Player Two") {
-            Ok(()) => {}
-            Err(_) => {
-                panic!();
-            }
-        };
-
-        let player_two = game_engine.players.last().unwrap().clone();
-
-        // Now, Player One should be able to take their turn while Player Two should not be able to.
-        assert!(game_engine.can_player_take_turn(&player_one));
-        assert!(!game_engine.can_player_take_turn(&player_two));
-
-        // Have Player One take their turn...
-        let turn_info = GameTurnInfo {
-            destination: BoardPosition::new(0, 0),
-            player_id: player_one.player_id.clone(),
-        };
-        match game_engine.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
-
-        // Now, Player Two should be able to take their turn while Player One should not be able to.
-        assert!(!game_engine.can_player_take_turn(&player_one));
-        assert!(game_engine.can_player_take_turn(&player_two));
-    }
-
-    #[test]
     fn test_get_current_board_state() {
         //
 
