@@ -20,10 +20,7 @@ use crate::game_board::{
     BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM,
     BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP,
     BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT,
-    BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS, THREE_ACROSS_DIAGONAL_1,
-    THREE_ACROSS_DIAGONAL_2, THREE_ACROSS_HORIZONTAL_BOTTOM, THREE_ACROSS_HORIZONTAL_MIDDLE,
-    THREE_ACROSS_HORIZONTAL_TOP, THREE_ACROSS_VERTICAL_CENTER, THREE_ACROSS_VERTICAL_LEFT,
-    THREE_ACROSS_VERTICAL_RIGHT,
+    BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS,
 };
 use crate::models::PlayerInfo;
 use crate::play_outcome::PlayOutcome;
@@ -106,50 +103,6 @@ impl GameState {
         // NOTE: The order in which we check the states is important!
         let current_player_binary_representation = as_binary.0;
 
-        fn winning_board_positions_from_binary(
-            binary_representation: i16,
-        ) -> Option<Vec<BoardPosition>> {
-            //
-
-            let result = if (binary_representation & BIN_THREE_ACROSS_HORIZONTAL_TOP)
-                == BIN_THREE_ACROSS_HORIZONTAL_TOP
-            {
-                THREE_ACROSS_HORIZONTAL_TOP
-            } else if (binary_representation & BIN_THREE_ACROSS_HORIZONTAL_MIDDLE)
-                == BIN_THREE_ACROSS_HORIZONTAL_MIDDLE
-            {
-                THREE_ACROSS_HORIZONTAL_MIDDLE
-            } else if (binary_representation & BIN_THREE_ACROSS_HORIZONTAL_BOTTOM)
-                == BIN_THREE_ACROSS_HORIZONTAL_BOTTOM
-            {
-                THREE_ACROSS_HORIZONTAL_BOTTOM
-            } else if (binary_representation & BIN_THREE_ACROSS_VERTICAL_LEFT)
-                == BIN_THREE_ACROSS_VERTICAL_LEFT
-            {
-                THREE_ACROSS_VERTICAL_LEFT
-            } else if (binary_representation & BIN_THREE_ACROSS_VERTICAL_CENTER)
-                == BIN_THREE_ACROSS_VERTICAL_CENTER
-            {
-                THREE_ACROSS_VERTICAL_CENTER
-            } else if (binary_representation & BIN_THREE_ACROSS_VERTICAL_RIGHT)
-                == BIN_THREE_ACROSS_VERTICAL_RIGHT
-            {
-                THREE_ACROSS_VERTICAL_RIGHT
-            } else if (binary_representation & BIN_THREE_ACROSS_DIAGONAL_1)
-                == BIN_THREE_ACROSS_DIAGONAL_1
-            {
-                THREE_ACROSS_DIAGONAL_1
-            } else if (binary_representation & BIN_THREE_ACROSS_DIAGONAL_2)
-                == BIN_THREE_ACROSS_DIAGONAL_2
-            {
-                THREE_ACROSS_DIAGONAL_2
-            } else {
-                return None;
-            };
-
-            Some(result.to_vec())
-        }
-
         // Test for winning states
         if (current_player_binary_representation & BIN_THREE_ACROSS_HORIZONTAL_TOP)
             == BIN_THREE_ACROSS_HORIZONTAL_TOP
@@ -170,7 +123,7 @@ impl GameState {
         {
             PlayOutcome::new_with_win_details(
                 &PlayStatus::EndedInWin,
-                &winning_board_positions_from_binary(current_player_binary_representation).unwrap(),
+                &GameState::winning_board_positions_from_binary(current_player_binary_representation).unwrap(),
                 current_player_id,
             )
         } else if (as_binary.0 | as_binary.1) == BIN_FULL_BOARD {
@@ -195,6 +148,14 @@ impl GameState {
     /// Returns the Play Status.
     pub(crate) fn get_play_status(&self) -> PlayStatus {
         self.play_status.clone()
+    }
+
+    /// Determines whether the Play Status indicates the end of the game.
+    pub(crate) fn has_ended(&self) -> bool {
+        match self.play_status {
+            PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => true,
+            PlayStatus::InProgress | PlayStatus::NotStarted => false
+        }
     }
 
     /// Determines whether the specified position is a valid for the Tic-Tac_Toe game board.
@@ -288,5 +249,83 @@ impl GameState {
             winning_locations: outcome.winning_position,
             winning_player_id: outcome.winning_player_id,
         })
+    }
+
+    /// If the specified binary representation connotes a winning board layout, this method converts
+    /// the binary representation to a grid-based board layout.
+    fn winning_board_positions_from_binary(
+        binary_representation: i16,
+    ) -> Option<Vec<BoardPosition>> {
+        //
+
+        let result = if (binary_representation & BIN_THREE_ACROSS_HORIZONTAL_TOP)
+            == BIN_THREE_ACROSS_HORIZONTAL_TOP
+        {
+            &[
+                BoardPosition { row: 0, column: 0 },
+                BoardPosition { row: 0, column: 1 },
+                BoardPosition { row: 0, column: 2 },
+            ]
+        } else if (binary_representation & BIN_THREE_ACROSS_HORIZONTAL_MIDDLE)
+            == BIN_THREE_ACROSS_HORIZONTAL_MIDDLE
+        {
+            &[
+                BoardPosition { row: 1, column: 0 },
+                BoardPosition { row: 1, column: 1 },
+                BoardPosition { row: 1, column: 2 },
+            ]
+        } else if (binary_representation & BIN_THREE_ACROSS_HORIZONTAL_BOTTOM)
+            == BIN_THREE_ACROSS_HORIZONTAL_BOTTOM
+        {
+            &[
+                BoardPosition { row: 2, column: 0 },
+                BoardPosition { row: 2, column: 1 },
+                BoardPosition { row: 2, column: 2 },
+            ]
+        } else if (binary_representation & BIN_THREE_ACROSS_VERTICAL_LEFT)
+            == BIN_THREE_ACROSS_VERTICAL_LEFT
+        {
+            &[
+                BoardPosition { row: 0, column: 0 },
+                BoardPosition { row: 1, column: 0 },
+                BoardPosition { row: 2, column: 0 },
+            ]
+        } else if (binary_representation & BIN_THREE_ACROSS_VERTICAL_CENTER)
+            == BIN_THREE_ACROSS_VERTICAL_CENTER
+        {
+            &[
+                BoardPosition { row: 0, column: 1 },
+                BoardPosition { row: 1, column: 1 },
+                BoardPosition { row: 2, column: 1 },
+            ]
+        } else if (binary_representation & BIN_THREE_ACROSS_VERTICAL_RIGHT)
+            == BIN_THREE_ACROSS_VERTICAL_RIGHT
+        {
+            &[
+                BoardPosition { row: 0, column: 2 },
+                BoardPosition { row: 1, column: 2 },
+                BoardPosition { row: 2, column: 2 },
+            ]
+        } else if (binary_representation & BIN_THREE_ACROSS_DIAGONAL_1)
+            == BIN_THREE_ACROSS_DIAGONAL_1
+        {
+            &[
+                BoardPosition { row: 0, column: 0 },
+                BoardPosition { row: 1, column: 1 },
+                BoardPosition { row: 2, column: 2 },
+            ]
+        } else if (binary_representation & BIN_THREE_ACROSS_DIAGONAL_2)
+            == BIN_THREE_ACROSS_DIAGONAL_2
+        {
+            &[
+                BoardPosition { row: 0, column: 2 },
+                BoardPosition { row: 1, column: 1 },
+                BoardPosition { row: 2, column: 0 },
+            ]
+        } else {
+            return None;
+        };
+
+        Some(result.to_vec())
     }
 }

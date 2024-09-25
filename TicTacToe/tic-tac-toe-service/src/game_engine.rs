@@ -25,10 +25,10 @@ use crate::play_status::PlayStatus;
 pub(crate) struct GameEngine {
     //
 
-    /// The Player who can currently make a game move.
+    /// The Player who can currently make a game move
     pub(crate) current_player: Option<PlayerInfo>,
 
-    /// Provide the configuration required for clients subscribe to game updates via MQTT.
+    /// Provide the configuration required for clients to subscribe to game updates via MQTT
     pub(crate) event_plane_config: EventPlaneConfig,
 
     /// Code used to invite the second player to the game
@@ -44,6 +44,7 @@ pub(crate) struct GameEngine {
     /// The list of Game States from the very first turn until the latest turn
     pub(super) play_history: Vec<GameState>,
 
+    /// The list of Players engaged in the Game
     pub(crate) players: Vec<PlayerInfo>,
 }
 
@@ -85,7 +86,7 @@ impl GameTrait for GameEngine {
                 }
             }
             _ => {
-                // We are already maxed out
+                // Tic-Tac-Toe is a 2-player game. No more players can be added.
                 return Err(GameError::MaximumPlayersAlreadyAdded);
             }
         }
@@ -101,7 +102,8 @@ impl GameTrait for GameEngine {
     }
 
     /// Determines whether the specified Player can take a turn.
-    fn _can_player_take_turn(&self, player: &PlayerInfo) -> bool {
+    #[cfg(test)]
+    fn can_player_take_turn(&self, player: &PlayerInfo) -> bool {
         //
 
         // We can only begin Game Play when both players have been added to the Game.
@@ -109,7 +111,10 @@ impl GameTrait for GameEngine {
             return false;
         }
 
-        player.player_id == self.current_player.clone().unwrap().player_id
+        match self.current_player.clone() {
+            None => false,
+            Some(current_player) => player.player_id == current_player.player_id,
+        }
     }
 
     /// Returns the current state of the Game Board.
@@ -188,31 +193,32 @@ impl GameTrait for GameEngine {
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError> {
         //
 
-        // Do not allow game moves when the game has already been completed
         let board_state = self.get_current_game_state();
-        match board_state.get_play_status() {
-            PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
-                return Err(GameError::GameHasAlreadyEnded);
-            }
-            PlayStatus::InProgress | PlayStatus::NotStarted => {}
+
+        // Do not allow game moves when the game has already been completed.
+        if board_state.has_ended() {
+            return Err(GameError::GameHasAlreadyEnded);
         }
 
-        // Get the Players - also validating that the correct IDs have been sent in.
+        // Get the Player - also validating that the correct IDs have been sent in.
         let player_taking_a_turn = self.get_player_info_by_id(&game_turn_info.player_id)?;
-        let other_player =
-            PlayerInfo::get_other_player_info_by_id(&game_turn_info.player_id, &self.players)?;
 
-        // Ensure that a Player is not making a move out of turn.
+        // Ensure that the Player is not making a move out of turn.
         if player_taking_a_turn.player_id != self.current_player.clone().unwrap().player_id {
             return Err(GameError::WrongPlayerTakingTurn);
         }
 
-        // Make sure that the target location is not already occupied
+        // Make sure that the target location is not already occupied.
         if Self::is_location_occupied(&board_state.get_game_board(), &game_turn_info.destination) {
             return Err(BoardLocationAlreadyOccupied);
         }
 
-        // Make a new Board State by adding the specified piece to the board of the current Board State.
+        // Load the other Player.
+        let other_player =
+            PlayerInfo::get_other_player_info_by_id(&game_turn_info.player_id, &self.players)?;
+
+        // Take the turn and make a new Board State by adding the specified piece to the board of
+        // the current Board State.
         let final_board_state = board_state.place_game_piece(
             &game_turn_info.destination,
             &player_taking_a_turn,
@@ -222,7 +228,7 @@ impl GameTrait for GameEngine {
         // Add this move to our Game Play History
         self.play_history.push(final_board_state.clone());
 
-        // change Players
+        // Change Players
         self.current_player = Some(other_player);
 
         Ok(final_board_state.clone())

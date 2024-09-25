@@ -296,7 +296,7 @@ mod game_engine_tests {
         let player_one = game_engine.players.first().unwrap().clone();
 
         // Must not be able to take a turn before the Second Player has been added
-        assert!(!game_engine._can_player_take_turn(&player_one));
+        assert!(!game_engine.can_player_take_turn(&player_one));
 
         // Add the Second Player
         match game_engine.add_player("Player Two") {
@@ -309,8 +309,8 @@ mod game_engine_tests {
         let player_two = game_engine.players.last().unwrap().clone();
 
         // Now, Player One should be able to take their turn while Player Two should not be able to.
-        assert!(game_engine._can_player_take_turn(&player_one));
-        assert!(!game_engine._can_player_take_turn(&player_two));
+        assert!(game_engine.can_player_take_turn(&player_one));
+        assert!(!game_engine.can_player_take_turn(&player_two));
 
         // Have Player One take their turn...
         let turn_info = GameTurnInfo {
@@ -325,8 +325,8 @@ mod game_engine_tests {
         }
 
         // Now, Player Two should be able to take their turn while Player One should not be able to.
-        assert!(!game_engine._can_player_take_turn(&player_one));
-        assert!(game_engine._can_player_take_turn(&player_two));
+        assert!(!game_engine.can_player_take_turn(&player_one));
+        assert!(game_engine.can_player_take_turn(&player_two));
     }
 
     #[test]
