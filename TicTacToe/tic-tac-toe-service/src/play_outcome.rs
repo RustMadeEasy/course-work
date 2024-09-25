@@ -1,11 +1,11 @@
 use crate::game_board::BoardPosition;
 use crate::play_status::PlayStatus;
 
-/// Models the outcome of a game turn (play). See determine_outcome_of_play().
+/// Models the outcome of a game turn (play). See GameState::determine_outcome_of_play().
 pub(crate) struct PlayOutcome {
     pub(crate) play_status: PlayStatus,
-    pub(crate) winning_position: Option<Vec<BoardPosition>>,
     pub(crate) winning_player_id: Option<String>,
+    pub(crate) winning_position: Option<Vec<BoardPosition>>,
 }
 
 impl PlayOutcome {
@@ -15,8 +15,8 @@ impl PlayOutcome {
     pub(crate) fn new(play_status: &PlayStatus) -> Self {
         Self {
             play_status: play_status.clone(),
-            winning_position: None,
             winning_player_id: None,
+            winning_position: None,
         }
     }
 
@@ -28,8 +28,8 @@ impl PlayOutcome {
     ) -> Self {
         Self {
             play_status: play_status.clone(),
-            winning_position: Some(winning_position.to_vec()),
             winning_player_id: Some(winning_player_id.to_string()),
+            winning_position: Some(winning_position.to_vec()),
         }
     }
 }

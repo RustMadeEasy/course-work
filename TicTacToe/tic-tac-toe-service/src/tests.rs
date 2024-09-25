@@ -62,21 +62,56 @@ mod game_board_tests {
     use crate::play_status::PlayStatus;
 
     #[test]
-    fn test_valid_piece_placement() {
+    fn test_occupied_piece_placement() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        match GameState::new().place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
-        {
-            Ok(board_state) => {
-                // Double check that the location now contains the piece we specified
-                assert_eq!(board_state.game_board[0][0], GamePiece::O)
-            }
-            Err(_) => {
-                panic!()
-            }
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+
+        // Place an X at 0:0
+        let board_state = GameState::new();
+        let new_board_state =
+            match board_state.place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
+            {
+                Ok(board_state) => board_state,
+                Err(_) => {
+                    panic!()
+                }
+            };
+
+        // Have Player Two attempt to move to the same space (0:0)
+        let result =
+            new_board_state.place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one);
+        if result.is_ok() {
+            panic!()
         }
+    }
+
+    #[test]
+    fn test_in_progress_status() {
+        //
+
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+
+        /*
+        O  O  X
+        X  O  O
+        O  X  X     */
+        let mut board_state = GameState::new()
+            .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
+            .unwrap();
+        // Make sure that the Play Status game indicates InProgress since the game has not ended
+        assert_eq!(board_state.play_status, PlayStatus::InProgress);
     }
 
     #[test]
@@ -111,28 +146,62 @@ mod game_board_tests {
     }
 
     #[test]
-    fn test_occupied_piece_placement() {
+    fn test_stalemate() {
         //
 
         let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
         let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
 
-        // Place an X at 0:0
-        let board_state = GameState::new();
-        let new_board_state =
-            match board_state.place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
-            {
-                Ok(board_state) => board_state,
-                Err(_) => {
-                    panic!()
-                }
-            };
+        /*
+        O  O  X
+        X  O  O
+        O  X  X     */
+        let mut board_state = GameState::new()
+            .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 1), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 1), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .unwrap();
+        // Make sure the game ended in a Stalemate
+        assert_eq!(board_state.play_status, PlayStatus::EndedInStalemate);
+    }
 
-        // Have Player Two attempt to move to the same space (0:0)
-        let result =
-            new_board_state.place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one);
-        if result.is_ok() {
-            panic!()
+    #[test]
+    fn test_valid_piece_placement() {
+        //
+
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
+        match GameState::new().place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
+        {
+            Ok(board_state) => {
+                // Double check that the location now contains the piece we specified
+                assert_eq!(board_state.game_board[0][0], GamePiece::O)
+            }
+            Err(_) => {
+                panic!()
+            }
         }
     }
 
@@ -201,75 +270,6 @@ mod game_board_tests {
         // Make sure Player Two won
         assert_eq!(board_state.play_status, PlayStatus::EndedInWin);
         assert_eq!(board_state.winning_player_id.unwrap(), player_two.player_id);
-    }
-
-    #[test]
-    fn test_stalemate() {
-        //
-
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
-
-        /*
-        O  O  X
-        X  O  O
-        O  X  X     */
-        let mut board_state = GameState::new()
-            .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 1), &player_two, &player_one)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 1), &player_one, &player_two)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
-            .unwrap();
-        // Make sure the game ended in a Stalemate
-        assert_eq!(board_state.play_status, PlayStatus::EndedInStalemate);
-    }
-
-    #[test]
-    fn test_in_progress_status() {
-        //
-
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
-
-        /*
-        O  O  X
-        X  O  O
-        O  X  X     */
-        let mut board_state = GameState::new()
-            .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
-            .unwrap();
-        board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
-            .unwrap();
-        // Make sure that the Play Status game indicates InProgress since the game has not ended
-        assert_eq!(board_state.play_status, PlayStatus::InProgress);
     }
 }
 
@@ -511,47 +511,6 @@ mod game_manager_tests {
     }
 
     #[tokio::test]
-    async fn test_add_second_player_with_invalid_invitation_code() {
-        //
-
-        let display_name = Uuid::new_v4().to_string();
-        let params = NewGameParams {
-            player_one_display_name: display_name.clone(),
-        };
-        let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params) {
-            Ok(game) => game,
-            Err(_) => {
-                panic!()
-            }
-        };
-
-        let second_player_params = AddPlayerParams {
-            game_invitation_code: Uuid::new_v4().to_string(),
-            player_display_name: Uuid::new_v4().to_string(),
-        };
-        match manager.add_player(&second_player_params).await {
-            Ok(new_game_instance) => {
-                match new_game_instance.players.last() {
-                    None => {
-                        panic!()
-                    }
-                    Some(player_info) => {
-                        // Make sure the game piece is different from that of Player One
-                        assert_ne!(
-                            game.players.first().unwrap().game_piece,
-                            player_info.game_piece
-                        );
-                    }
-                }
-            }
-            Err(error) => {
-                assert_eq!(error, GameError::InvitationCodeNotFound)
-            }
-        }
-    }
-
-    #[tokio::test]
     async fn test_add_second_player_twice() {
         //
 
@@ -654,6 +613,47 @@ mod game_manager_tests {
             }
             Err(error) => {
                 assert_eq!(error, GameError::DisplayNameAlreadyInUseInGame)
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_add_second_player_with_invalid_invitation_code() {
+        //
+
+        let display_name = Uuid::new_v4().to_string();
+        let params = NewGameParams {
+            player_one_display_name: display_name.clone(),
+        };
+        let mut manager = TicTacToeGamesManager::new();
+        let game = match manager.create_game(&params) {
+            Ok(game) => game,
+            Err(_) => {
+                panic!()
+            }
+        };
+
+        let second_player_params = AddPlayerParams {
+            game_invitation_code: Uuid::new_v4().to_string(),
+            player_display_name: Uuid::new_v4().to_string(),
+        };
+        match manager.add_player(&second_player_params).await {
+            Ok(new_game_instance) => {
+                match new_game_instance.players.last() {
+                    None => {
+                        panic!()
+                    }
+                    Some(player_info) => {
+                        // Make sure the game piece is different from that of Player One
+                        assert_ne!(
+                            game.players.first().unwrap().game_piece,
+                            player_info.game_piece
+                        );
+                    }
+                }
+            }
+            Err(error) => {
+                assert_eq!(error, GameError::InvitationCodeNotFound)
             }
         }
     }
