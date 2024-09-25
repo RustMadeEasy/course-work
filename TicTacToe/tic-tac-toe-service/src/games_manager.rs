@@ -34,78 +34,77 @@ const MQTT_PORT: u16 = 1883;
 /// NOTE: Production-grade code would persist the gaming info to a mem cache or database so that
 /// multiple instances of the service can be run.
 #[derive(Clone)]
-pub(crate) struct GamesManager<G: GameTrait + Clone> {
+pub(crate) struct GamesManager<T: GameTrait + Clone> {
     //
 
     /// Provides MQTT message publishing functionality.
     event_publisher: Publisher,
 
     /// The games being managed by this instance. They are stored by game ID.
-    games: HashMap<String, G>,
+    games: HashMap<String, T>,
 }
 
-impl<GenericGame: GameTrait + Clone> GamesManager<GenericGame> {
+impl<T: GameTrait + Clone> GamesManager<T> {
     //
 
     /// Adds a Player to the Game.
     pub(crate) async fn add_player(
         &mut self,
         second_player_params: &AddPlayerParams,
-    ) -> Result<GenericGame, GameError> {
+    ) -> Result<T, GameError> {
         //
 
-        // Find the Game via the game_invitation_code
-        let mut game_engine =
-            match self.get_game_by_invitation_code(&second_player_params.game_invitation_code) {
-                None => {
-                    return Err(GameError::InvitationCodeNotFound);
-                }
-                Some(game_engine) => game_engine,
-            };
+        // Find the Game instance via the game_invitation_code.
+        let mut game = match self.get_game_by_invitation_code(&second_player_params.game_invitation_code) {
+            None => {
+                return Err(GameError::InvitationCodeNotFound);
+            }
+            Some(game) => game,
+        };
 
-        game_engine.add_player(&second_player_params.player_display_name)?;
+        game.add_player(&second_player_params.player_display_name)?;
 
-        // Update the Game Engine in the list
-        self.games.insert(game_engine.get_id(), game_engine.clone());
+        // Update the Game instance in the list.
+        self.games.insert(game.get_id(), game.clone());
 
         // Inform the listening clients that a Player has been added.
-        let topic = EventPlaneTopicNames::PlayerAdded.build(game_engine.get_event_channel_id().as_str());
+        let topic = EventPlaneTopicNames::PlayerAdded.build(game.get_event_channel_id().as_str());
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
 
-        Ok(game_engine)
+        Ok(game)
     }
 
-    /// Creates a new Game Engine.
-    pub(crate) fn create_game_engine(
+    /// Creates a new Game instance.
+    pub(crate) fn create_game(
         &mut self,
         params: &NewGameParams,
-    ) -> Result<GenericGame, GameError> {
+    ) -> Result<T, GameError> {
         //
 
         let invitation_code = self.generate_invitation_code();
-        let game_engine = GenericGame::new(params,
-                                           MQTT_BROKER_ADDRESS,
-                                           MQTT_PORT,
-                                           invitation_code)?;
+        let game = T::new(params,
+                          MQTT_BROKER_ADDRESS,
+                          MQTT_PORT,
+                          invitation_code)?;
 
-        self.games.insert(game_engine.get_id().clone(), game_engine.clone());
+        self.games.insert(game.get_id().clone(), game.clone());
 
-        Ok(game_engine.clone())
+        Ok(game.clone())
     }
 
-    /// Closes down the specified game and returns its final game state.
+    /// Closes down the specified game instance.
     pub(crate) fn end_game(&mut self, game_id: &String) -> Result<(), GameError> {
         //
 
-        let game_engine = self.get_game_engine(game_id)?;
+        let game = self.get_game_instance(game_id)?;
 
-        self.games.remove(&game_engine.get_id());
+        self.games.remove(&game.get_id());
 
         Ok(())
     }
 
-    /// Retrieves the specified Game Engine.
-    pub(crate) fn get_game_engine(&self, game_id: impl Into<String>) -> Result<GenericGame, GameError> {
+    /// Retrieves the specified Game instance.
+    pub(crate) fn get_game_instance(&self, game_id: impl Into<String>) -> Result<T, GameError> {
         match self.games.get(&game_id.into()) {
             None => Err(GameError::GameNotFound),
             Some(game) => Ok(game.clone()),
@@ -116,8 +115,8 @@ impl<GenericGame: GameTrait + Clone> GamesManager<GenericGame> {
     /// Game State. This can be used, for instance, the client could provide an animation that
     /// shows a time-lapse of the game play.
     pub(crate) fn get_game_history(&self, game_id: &String) -> Result<Vec<GameState>, GameError> {
-        let game_engine = self.get_game_engine(game_id)?;
-        Ok(game_engine.get_play_history())
+        let game = self.get_game_instance(game_id)?;
+        Ok(game.get_play_history())
     }
 
     /// Creates a new GamesManager instance.
@@ -130,7 +129,7 @@ impl<GenericGame: GameTrait + Clone> GamesManager<GenericGame> {
         }
     }
 
-    /// Make a game move for the specified Player.
+    /// Takes a turn for the specified Player.
     pub(crate) async fn take_turn(
         &mut self,
         game_id: &String,
@@ -138,14 +137,14 @@ impl<GenericGame: GameTrait + Clone> GamesManager<GenericGame> {
     ) -> Result<GameState, GameError> {
         //
 
-        let mut game_engine = self.get_game_engine(game_id)?;
-        let new_game_state = game_engine.take_turn(game_turn_info)?;
+        let mut game = self.get_game_instance(game_id)?;
+        let new_game_state = game.take_turn(game_turn_info)?;
 
-        // Update our game engine
-        self.games.insert(game_engine.get_id().clone(), game_engine.clone());
+        // Update our game instance.
+        self.games.insert(game.get_id().clone(), game.clone());
 
         // Inform the listening clients that a Player has taken a new turn.
-        let event_channel_id = game_engine.get_event_channel_id();
+        let event_channel_id = game.get_event_channel_id();
         let topic = EventPlaneTopicNames::TurnTaken.build(event_channel_id.as_str());
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
 
@@ -166,25 +165,28 @@ impl<GenericGame: GameTrait + Clone> GamesManager<GenericGame> {
     }
 }
 
-impl<GenericGame: GameTrait + Clone> GamesManager<GenericGame> {
+// Invitation code handling
+impl<T: GameTrait + Clone> GamesManager<T> {
     //
 
     /// Retrieves a game by its invitation code.
-    fn get_game_by_invitation_code(&self, invitation_code: &String) -> Option<GenericGame> {
+    fn get_game_by_invitation_code(&self, invitation_code: &String) -> Option<T> {
         self.games
             .iter()
             .find(|it| it.1.get_invitation_code() == *invitation_code)
             .map(|it| it.1.clone())
     }
 
-    /// Creates a unique, 6-digit code for use as a Game Invitation. We use a 6-digit Game
-    /// Invitation instead of performing the game setup handshaking with the Game ID for 2 reasons:
+    /// Creates a unique, 6-digit code for use as a Game Invitation.
+    ///
+    /// NOTE: We use a 6-digit Game Invitation instead of performing the game setup handshaking
+    /// with the Game ID for 2 reasons:
     ///     1) We don't want to expose the Game ID to clients that are not party to the Game.
     ///     2) A 6-digit code is practical for end-users to utilize.
     fn generate_invitation_code(&self) -> String {
         //
 
-        // Place a limit to prevent endless loop.
+        // Place a limit to prevent an endless loop.
         for _ in 0..=1000 {
             let game_invitation_code: String = VerificationCodeGenerator::generate();
             // Ensure uniqueness across all open Games

@@ -274,7 +274,7 @@ mod game_board_tests {
 }
 
 #[cfg(test)]
-mod game_engine_tests {
+mod game_tests {
     use uuid::Uuid;
 
     use crate::game_board::{BoardPosition, GamePiece};
@@ -293,24 +293,24 @@ mod game_engine_tests {
         };
         let mqtt_broker_address = "test.mosquitto.org";
         let mqtt_port = 1883;
-        let mut game_engine = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
-        let player_one_id = game_engine.players.first().unwrap().player_id.clone();
+        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
-        match game_engine.add_player("Player Two") {
+        match game.add_player("Player Two") {
             Ok(_) => {}
             Err(_) => {
                 panic!();
             }
         };
-        let player_two_id = game_engine.players.last().unwrap().player_id.clone();
+        let player_two_id = game.players.last().unwrap().player_id.clone();
 
         // Let Player One take their turn
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 0),
             player_id: player_one_id.clone(),
         };
-        match game_engine.take_turn(&turn_info) {
+        match game.take_turn(&turn_info) {
             Ok(_) => {}
             Err(_) => {
                 panic!();
@@ -318,7 +318,7 @@ mod game_engine_tests {
         }
 
         // Check the board state
-        let game_state = game_engine.get_current_game_state();
+        let game_state = game.get_current_game_state();
         assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
         assert_eq!(game_state.get_id_of_player_who_made_move(), player_one_id);
 
@@ -327,7 +327,7 @@ mod game_engine_tests {
             destination: BoardPosition::new(0, 1),
             player_id: player_two_id.clone(),
         };
-        match game_engine.take_turn(&turn_info) {
+        match game.take_turn(&turn_info) {
             Ok(_) => {}
             Err(_) => {
                 panic!();
@@ -335,7 +335,7 @@ mod game_engine_tests {
         }
 
         // Check the board state
-        let game_state = game_engine.get_current_game_state();
+        let game_state = game.get_current_game_state();
         assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
         assert_eq!(game_state.get_id_of_player_who_made_move(), player_two_id);
     }
@@ -350,27 +350,27 @@ mod game_engine_tests {
         };
         let mqtt_broker_address = "test.mosquitto.org";
         let mqtt_port = 1883;
-        let mut game_engine = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
-        let player_one_id = game_engine.players.first().unwrap().player_id.clone();
+        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
-        match game_engine.add_player("Player Two") {
+        match game.add_player("Player Two") {
             Ok(_) => {}
             Err(_) => {
                 panic!();
             }
         };
-        let player_two_id = game_engine.players.last().unwrap().player_id.clone();
+        let player_two_id = game.players.last().unwrap().player_id.clone();
 
         // There should be no moves in the history at this point
-        assert_eq!(game_engine.play_history.len(), 0);
+        assert_eq!(game.play_history.len(), 0);
 
         // Let Player One take their turn
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 0),
             player_id: player_one_id.clone(),
         };
-        match game_engine.take_turn(&turn_info) {
+        match game.take_turn(&turn_info) {
             Ok(_) => {}
             Err(_) => {
                 panic!();
@@ -378,14 +378,14 @@ mod game_engine_tests {
         }
 
         // There should be exactly one move in the history
-        assert_eq!(game_engine.play_history.len(), 1);
+        assert_eq!(game.play_history.len(), 1);
 
         // Let Player Two take their turn
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 1),
             player_id: player_two_id.clone(),
         };
-        match game_engine.take_turn(&turn_info) {
+        match game.take_turn(&turn_info) {
             Ok(_) => {}
             Err(_) => {
                 panic!();
@@ -393,7 +393,7 @@ mod game_engine_tests {
         }
 
         // There should be exactly two moves in the history
-        assert_eq!(game_engine.play_history.len(), 2);
+        assert_eq!(game.play_history.len(), 2);
     }
 
     #[test]
@@ -406,17 +406,17 @@ mod game_engine_tests {
         };
         let mqtt_broker_address = "test.mosquitto.org";
         let mqtt_port = 1883;
-        let mut game_engine = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
-        let player_one_id = game_engine.players.first().unwrap().player_id.clone();
+        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
-        match game_engine.add_player("Player Two") {
+        match game.add_player("Player Two") {
             Ok(_) => {}
             Err(_) => {
                 panic!();
             }
         };
-        let player_two_id = game_engine.players.last().unwrap().player_id.clone();
+        let player_two_id = game.players.last().unwrap().player_id.clone();
 
         let player_one_destination = BoardPosition::new(0, 0);
         let player_two_destination = BoardPosition::new(1, 1);
@@ -426,7 +426,7 @@ mod game_engine_tests {
             destination: player_one_destination.clone(),
             player_id: player_one_id.clone(),
         };
-        match game_engine.take_turn(&turn_info) {
+        match game.take_turn(&turn_info) {
             Ok(_) => {}
             Err(_) => {
                 panic!();
@@ -435,7 +435,7 @@ mod game_engine_tests {
 
         // There should be an X at 0:0
         assert_eq!(
-            game_engine.get_current_game_state().get_game_board()[player_one_destination.row]
+            game.get_current_game_state().get_game_board()[player_one_destination.row]
                 [player_one_destination.column],
             GamePiece::X
         );
@@ -445,7 +445,7 @@ mod game_engine_tests {
             destination: player_two_destination.clone(),
             player_id: player_two_id.clone(),
         };
-        match game_engine.take_turn(&turn_info) {
+        match game.take_turn(&turn_info) {
             Ok(_) => {}
             Err(_) => {
                 panic!();
@@ -454,7 +454,7 @@ mod game_engine_tests {
 
         // There should be an O at 1:1
         assert_eq!(
-            game_engine.get_current_game_state().get_game_board()[player_two_destination.row]
+            game.get_current_game_state().get_game_board()[player_two_destination.row]
                 [player_two_destination.column],
             GamePiece::O
         );
@@ -478,27 +478,27 @@ mod game_manager_tests {
             player_one_display_name: display_name.clone(),
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game_engine = match manager.create_game_engine(&params) {
-            Ok(game_engine) => game_engine,
+        let game = match manager.create_game(&params) {
+            Ok(game) => game,
             Err(_) => {
                 panic!()
             }
         };
 
         let second_player_params = AddPlayerParams {
-            game_invitation_code: game_engine.game_invitation_code,
+            game_invitation_code: game.game_invitation_code,
             player_display_name: Uuid::new_v4().to_string(),
         };
         match manager.add_player(&second_player_params).await {
-            Ok(new_game_engine) => {
-                match new_game_engine.players.last() {
+            Ok(new_game_instance) => {
+                match new_game_instance.players.last() {
                     None => {
                         panic!()
                     }
                     Some(player_info) => {
                         // Make sure the game piece is different from that of Player One
                         assert_ne!(
-                            game_engine.players.first().unwrap().game_piece,
+                            game.players.first().unwrap().game_piece,
                             player_info.game_piece
                         );
                     }
@@ -519,8 +519,8 @@ mod game_manager_tests {
             player_one_display_name: display_name.clone(),
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game_engine = match manager.create_game_engine(&params) {
-            Ok(game_engine) => game_engine,
+        let game = match manager.create_game(&params) {
+            Ok(game) => game,
             Err(_) => {
                 panic!()
             }
@@ -531,15 +531,15 @@ mod game_manager_tests {
             player_display_name: Uuid::new_v4().to_string(),
         };
         match manager.add_player(&second_player_params).await {
-            Ok(new_game_engine) => {
-                match new_game_engine.players.last() {
+            Ok(new_game_instance) => {
+                match new_game_instance.players.last() {
                     None => {
                         panic!()
                     }
                     Some(player_info) => {
                         // Make sure the game piece is different from that of Player One
                         assert_ne!(
-                            game_engine.players.first().unwrap().game_piece,
+                            game.players.first().unwrap().game_piece,
                             player_info.game_piece
                         );
                     }
@@ -560,27 +560,27 @@ mod game_manager_tests {
             player_one_display_name: display_name.clone(),
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game_engine = match manager.create_game_engine(&params) {
-            Ok(game_engine) => game_engine,
+        let game = match manager.create_game(&params) {
+            Ok(game) => game,
             Err(_) => {
                 panic!()
             }
         };
 
         let second_player_params = AddPlayerParams {
-            game_invitation_code: game_engine.game_invitation_code.clone(),
+            game_invitation_code: game.game_invitation_code.clone(),
             player_display_name: Uuid::new_v4().to_string(),
         };
         match manager.add_player(&second_player_params).await {
-            Ok(new_game_engine) => {
-                match new_game_engine.players.last() {
+            Ok(new_game_instance) => {
+                match new_game_instance.players.last() {
                     None => {
                         panic!()
                     }
                     Some(player_info) => {
                         // Make sure the game piece is different from that of Player One
                         assert_ne!(
-                            game_engine.players.first().unwrap().game_piece,
+                            game.players.first().unwrap().game_piece,
                             player_info.game_piece
                         );
                     }
@@ -593,19 +593,19 @@ mod game_manager_tests {
 
         // This attempt should fail
         let second_player_params = AddPlayerParams {
-            game_invitation_code: game_engine.game_invitation_code,
+            game_invitation_code: game.game_invitation_code,
             player_display_name: Uuid::new_v4().to_string(),
         };
         match manager.add_player(&second_player_params).await {
-            Ok(new_game_engine) => {
-                match new_game_engine.players.last() {
+            Ok(new_game_instance) => {
+                match new_game_instance.players.last() {
                     None => {
                         panic!()
                     }
                     Some(player_info) => {
                         // Make sure the game piece is different from that of Player One
                         assert_ne!(
-                            game_engine.players.first().unwrap().game_piece,
+                            game.players.first().unwrap().game_piece,
                             player_info.game_piece
                         );
                     }
@@ -626,27 +626,27 @@ mod game_manager_tests {
             player_one_display_name: player_one_display_name.clone(),
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game_engine = match manager.create_game_engine(&params) {
-            Ok(game_engine) => game_engine,
+        let game = match manager.create_game(&params) {
+            Ok(game) => game,
             Err(_) => {
                 panic!()
             }
         };
 
         let second_player_params = AddPlayerParams {
-            game_invitation_code: game_engine.game_invitation_code,
+            game_invitation_code: game.game_invitation_code,
             player_display_name: player_one_display_name,
         };
         match manager.add_player(&second_player_params).await {
-            Ok(new_game_engine) => {
-                match new_game_engine.players.last() {
+            Ok(new_game_instance) => {
+                match new_game_instance.players.last() {
                     None => {
                         panic!()
                     }
                     Some(player_info) => {
                         // Make sure the game piece is different from that of Player One
                         assert_ne!(
-                            game_engine.players.first().unwrap().game_piece,
+                            game.players.first().unwrap().game_piece,
                             player_info.game_piece
                         );
                     }

@@ -123,7 +123,7 @@ pub mod responses {
         // /// Code used to invite the second player to the game
         // pub(crate) game_invitation_code: String,
 
-        /// Unique ID of the Game Engine
+        /// Unique ID of the Game instance
         pub(crate) id: String,
 
         /// List of Players
@@ -133,15 +133,15 @@ pub mod responses {
     impl TryFrom<TicTacToeGame> for GameInfo {
         type Error = GameError;
 
-        fn try_from(game_engine: TicTacToeGame) -> Result<Self, Self::Error> {
-            let game_state = game_engine.get_current_game_state();
+        fn try_from(game: TicTacToeGame) -> Result<Self, Self::Error> {
+            let game_state = game.get_current_game_state();
             Ok(GameInfo {
-                current_player: game_engine.current_player,
+                current_player: game.current_player,
                 // event_channel_id: value.event_channel_id,
                 game_state,
                 // game_invitation_code: value.game_invitation_code,
-                id: game_engine.id.clone(),
-                players: game_engine.players,
+                id: game.id.clone(),
+                players: game.players,
             })
         }
     }
@@ -162,11 +162,11 @@ pub mod responses {
     impl TryFrom<TicTacToeGame> for GameCreationResult {
         type Error = GameError;
 
-        fn try_from(game_engine: TicTacToeGame) -> Result<Self, Self::Error> {
-            let game_invitation_code = game_engine.game_invitation_code.clone();
+        fn try_from(game: TicTacToeGame) -> Result<Self, Self::Error> {
+            let game_invitation_code = game.game_invitation_code.clone();
             Ok(GameCreationResult {
-                game_info: GameInfo::try_from(game_engine.clone()).unwrap(),
-                event_plane_config: game_engine.event_plane_config,
+                game_info: GameInfo::try_from(game.clone()).unwrap(),
+                event_plane_config: game.event_plane_config,
                 game_invitation_code,
             })
         }

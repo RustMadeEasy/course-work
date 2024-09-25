@@ -42,7 +42,7 @@ pub(crate) async fn add_player(
         .unwrap()
         .add_player(&second_player_params.into_inner()).await
     {
-        Ok(game_engine) => match GameCreationResult::try_from(game_engine) {
+        Ok(game) => match GameCreationResult::try_from(game) {
             Ok(new_game_info) => { Ok(web::Json(new_game_info)) }
             Err(error) => { Err(actix_web::error::ErrorNotFound(error.to_string())) }
         },
@@ -71,8 +71,8 @@ pub(crate) async fn create_game(
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
-    match games_manager.lock().unwrap().create_game_engine(&new_game_params) {
-        Ok(game_engine) => match GameCreationResult::try_from(game_engine) {
+    match games_manager.lock().unwrap().create_game(&new_game_params) {
+        Ok(game) => match GameCreationResult::try_from(game) {
             Ok(new_game_info) => { Ok(web::Json(new_game_info)) }
             Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
         },
@@ -164,9 +164,9 @@ pub(crate) async fn get_game_info(
     match games_manager
         .lock()
         .unwrap()
-        .get_game_engine(game_id.into_inner())
+        .get_game_instance(game_id.into_inner())
     {
-        Ok(game_engine) => match GameInfo::try_from(game_engine) {
+        Ok(game) => match GameInfo::try_from(game) {
             Ok(game_info) => Ok(web::Json(game_info)),
             Err(error) => { Err(actix_web::error::ErrorNotFound(error.to_string())) }
         },
