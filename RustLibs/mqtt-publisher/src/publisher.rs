@@ -5,7 +5,7 @@ use crate::async_mqtt_client::AsyncMqttClient;
 use crate::broker_config::PublisherConfig;
 use crate::publisher_error::PublisherError;
 use crate::publisher_qos::PublisherQoS;
-use log::trace;
+use log::error;
 
 /// Provides MQTT message publishing functionality, including simulcast to disparate brokers and
 /// different version of the MQTT protocol.
@@ -22,8 +22,6 @@ impl Publisher {
     pub fn new(configurations: HashSet<PublisherConfig>, keep_alive: Duration, capacity: usize) -> Self {
         //
 
-        trace!("Constructing new Publisher instance");
-
         let mut clients: Vec<AsyncMqttClient> = vec!();
 
         for config in configurations {
@@ -36,12 +34,13 @@ impl Publisher {
     }
 
     /// Publishes an empty message to the specified topic.
-    pub async fn publish(&self, topic: &str, qos: PublisherQoS) -> Result<(), PublisherError> {
+    pub async fn publish(&self, topic: &str, qos: PublisherQoS) -> Result<(), Vec<PublisherError>> {
         self.publish_with_payload("", topic, qos).await
     }
 
-    /// Publishes a message with the specified payload to the specified topic.
-    pub async fn publish_with_payload(&self, payload: &str, topic: &str, qos: PublisherQoS) -> Result<(), PublisherError> {
+    /// Publishes a message with the specified payload to the specified topic. The message is
+    /// published to all the clients that have been setup on initialization.
+    pub async fn publish_with_payload(&self, payload: &str, topic: &str, qos: PublisherQoS) -> Result<(), Vec<PublisherError>> {
         //
 
         let mut failed_results: Vec<PublisherError> = vec!();
@@ -50,14 +49,15 @@ impl Publisher {
             match client.publish_with_payload(payload.to_string(), topic.to_string(), qos.clone()).await {
                 Ok(_) => {}
                 Err(error) => {
+                    error!("Failed to publish message: {}", error.to_string());
                     failed_results.push(error)
                 }
             }
         }
 
-        return match failed_results.is_empty() {
+        match failed_results.is_empty() {
             true => Ok(()),
-            false => Err((*failed_results.first().unwrap()).clone())
-        };
+            false => Err(failed_results)
+        }
     }
 }
