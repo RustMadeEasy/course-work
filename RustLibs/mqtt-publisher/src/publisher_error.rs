@@ -4,6 +4,5 @@ use derive_more::{Display, Error};
 #[derive(Clone, Debug, Display, Error, PartialEq)]
 pub enum PublisherError {
     ClientNotConfigured,
-    DuplicateMessage,
     FailedToMessage,
 }
