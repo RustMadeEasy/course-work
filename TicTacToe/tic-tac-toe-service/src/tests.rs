@@ -278,10 +278,10 @@ mod game_engine_tests {
     use uuid::Uuid;
 
     use crate::game_board::{BoardPosition, GamePiece};
-    use crate::game_engine::GameEngine;
     use crate::game_trait::GameTrait;
     use crate::models::requests::{GameTurnInfo, NewGameParams};
     use crate::play_status::PlayStatus;
+    use crate::tic_tac_toe_game::TicTacToeGame;
 
     #[test]
     fn test_get_current_board_state() {
@@ -293,7 +293,7 @@ mod game_engine_tests {
         };
         let mqtt_broker_address = "test.mosquitto.org";
         let mqtt_port = 1883;
-        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let mut game_engine = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
         let player_one_id = game_engine.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -350,7 +350,7 @@ mod game_engine_tests {
         };
         let mqtt_broker_address = "test.mosquitto.org";
         let mqtt_port = 1883;
-        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let mut game_engine = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
         let player_one_id = game_engine.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -406,7 +406,7 @@ mod game_engine_tests {
         };
         let mqtt_broker_address = "test.mosquitto.org";
         let mqtt_port = 1883;
-        let mut game_engine = GameEngine::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let mut game_engine = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
         let player_one_id = game_engine.players.first().unwrap().player_id.clone();
 
         // Add the Second Player

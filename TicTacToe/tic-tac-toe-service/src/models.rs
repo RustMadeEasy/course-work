@@ -98,11 +98,11 @@ pub mod responses {
     use utoipa::ToSchema;
 
     use crate::errors::GameError;
-    use crate::game_engine::GameEngine;
     use crate::game_state::GameState;
     use crate::game_trait::GameTrait;
     use crate::models::event_plane::EventPlaneConfig;
     use crate::models::PlayerInfo;
+    use crate::tic_tac_toe_game::TicTacToeGame;
 
     /// Models the view of a Game.
     #[derive(Deserialize, Serialize, ToSchema)]
@@ -130,10 +130,10 @@ pub mod responses {
         pub(crate) players: Vec<PlayerInfo>,
     }
 
-    impl TryFrom<GameEngine> for GameInfo {
+    impl TryFrom<TicTacToeGame> for GameInfo {
         type Error = GameError;
 
-        fn try_from(game_engine: GameEngine) -> Result<Self, Self::Error> {
+        fn try_from(game_engine: TicTacToeGame) -> Result<Self, Self::Error> {
             let game_state = game_engine.get_current_game_state();
             Ok(GameInfo {
                 current_player: game_engine.current_player,
@@ -159,10 +159,10 @@ pub mod responses {
         pub(crate) game_invitation_code: String,
     }
 
-    impl TryFrom<GameEngine> for GameCreationResult {
+    impl TryFrom<TicTacToeGame> for GameCreationResult {
         type Error = GameError;
 
-        fn try_from(game_engine: GameEngine) -> Result<Self, Self::Error> {
+        fn try_from(game_engine: TicTacToeGame) -> Result<Self, Self::Error> {
             let game_invitation_code = game_engine.game_invitation_code.clone();
             Ok(GameCreationResult {
                 game_info: GameInfo::try_from(game_engine.clone()).unwrap(),

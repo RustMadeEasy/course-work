@@ -9,11 +9,11 @@ use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use std::sync::Mutex;
 use validator::Validate;
 
-use crate::game_engine::GameEngine;
 use crate::game_state::GameState;
 use crate::games_manager::GamesManager;
 use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo};
+use crate::tic_tac_toe_game::TicTacToeGame;
 
 /// Adds a Player to the Game. Returns the result of the initial Game Creation.
 #[utoipa::path(
@@ -29,7 +29,7 @@ use crate::models::responses::{GameCreationResult, GameInfo};
 #[post("/games/players")]
 pub(crate) async fn add_player(
     second_player_params: web::Json<AddPlayerParams>,
-    games_manager: web::Data<Mutex<GamesManager<GameEngine>>>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
 
     // *** Validate input params ***
@@ -63,7 +63,7 @@ pub(crate) async fn add_player(
 #[post("/games")]
 pub(crate) async fn create_game(
     new_game_params: web::Json<NewGameParams>,
-    games_manager: web::Data<Mutex<GamesManager<GameEngine>>>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
 
     // *** Validate input params ***
@@ -94,7 +94,7 @@ pub(crate) async fn create_game(
 #[delete("/games/{game_id}")]
 pub(crate) async fn end_game(
     game_id: web::Path<String>,
-    games_manager: web::Data<Mutex<GamesManager<GameEngine>>>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> HttpResponse {
 
     // *** Validate input params ***
@@ -128,7 +128,7 @@ pub(crate) async fn end_game(
 #[get("/games/{game_id}/turns")]
 pub(crate) async fn get_game_history(
     game_id: web::Path<String>,
-    games_manager: web::Data<Mutex<GamesManager<GameEngine>>>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<Vec<GameState>>> {
 
     // *** Validate input params ***
@@ -155,7 +155,7 @@ pub(crate) async fn get_game_history(
 #[get("/games/{game_id}")]
 pub(crate) async fn get_game_info(
     game_id: web::Path<String>,
-    games_manager: web::Data<Mutex<GamesManager<GameEngine>>>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameInfo>> {
 
     // *** Validate input params ***
@@ -191,7 +191,7 @@ pub(crate) async fn get_game_info(
 pub(crate) async fn take_turn(
     game_id: web::Path<String>,
     game_turn_info: web::Json<GameTurnInfo>,
-    games_manager: web::Data<Mutex<GamesManager<GameEngine>>>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> impl Responder {
 
     // *** Validate input params ***

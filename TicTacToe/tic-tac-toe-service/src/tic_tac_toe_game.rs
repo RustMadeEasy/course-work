@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -22,7 +20,7 @@ use crate::play_status::PlayStatus;
 
 /// Provides Tic-Tac-Toe game play functionality.
 #[derive(Clone, Serialize)]
-pub(crate) struct GameEngine {
+pub(crate) struct TicTacToeGame {
     //
 
     /// The Player who can currently make a game move
@@ -34,12 +32,8 @@ pub(crate) struct GameEngine {
     /// Code used to invite the second player to the game
     pub(crate) game_invitation_code: String,
 
-    /// Unique ID of the Game Engine
+    /// Unique ID of the Game
     pub(crate) id: String,
-
-    /// Helps ensures this struct can only be instantiated via new()
-    #[serde(skip)]
-    _outside_instantiation_preventor: PhantomData<u8>,
 
     /// The list of Game States from the very first turn until the latest turn
     pub(super) play_history: Vec<GameState>,
@@ -48,7 +42,7 @@ pub(crate) struct GameEngine {
     pub(crate) players: Vec<PlayerInfo>,
 }
 
-impl GameEngine {
+impl TicTacToeGame {
     //
 
     /// Determines whether the specified board location is occupied by a game piece.
@@ -60,7 +54,7 @@ impl GameEngine {
     }
 }
 
-impl GameTrait for GameEngine {
+impl GameTrait for TicTacToeGame {
     //
 
     /// Adds a Player to the Game.
@@ -151,26 +145,25 @@ impl GameTrait for GameEngine {
         }
     }
 
-    /// Creates a new GameEngine instance.
+    /// Creates a new Game instance.
     fn new(params: &NewGameParams,
            mqtt_broker_address: impl Into<String>,
            mqtt_port: u16,
            invitation_code: impl Into<String>) -> Result<Self, GameError> {
         //
 
-        let mut engine = Self {
+        let mut game = Self {
             current_player: None,
             id: Uuid::new_v4().to_string(),
-            _outside_instantiation_preventor: Default::default(),
             players: vec![],
             play_history: vec![],
             game_invitation_code: invitation_code.into(),
             event_plane_config: EventPlaneConfig::new(mqtt_broker_address.into(), mqtt_port),
         };
 
-        engine.add_player(&params.player_one_display_name)?;
+        game.add_player(&params.player_one_display_name)?;
 
-        Ok(engine)
+        Ok(game)
     }
 
     /// Make a game move for the specified Player.

@@ -7,15 +7,15 @@ use mqtt_publisher_lib::publisher::Publisher;
 use mqtt_publisher_lib::publisher_qos::PublisherQoS;
 
 use crate::errors::GameError;
-use crate::game_engine::GameEngine;
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams};
 use crate::play_status::PlayStatus;
+use crate::tic_tac_toe_game::TicTacToeGame;
 use crate::verification_code_generator::VerificationCodeGenerator;
 
-pub(crate) type TicTacToeGamesManager = GamesManager<GameEngine>;
+pub(crate) type TicTacToeGamesManager = GamesManager<TicTacToeGame>;
 
 const MQTT_BROKER_ADDRESS: &str = "test.mosquitto.org";
 const MQTT_PORT: u16 = 1883;

@@ -20,7 +20,7 @@ mod api_gaming;
 mod api_health_and_docs;
 mod errors;
 mod game_board;
-mod game_engine;
+mod tic_tac_toe_game;
 mod game_state;
 mod game_trait;
 mod games_manager;
