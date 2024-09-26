@@ -2,18 +2,23 @@ use bevy::prelude::Resource;
 
 use crate::shared::local_models::local_player_info::LocalPlayerInfo;
 
+//  Tic-Tac-Toe Bevy Client App
+//
+//  © 2024 Rust Made Easy. All rights reserved.
+//  @author JoelDavisEngineering@Gmail.com
+
 /// Houses the application state variables.
 #[derive(Default, Resource)]
 pub(crate) struct AppStateResource {
     //
 
-    /// The code used to invite a new Player to the Game.
+    /// This is the code used to invite a new Player to the Game.
     pub(crate) invitation_code: String,
 
     /// The local Player, i.e. the Player using this app instance.
     pub(crate) local_player: LocalPlayerInfo,
 
-    /// Indicates that this client app instance is the one that started the Game
+    /// Indicates that this client app instance is the one that started the Game.
     pub(crate) local_player_initiated_game: bool,
 
     /// The other Player, i.e. the local Player's opponent.

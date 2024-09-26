@@ -25,7 +25,7 @@ mod start_screen;
 fn main() {
     //
 
-    // Set the window title and initial size
+    // Set the window title and its initial size
     let window_plugin = WindowPlugin {
         primary_window: Some(Window {
             title: "Tic-Tac-Toe".to_string(),
@@ -44,7 +44,7 @@ fn main() {
         .add_plugins(StartScreenPlugin)
         .add_plugins(InvitationScreenPlugin)
         .add_plugins(CameraPlugin)
-        .add_systems(FixedUpdate, bevy::window::close_on_esc) // Close the app when Esc is hit
+        .add_systems(FixedUpdate, bevy::window::close_on_esc) // Close the app when the Escape button is pressed
         .insert_state(AppMode::StartMenu) // Set the initial state
         .run();
 }

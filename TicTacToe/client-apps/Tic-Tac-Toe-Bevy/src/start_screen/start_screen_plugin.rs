@@ -27,6 +27,8 @@ struct PlayerNameLabelComponent;
 pub(crate) struct StartScreenPlugin;
 
 impl Plugin for StartScreenPlugin {
+    //
+
     /// Composes the plugin.
     fn build(&self, app: &mut App) {
         app //
@@ -119,7 +121,7 @@ mod functionality {
         mut app_state: ResMut<AppStateResource>,
         mut local_game_state: ResMut<LocalGameStateResource>,
     ) {
-        // Forgets everything except for the local Player's chosen name
+        // Forget everything except for the local Player's chosen name.
         let local_player_name = app_state.local_player.display_name.clone();
         app_state.reset();
         app_state.local_player.display_name = local_player_name;
@@ -134,7 +136,7 @@ mod functionality {
     pub(super) fn text_input(
         mut app_state: ResMut<AppStateResource>,
         keyboard_input: Res<ButtonInput<KeyCode>>,
-        mut evr_char: EventReader<ReceivedCharacter>,
+        mut event_reader: EventReader<ReceivedCharacter>,
         mut player_name_label_text: Query<&mut Text, With<PlayerNameLabelComponent>>,
     ) {
         //
@@ -151,7 +153,7 @@ mod functionality {
             //
 
             // Add the characters, ignoring non-alphanumeric characters.
-            for received_char in evr_char.read() {
+            for received_char in event_reader.read() {
                 let char = received_char
                     .char
                     .to_string()
@@ -184,7 +186,7 @@ mod ui {
     use crate::start_screen::start_screen_plugin::ButtonPurpose::{AcceptInvitation, StartNewGame};
     use crate::start_screen::start_screen_plugin::{OnStartScreen, PlayerNameLabelComponent};
 
-    /// Sets up and then spawns the UI widgets.
+    /// Sets up and then spawns the Start Screen UI widgets.
     pub(super) fn spawn_buttons(mut commands: Commands) {
         //
 

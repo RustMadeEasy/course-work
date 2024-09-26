@@ -1,3 +1,8 @@
+//  Tic-Tac-Toe Bevy Client App
+//
+//  © 2024 Rust Made Easy. All rights reserved.
+//  @author JoelDavisEngineering@Gmail.com
+
 use bevy::app::{App, Startup};
 use bevy::prelude::IntoSystemConfigs;
 use bevy::prelude::{
@@ -9,11 +14,6 @@ use bevy::window::PrimaryWindow;
 use crate::shared::app_mode::AppMode;
 use crate::shared::BACKGROUND_COLOR;
 
-//  Tic-Tac-Toe Bevy Client App
-//
-//  © 2024 Rust Made Easy. All rights reserved.
-//  @author JoelDavisEngineering@Gmail.com
-
 // Our set_camera_zoom() function will animate the zoom from 2.0 down to TARGET_SCALE.
 const TARGET_SCALE: f32 = 0.52;
 
@@ -23,12 +23,19 @@ pub(super) struct CameraPlugin;
 impl Plugin for CameraPlugin {
     //
 
-    /// Composes the plugin.
+    /// Composes the camera plugin.
     fn build(&self, app: &mut App) {
         app //
             .insert_resource(ClearColor(*BACKGROUND_COLOR)) // Set the color to which everything erases.
-            .add_systems(Startup, (spawn_camera, set_camera_zoom).chain())
+            .add_systems(Startup, (spawn_camera, set_initial_zoom).chain())
             .add_systems(Update, zoom_in.run_if(in_state(AppMode::GamePlay)));
+    }
+}
+
+/// Sets the initial zoom to be wide so that we can, subsequently, animate a zoom-in.
+fn set_initial_zoom(mut projection_query: Query<&mut OrthographicProjection, With<Camera>>) {
+    if let Ok(mut projection) = projection_query.get_single_mut() {
+        projection.scale = 2.0;
     }
 }
 
@@ -48,13 +55,6 @@ fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Primar
         };
 
         commands.spawn(camera_bundle);
-    }
-}
-
-/// Sets the initial zoom to be wide so that we can, subsequently, animate a zoom-in.
-fn set_camera_zoom(mut projection_query: Query<&mut OrthographicProjection, With<Camera>>) {
-    if let Ok(mut projection) = projection_query.get_single_mut() {
-        projection.scale = 2.0;
     }
 }
 

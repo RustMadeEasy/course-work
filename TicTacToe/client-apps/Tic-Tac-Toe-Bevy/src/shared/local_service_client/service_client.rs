@@ -1,8 +1,10 @@
-use std::sync::Mutex;
+//  Tic-Tac-Toe Bevy Client App
+//
+//  © 2024 Rust Made Easy. All rights reserved.
+//  @author JoelDavisEngineering@Gmail.com
+
 use std::time::Duration;
 
-use lazy_static::lazy_static;
-use tic_tac_toe_rust_client_sdk::apis::configuration::Configuration;
 use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::{
     AddPlayerError, CreateGameError, GetGameInfoError, TakeTurnError,
 };
@@ -15,40 +17,11 @@ use crate::shared::local_models::local_game_state::LocalGameStateResource;
 use crate::shared::local_models::local_grid_position::LocalGridPosition;
 use crate::shared::local_models::local_player_info::LocalPlayerInfo;
 use crate::shared::local_service_client::helper_functions::remote_players_to_local_players;
+use crate::shared::local_service_client::service_client::helpers::{GameInfoResult, AUTO_UPDATE_INFO, SDK_CONFIG};
 
-//  Tic-Tac-Toe Bevy Client App
-//
-//  © 2024 Rust Made Easy. All rights reserved.
-//  @author JoelDavisEngineering@Gmail.com
-
-lazy_static! {
-    //
-
-    static ref SDK_CONFIG: Configuration = {
-        Configuration {
-            base_path: "http://127.0.0.1:50020".to_string(), // TODO: JD: set this to the address of the load balancer.
-            user_agent: Some("Tic-Tac-Toe Rust Client".to_string()),
-            ..Default::default()
-        }
-    };
-
-    static ref AUTO_UPDATE_INFO: Mutex<AutoUpdateInfo> = Mutex::new(AutoUpdateInfo::default());
-}
-
-type GameInfoResult = Result<(LocalGameStateResource, Vec<LocalPlayerInfo>), GetGameInfoError>;
-
-/// Models the data need to perform and cache background updates for Game Info.
-#[derive(Clone, Default)]
-struct AutoUpdateInfo {
-    game_id: String,
-    interval: Duration,
-    is_running: bool,
-    latest_results: Option<GameInfoResult>,
-}
-
-/// Serves as a local client to the Tic-Tac-Toe service. Keeps the Game Info current and cached so
-/// that new Game Info is accessed directly from memory. This prevents networking-induced lag in
-/// the game frame updates.
+/// Serves as a local client to the Tic-Tac-Toe service. This struct also caches the Game Info so
+/// that it is accessed directly from memory. This prevents networking-induced lag in the game frame
+/// updates.
 pub(crate) struct LocalServiceClient;
 
 impl LocalServiceClient {
@@ -82,8 +55,8 @@ impl LocalServiceClient {
         ))
     }
 
-    /// Returns Game state of a specified Game. NOTE: this info is preloaded and cached for
-    /// immediate access if setup_auto_update() is called whenever a new Game is started or joined.
+    /// Returns Game state of a specified Game. NOTE: This info cached for immediate access if
+    /// setup_auto_update() is called whenever a new Game is started or joined.
     pub(crate) fn get_game_info(game_id: &str) -> GameInfoResult {
         //
 
@@ -146,6 +119,7 @@ impl LocalServiceClient {
 
     /// Sets Game ID to use for Game Info auto-updating. The interval parameter should be set to
     /// 1/2 the interval at which the system calls get_game_info(), i.e. twice as frequent.
+    #[deprecated(note="Instead of polling, use MQTT to keep the game state updated.")]
     pub(crate) fn setup_auto_update(new_game_id: &str, interval: &Duration) {
         //
 
@@ -163,6 +137,7 @@ impl LocalServiceClient {
     }
 
     /// Begins the background thread that frequently retrieves and caches the Game Info.
+    #[deprecated(note="Instead of polling, use MQTT to keep the game state updated.")]
     fn start_auto_game_info_update() {
         //
 
@@ -216,5 +191,40 @@ impl LocalServiceClient {
             player_id: local_player_id.to_string(),
         };
         tic_tac_toe_api::take_turn(&SDK_CONFIG, game_id, params)
+    }
+}
+
+mod helpers {
+    use crate::shared::local_models::local_game_state::LocalGameStateResource;
+    use crate::shared::local_models::local_player_info::LocalPlayerInfo;
+    use lazy_static::lazy_static;
+    use std::sync::Mutex;
+    use std::time::Duration;
+    use tic_tac_toe_rust_client_sdk::apis::configuration::Configuration;
+    use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetGameInfoError;
+
+    lazy_static! {
+        //
+
+        pub(crate) static ref SDK_CONFIG: Configuration = {
+            Configuration {
+                base_path: "http://127.0.0.1:50020".to_string(), // TODO: JD: set this to the address of the load balancer.
+                user_agent: Some("Tic-Tac-Toe Rust Client".to_string()),
+                ..Default::default()
+            }
+        };
+
+        pub(crate) static ref AUTO_UPDATE_INFO: Mutex<AutoUpdateInfo> = Mutex::new(AutoUpdateInfo::default());
+    }
+
+    pub(crate) type GameInfoResult = Result<(LocalGameStateResource, Vec<LocalPlayerInfo>), GetGameInfoError>;
+
+    /// Models the data need to perform and cache background updates for Game Info.
+    #[derive(Clone, Default)]
+    pub(crate) struct AutoUpdateInfo {
+        pub(crate) game_id: String,
+        pub(crate) interval: Duration,
+        pub(crate) is_running: bool,
+        pub(crate) latest_results: Option<GameInfoResult>,
     }
 }

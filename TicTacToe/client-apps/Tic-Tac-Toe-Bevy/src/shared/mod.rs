@@ -22,7 +22,7 @@ lazy_static! {
 
 pub(crate) const FONT_SIZE: f32 = 15.0;
 
-/// Helper function to despawn all components of the specified type.
+/// Helper function to de-spawn all components of the specified type.
 pub(crate) fn despawn<T: Component>(components: Query<Entity, With<T>>, mut commands: Commands) {
     for component in &components {
         commands.entity(component).despawn();

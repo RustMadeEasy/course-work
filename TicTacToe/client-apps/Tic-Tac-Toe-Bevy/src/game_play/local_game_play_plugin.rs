@@ -17,7 +17,6 @@ use crate::shared::despawn;
 use crate::shared::local_models::local_game_piece::LocalGamePiece;
 use crate::shared::local_models::local_game_state::LocalGameStateResource;
 use crate::shared::local_models::local_player_status::LocalPlayStatus;
-use crate::shared::local_service_client::service_client;
 use crate::shared::local_service_client::service_client::LocalServiceClient;
 
 //  Tic-Tac-Toe Bevy Client App
@@ -246,7 +245,7 @@ impl LocalGamePlayPlugin {
         let game_started_before_call = local_game_state.has_game_started();
 
         // Call the server
-        let result = match service_client::LocalServiceClient::get_game_info(
+        let result = match LocalServiceClient::get_game_info(
             &local_game_state.get_game_id(),
         ) {
             Ok(remote_game_info) => remote_game_info,
