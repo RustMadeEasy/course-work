@@ -6,3 +6,15 @@ pub(crate) enum LocalGamePiece {
     O,
     X,
 }
+
+#[allow(clippy::from_over_into)]
+impl Into<String> for LocalGamePiece {
+    fn into(self) -> String {
+        match self {
+            LocalGamePiece::Unoccupied => "",
+            LocalGamePiece::O => "O",
+            LocalGamePiece::X => "X",
+        }
+            .to_string()
+    }
+}

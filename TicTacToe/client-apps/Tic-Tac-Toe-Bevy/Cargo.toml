@@ -5,7 +5,7 @@ edition = "2021"
 description = "Tic-Tac-Toe"
 
 [package.metadata.bundle]
-icon = [ "icons/app_icon.png" ]
+icon = ["icons/app_icon.png"]
 
 [dependencies]
 

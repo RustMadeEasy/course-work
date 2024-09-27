@@ -1,21 +1,21 @@
+//  Tic-Tac-Toe Bevy Client App
+//
+//  © 2024 Rust Made Easy. All rights reserved.
+//  @author JoelDavisEngineering@Gmail.com
+
 use bevy::app::PluginGroupBuilder;
 use bevy::math::Vec2;
 use bevy::prelude::{Component, Event, PluginGroup};
 
-use crate::game_play::info_panel_plugin::InfoPanelPlugin;
-use crate::game_play::local_game_play_plugin::LocalGamePlayPlugin;
-use crate::game_play::tiles_plugin::TilesPlugin;
+use crate::game_play_screen::info_panel_plugin::InfoPanelPlugin;
+use crate::game_play_screen::local_game_play_plugin::LocalGamePlayPlugin;
+use crate::game_play_screen::tiles_plugin::TilesPlugin;
 use crate::shared::local_models::local_grid_position::LocalGridPosition;
 
 pub(super) mod info_panel_plugin;
 pub(super) mod local_game_play_plugin;
 mod tile_components;
 pub(super) mod tiles_plugin;
-
-//  Tic-Tac-Toe Bevy Client App
-//
-//  © 2024 Rust Made Easy. All rights reserved.
-//  @author JoelDavisEngineering@Gmail.com
 
 pub(super) const GRID_ROWS: usize = 3;
 pub(super) const GRID_COLUMNS: usize = 3;
@@ -37,6 +37,7 @@ impl PluginGroup for GamePlayPluginGroup {
 #[derive(Component)]
 struct OnGamePlayScreen;
 
+/// Models a window location.
 #[derive(Clone, Debug)]
 pub(super) struct Point {
     pub(super) x: f32,
@@ -65,7 +66,9 @@ impl Into<Vec2> for Point {
     }
 }
 
+/// Event that is fired when a Tic-Tac-Toe tile is pressed.
 #[derive(Event)]
-pub(super) struct TileHitEvent {
+pub(super) struct TilePressedEvent {
+    /// Indicates the tile's location on the game board.
     pub(super) grid_position: LocalGridPosition,
 }

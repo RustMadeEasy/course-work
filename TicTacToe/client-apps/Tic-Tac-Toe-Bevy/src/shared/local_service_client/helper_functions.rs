@@ -70,7 +70,7 @@ impl From<GameInfo> for LocalGameStateResource {
             PlayStatus::InProgress => LocalPlayStatus::InProgress,
             PlayStatus::NotStarted => LocalPlayStatus::NotStarted,
         };
-        
+
         let id_of_player_who_made_move = value.game_state.id_of_player_who_made_move.clone();
         local_game_state.id_of_player_who_made_the_last_move = id_of_player_who_made_move.clone();
 
@@ -80,7 +80,7 @@ impl From<GameInfo> for LocalGameStateResource {
                 .players
                 .iter()
                 .find(|it| {
-                    it.player_id == value.game_state.winning_player_id.clone().unwrap().unwrap()
+                    it.player_id == value.game_state.winning_player_id.clone().unwrap_or_default().unwrap_or_default()
                 })
                 .unwrap();
             local_game_state.winning_player_name = Some(winning_player.display_name.clone());
@@ -90,8 +90,8 @@ impl From<GameInfo> for LocalGameStateResource {
                 .game_state
                 .winning_locations
                 .clone()
-                .unwrap()
-                .unwrap()
+                .unwrap_or_default()
+                .unwrap_or_default()
                 .iter()
             {
                 let grid_position =

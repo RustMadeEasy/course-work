@@ -1,19 +1,19 @@
-use bevy::prelude::{
-    in_state, App, Component, FixedUpdate, IntoSystemConfigs, OnEnter, Plugin, Update,
-};
-
-use crate::game_play::info_panel_plugin::functionality::{
-    button_interaction, set_status_text, update_info_panel_bottom, update_info_panel_top,
-};
-use crate::game_play::info_panel_plugin::spawn_ui::{
-    spawn_end_game_button, spawn_info_panel_entities,
-};
-use crate::shared::app_mode::AppMode;
-
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
 //  @author JoelDavisEngineering@Gmail.com
+
+use bevy::prelude::{
+    in_state, App, Component, FixedUpdate, IntoSystemConfigs, OnEnter, Plugin, Update,
+};
+
+use crate::game_play_screen::info_panel_plugin::functionality::{
+    button_interaction, set_status_text, update_info_panel_bottom, update_info_panel_top,
+};
+use crate::game_play_screen::info_panel_plugin::spawn_ui::{
+    spawn_end_game_button, spawn_info_panel_entities,
+};
+use crate::shared::app_mode::AppMode;
 
 /// Displays relevant Game info along the top of the screen.
 pub(super) struct InfoPanelPlugin;
@@ -44,11 +44,11 @@ impl Plugin for InfoPanelPlugin {
 
 const INFO_PANEL_FONT_SIZE_LABEL: f32 = 22.0;
 
-/// Marker for entities on the first row.
+/// Marker for entities on the panel's first row.
 #[derive(Component)]
 pub(super) struct InfoPanelUiComponentTop;
 
-/// Marker for entities on the second row.
+/// Marker for entities on the panel's second row.
 #[derive(Component)]
 pub(super) struct InfoPanelUiComponentBottom;
 
@@ -62,7 +62,7 @@ mod functionality {
     use bevy::window::PrimaryWindow;
     use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 
-    use crate::game_play::info_panel_plugin::{
+    use crate::game_play_screen::info_panel_plugin::{
         InfoPanelUiComponentBottom, InfoPanelUiComponentTop,
     };
     use crate::shared::app_mode::AppMode;
@@ -70,10 +70,9 @@ mod functionality {
     use crate::shared::local_models::local_game_state::LocalGameStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
 
-    /// Provides button functionality, including state changes as well as click response.
+    /// Provides button functionality, including state changes as well as response to presses.
     #[allow(clippy::type_complexity)] // The query is complex by necessity.
     pub(super) fn button_interaction(
-        // local_Game_state: ResMut<LocalGameStateResource>,
         mut interactions: Query<
             (&Interaction, &mut BackgroundColor),
             (Changed<Interaction>, With<Button>),
@@ -164,10 +163,10 @@ mod spawn_ui {
     use bevy::utils::default;
     use bevy::window::PrimaryWindow;
 
-    use crate::game_play::info_panel_plugin::{
+    use crate::game_play_screen::info_panel_plugin::{
         InfoPanelUiComponentBottom, InfoPanelUiComponentTop, INFO_PANEL_FONT_SIZE_LABEL,
     };
-    use crate::game_play::OnGamePlayScreen;
+    use crate::game_play_screen::OnGamePlayScreen;
     use crate::shared::{BUTTON_COLOR_NORMAL, FONT_SIZE, FOREGROUND_COLOR, TEXT_COLOR};
 
     /// Sets up and creates the UI entities in the information panel area.

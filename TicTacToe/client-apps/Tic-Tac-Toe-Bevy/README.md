@@ -9,7 +9,8 @@ production._
 
 Roadmap:
 
-1. Refactor the ServiceClient so that none of its methods return models from the client SDK. We want to do this so that the app code is separated from client SDK code.  
+1. Refactor the ServiceClient so that none of its methods return models from the client SDK. We want to do this so that
+   the app code is separated from client SDK code.
 2. Resilient communication with the service - retries, etc.
 3. Option to replay the game once it has ended - using the Tic-Tac-Toe service's Game History endpoint.
 4. Support MQTT for game state updates.

@@ -1,3 +1,8 @@
+//  Tic-Tac-Toe Bevy Client App
+//
+//  © 2024 Rust Made Easy. All rights reserved.
+//  @author JoelDavisEngineering@Gmail.com
+
 use bevy::a11y::accesskit::Size;
 use bevy::app::{App, FixedUpdate};
 use bevy::input::common_conditions::input_pressed;
@@ -12,25 +17,22 @@ use bevy::utils::default;
 use bevy::window::PrimaryWindow;
 use lazy_static::lazy_static;
 
-use crate::game_play::tile_components::{
+use crate::game_play_screen::tile_components::{
     TileDetailsComponent, TileHighlightComponent, TileLabelComponent,
 };
-use crate::game_play::{OnGamePlayScreen, Point, TileHitEvent, GRID_COLUMNS, GRID_ROWS};
+use crate::game_play_screen::{OnGamePlayScreen, Point, TilePressedEvent, GRID_COLUMNS, GRID_ROWS};
 use crate::shared::app_mode::AppMode;
 use crate::shared::local_models::local_game_state::LocalGameStateResource;
 use crate::shared::local_models::local_grid_position::LocalGridPosition;
 use crate::shared::{BACKGROUND_COLOR, FOREGROUND_COLOR};
 
-//  Tic-Tac-Toe Bevy Client App
-//
-//  © 2024 Rust Made Easy. All rights reserved.
-//  @author JoelDavisEngineering@Gmail.com
-
 const TILE_FONT_SIZE: f32 = 44_f32;
 const TILE_SIDE: f32 = 100_f32;
+const TILE_PADDING: f32 = 1.;
+
 const TILE_HIGHLIGHT_Z_ORDER: f32 = 1_f32;
-const TILE_Z_ORDER: f32 = 2_f32;
 const TILE_TEXT_Z_ORDER: f32 = 3_f32;
+const TILE_Z_ORDER: f32 = 2_f32;
 
 lazy_static! {
     static ref POS_TOP_LEFT: LocalGridPosition = LocalGridPosition::new(0, 0);
@@ -48,7 +50,7 @@ impl Plugin for TilesPlugin {
     /// Composes the plugin.
     fn build(&self, app: &mut App) {
         app //
-            .add_event::<TileHitEvent>()
+            .add_event::<TilePressedEvent>()
             .add_systems(OnEnter(AppMode::GamePlay), Self::spawn_tiles)
             .add_systems(
                 Update,
@@ -68,11 +70,11 @@ impl Plugin for TilesPlugin {
 impl TilesPlugin {
     //
 
-    /// Detects when any game Tile is hit, posting a Tile Hit Event.
+    /// Detects when any game Tile is hit, posting a Tile Pressed Event.
     fn detect_tile_hit(
         button: Res<ButtonInput<MouseButton>>,
         camera_query: Query<(&Camera, &GlobalTransform)>,
-        mut event_writer: EventWriter<TileHitEvent>,
+        mut event_writer: EventWriter<TilePressedEvent>,
         tiles_query: Query<&TileDetailsComponent>,
         window_query: Query<&Window, With<PrimaryWindow>>,
     ) {
@@ -85,7 +87,7 @@ impl TilesPlugin {
         if let Ok(window) = window_query.get_single() {
             //
 
-            // Determine where the user clicked.
+            // Determine where the user pressed.
             if let Some(cursor_position) = window.cursor_position() {
                 //
 
@@ -94,10 +96,10 @@ impl TilesPlugin {
                 if let Some(cursor_position) =
                     camera.viewport_to_world_2d(camera_transform, cursor_position)
                 {
-                    // Hit test each of the Tiles and stop if/when we find which was hit.
+                    // See if any Tile was pressed.
                     for tile in &tiles_query {
                         if tile.hit_test(&cursor_position.into()) {
-                            event_writer.send(TileHitEvent {
+                            event_writer.send(TilePressedEvent {
                                 grid_position: tile.grid_position.clone(),
                             });
                             return;
@@ -108,7 +110,8 @@ impl TilesPlugin {
         }
     }
 
-    /// Provides a backing flare to the Tiles that represent the TicTacToe 3-in-a-row winning combination.
+    /// Provides a backing visual flare (highlight) to the Tiles that represent the TicTacToe
+    /// 3-in-a-row winning combination.
     fn highlight_winning_tiles(
         local_game_state: Res<LocalGameStateResource>,
         mut tile_highlights: Query<
@@ -116,12 +119,16 @@ impl TilesPlugin {
             With<TileHighlightComponent>,
         >,
     ) {
-        if local_game_state.is_changed() {
-            if let Some(winning_locations) = local_game_state.get_winning_location() {
-                for (mut visibility, tile_info) in tile_highlights.iter_mut() {
-                    if winning_locations.contains(&tile_info.grid_position) {
-                        *visibility = Visibility::Visible;
-                    }
+        //
+
+        if !local_game_state.is_changed() {
+            return;
+        }
+
+        if let Some(winning_locations) = local_game_state.get_winning_location() {
+            for (mut visibility, tile_info) in tile_highlights.iter_mut() {
+                if winning_locations.contains(&tile_info.grid_position) {
+                    *visibility = Visibility::Visible;
                 }
             }
         }
@@ -132,12 +139,15 @@ impl TilesPlugin {
         local_game_state: Res<LocalGameStateResource>,
         mut label_query: Query<(&mut Text, &TileLabelComponent), With<TileLabelComponent>>,
     ) {
-        if local_game_state.is_changed() {
-            for (mut label, tile_info) in label_query.iter_mut() {
-                let game_piece =
-                    local_game_state.get_game_piece_at_placement(&tile_info.grid_position);
-                label.sections[0].value = game_piece.into();
-            }
+        //
+
+        if !local_game_state.is_changed() {
+            return;
+        }
+
+        for (mut label, tile_info) in label_query.iter_mut() {
+            let game_piece = local_game_state.get_game_piece_at_placement(&tile_info.grid_position);
+            label.sections[0].value = game_piece.into();
         }
     }
 }
@@ -154,8 +164,6 @@ impl TilesPlugin {
         window_query: Query<&Window, With<PrimaryWindow>>,
     ) {
         //
-
-        const TILE_PADDING: f32 = 1.;
 
         if let Ok(window) = window_query.get_single() {
             //

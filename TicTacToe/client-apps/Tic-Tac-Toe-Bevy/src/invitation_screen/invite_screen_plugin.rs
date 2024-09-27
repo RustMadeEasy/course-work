@@ -34,6 +34,7 @@ impl Plugin for InvitationScreenPlugin {
     }
 }
 
+/// Marker for invitation code text edit control.
 #[derive(Component)]
 struct InvitationCodeLabelComponent;
 
@@ -52,8 +53,8 @@ mod functionality {
     };
     use crate::invitation_screen::ButtonPurpose;
     use crate::shared::app_mode::AppMode;
-    use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
     use crate::shared::app_state::AppStateResource;
+    use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
 
     /// Provides button functionality, including state changes as well as response when clicked.
     #[allow(clippy::type_complexity)] // The query is complex by necessity.
@@ -201,7 +202,7 @@ mod ui {
             justify_self: JustifySelf::Center,
             ..default()
         };
-        let invitation_code_label_bundle =
+        let invitation_code_text_bundle =
             TextBundle::from_sections(sections.clone()).with_style(label_style);
 
         // Button template
@@ -249,7 +250,7 @@ mod ui {
                 parent.spawn((instructions_label_bundle, OnInvitationScreen));
 
                 parent.spawn((
-                    invitation_code_label_bundle,
+                    invitation_code_text_bundle,
                     OnInvitationScreen,
                     InvitationCodeLabelComponent,
                 ));

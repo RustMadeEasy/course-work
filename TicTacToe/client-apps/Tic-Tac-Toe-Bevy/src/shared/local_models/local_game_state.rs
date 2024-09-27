@@ -1,6 +1,6 @@
 use bevy::prelude::Resource;
 
-use crate::game_play::{GRID_COLUMNS, GRID_ROWS};
+use crate::game_play_screen::{GRID_COLUMNS, GRID_ROWS};
 use crate::shared::local_models::local_game_piece::LocalGamePiece;
 use crate::shared::local_models::local_grid_position::LocalGridPosition;
 use crate::shared::local_models::local_player_info::LocalPlayerInfo;
@@ -15,6 +15,7 @@ use crate::shared::local_models::local_player_status::LocalPlayStatus;
 #[derive(Clone, Default, Resource)]
 pub(crate) struct LocalGameStateResource {
     //
+
     /// Specifies the Player currently taking their turn.
     pub current_player: Option<LocalPlayerInfo>,
 
@@ -30,19 +31,22 @@ pub(crate) struct LocalGameStateResource {
     /// Indicates whether the Game has been started.
     pub(crate) game_has_started: bool,
 
-    pub(crate) play_status: LocalPlayStatus,
-
+    /// ID of the Player who made the last move (took the latest turn)
     pub(crate) id_of_player_who_made_the_last_move: String,
 
-    /// If/when the Game has been won, winning_Player_name contains the name of the Player who won
-    /// the Game.
-    pub(crate) winning_player_name: Option<String>,
+    /// Status of game
+    pub(crate) play_status: LocalPlayStatus,
 
     /// If/when the Game has been won, winning_locations lists the locations of the winning
     /// Game pieces.
     pub(crate) winning_locations: Option<Vec<LocalGridPosition>>,
+
+    /// If/when the Game has been won, winning_Player_name contains the name of the Player who won
+    /// the Game.
+    pub(crate) winning_player_name: Option<String>,
 }
 
+// Property accessors
 impl LocalGameStateResource {
     //
 
@@ -70,11 +74,12 @@ impl LocalGameStateResource {
     }
 }
 
+// Helper functions
 impl LocalGameStateResource {
     //
 
     /// Generates Game completion text.
-    pub(crate) fn generate_results(
+    pub(crate) fn generate_results_text(
         &self,
         local_game_state: &LocalGameStateResource,
         local_player_name: &String,
@@ -100,18 +105,3 @@ impl LocalGameStateResource {
         *self = LocalGameStateResource::default();
     }
 }
-
-#[allow(clippy::from_over_into)]
-impl Into<String> for LocalGamePiece {
-    fn into(self) -> String {
-        match self {
-            LocalGamePiece::Unoccupied => "",
-            LocalGamePiece::O => "O",
-            LocalGamePiece::X => "X",
-        }
-        .to_string()
-    }
-}
-
-// #[derive(Component)]
-// pub(crate) struct Player {}
