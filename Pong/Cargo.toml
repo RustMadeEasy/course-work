@@ -8,7 +8,7 @@ authors = ["Joel Davis <JoelDavisEngineering@Gmail.com>"]
 license = "GPL-3"
 
 [package.metadata.bundle]
-icon = [ "icons/app_icon.png" ]
+icon = ["icons/app_icon.png"]
 
 [dependencies]
 
