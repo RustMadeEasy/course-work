@@ -13,6 +13,5 @@ Roadmap:
    the app code is separated from client SDK code.
 2. Resilient communication with the service - retries, etc.
 3. Option to replay the game once it has ended - using the Tic-Tac-Toe service's Game History endpoint.
-4. Support MQTT for game state updates.
-5. Publish the StatusTextPlugin to crates.io as open-source.
-6. Tell local player when the other player has abandoned the game.
+4. Publish the StatusTextPlugin to crates.io as open-source.
+5. Tell local player when the other player has abandoned the game.

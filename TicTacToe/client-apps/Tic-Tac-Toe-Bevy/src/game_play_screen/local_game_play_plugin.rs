@@ -27,7 +27,7 @@ use crate::shared::local_service_client::service_client::LocalServiceClient;
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
 pub(super) struct LocalGamePlayPlugin;
 
-pub(super) const STATE_UPDATE_INTERVAL_IN_MS: u64 = 1000;
+pub(super) const STATE_UPDATE_INTERVAL_IN_MS: u64 = 500;
 
 impl Plugin for LocalGamePlayPlugin {
     //
@@ -222,9 +222,6 @@ impl LocalGamePlayPlugin {
         // Update our local state with the initial game state from the server.
         *local_game_state = game_info;
         app_state.update(&players);
-
-        // TODO: JD: subscribe to game state updates via MQTT instead of calling
-        // LocalServiceClient::setup_auto_update().
 
         // Point the background update thread to the new Game ID.
         LocalServiceClient::setup_auto_update(

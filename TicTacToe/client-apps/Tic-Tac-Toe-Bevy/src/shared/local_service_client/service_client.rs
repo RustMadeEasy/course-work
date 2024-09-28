@@ -119,7 +119,6 @@ impl LocalServiceClient {
 
     /// Sets Game ID to use for Game Info auto-updating. The interval parameter should be set to
     /// 1/2 the interval at which the system calls get_game_info(), i.e. twice as frequent.
-    #[deprecated(note = "Instead of polling, use MQTT to keep the game state updated.")]
     pub(crate) fn setup_auto_update(new_game_id: &str, interval: &Duration) {
         //
 
@@ -137,7 +136,6 @@ impl LocalServiceClient {
     }
 
     /// Begins the background thread that frequently retrieves and caches the Game Info.
-    #[deprecated(note = "Instead of polling, use MQTT to keep the game state updated.")]
     fn start_auto_game_info_update() {
         //
 
