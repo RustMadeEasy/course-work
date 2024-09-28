@@ -193,7 +193,7 @@ extension GameInfoViewModel {
         return result.error
     }
 
-    /// Gets the textual representation for the board position.
+    /// Gets the textual represenation for the board position.
     func textForGamePiece(pos: Position) -> String {
         
         if self.gameBoard.isEmpty {

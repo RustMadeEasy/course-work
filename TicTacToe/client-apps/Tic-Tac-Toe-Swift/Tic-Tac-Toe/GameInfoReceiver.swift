@@ -35,6 +35,7 @@ class GameInfoReceiver {
         prebuildTopics()
         self.client = setupMqttClient(eventPlaneConfig: eventPlaneConfig)
     }
+    
 }
 
 extension GameInfoReceiver {

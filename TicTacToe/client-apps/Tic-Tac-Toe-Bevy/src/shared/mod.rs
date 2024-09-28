@@ -5,7 +5,7 @@ pub(crate) mod app_mode;
 pub(crate) mod app_state;
 pub(crate) mod local_models;
 pub(crate) mod local_service_client;
-mod game_info_receiver;
+
 //  Tic-Tac-Toe Bevy Client App
 //
 //  © 2024 Rust Made Easy. All rights reserved.
