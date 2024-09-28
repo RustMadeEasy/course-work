@@ -1,3 +1,9 @@
+// Pong Game
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use bevy::app::{App, Plugin, Startup};
 use bevy::prelude::{Camera2dBundle, Commands, Query, Transform, Window, With};
 use bevy::window::PrimaryWindow;

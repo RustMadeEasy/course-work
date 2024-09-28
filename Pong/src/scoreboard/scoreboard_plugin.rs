@@ -1,3 +1,9 @@
+// Pong Game
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use bevy::prelude::{in_state, IntoSystemConfigs};
 use bevy::prelude::{App, EventReader, FixedUpdate, Plugin, ResMut, Startup};
 use bevy::prelude::{

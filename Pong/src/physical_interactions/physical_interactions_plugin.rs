@@ -1,3 +1,9 @@
+// Pong Game
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use bevy::app::{App, FixedUpdate, Plugin};
 use bevy::math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume};
 use bevy::math::Vec2;

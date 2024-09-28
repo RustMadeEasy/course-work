@@ -1,3 +1,9 @@
+// Pong Game
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use bevy::app::{App, FixedUpdate, Startup};
 use bevy::asset::{AssetServer, Handle};
 use bevy::audio::{AudioBundle, AudioSource, PlaybackSettings};

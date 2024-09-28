@@ -1,3 +1,9 @@
+// Pong Game
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use bevy::prelude::Event;
 
 use crate::physical_interactions::physical_interactions_actor::PhysicalInteractionActor;
