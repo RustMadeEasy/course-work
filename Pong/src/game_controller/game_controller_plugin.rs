@@ -6,6 +6,13 @@
 
 use bevy::app::{App, FixedUpdate, Plugin, Startup};
 
+#[derive(Clone, PartialEq)]
+/// Defines the purposes of the Game Controller Screen buttons.
+enum ButtonPurpose {
+    TogglePlay,
+    ToggleSound,
+}
+
 /// Provides the UI and functionality for the on-screen Game Controls.
 pub(crate) struct GameControllerPlugin;
 
@@ -39,14 +46,13 @@ mod functionality {
             (&Interaction, &EntityInfoComponent<ButtonPurpose>),
             (Changed<Interaction>, With<Button>),
         >,
-        state_game_play: Res<State<GamePlayState>>,
         mut next_game_play: ResMut<NextState<GamePlayState>>,
-        state_sound: Res<State<SoundSetting>>,
         mut next_state_sound: ResMut<NextState<SoundSetting>>,
+        state_game_play: Res<State<GamePlayState>>,
+        state_sound: Res<State<SoundSetting>>,
     ) {
         for (interaction, button_info) in &mut interactions {
             if *interaction == Interaction::Pressed {
-                //
                 // Which button was pressed?
                 match button_info.get_purpose() {
                     ButtonPurpose::TogglePlay => match state_game_play.get() {
@@ -62,7 +68,7 @@ mod functionality {
         }
     }
 
-    /// Places the appropriate image Button into the Button according to the current state.
+    /// Places the appropriate image into the Button according to the current state.
     pub(super) fn update_button_image(
         asset_server: Res<AssetServer>,
         mut query: Query<(&mut UiImage, &EntityInfoComponent<ButtonPurpose>), With<Button>>,
@@ -73,7 +79,6 @@ mod functionality {
 
         if state_game_play.is_changed() {
             for (mut button_image, button_info) in &mut query {
-                //
                 // Which button was pressed?
                 if button_info.get_purpose() == ButtonPurpose::TogglePlay {
                     match state_game_play.get() {
@@ -90,7 +95,6 @@ mod functionality {
 
         if state_sound.is_changed() {
             for (mut button_image, button_info) in &mut query {
-                //
                 // Which button was pressed?
                 if button_info.get_purpose() == ButtonPurpose::ToggleSound {
                     match state_sound.get() {
@@ -106,12 +110,6 @@ mod functionality {
             }
         }
     }
-}
-
-#[derive(Clone, PartialEq)]
-enum ButtonPurpose {
-    TogglePlay,
-    ToggleSound,
 }
 
 mod ui {

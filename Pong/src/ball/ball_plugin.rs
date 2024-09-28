@@ -20,10 +20,10 @@ use crate::physical_interactions::DIRECTION_BACKWARD;
 
 const BALL_DIAMETER: f32 = 64_f32;
 pub(crate) const BALL_RADIUS: f32 = 32_f32;
+const BALL_SPAWN_LATERAL_RANDOMNESS_FACTOR: f32 = 3_f32;
 const BALL_SPEED: f32 = 700_f32;
 const BALL_SPRITE: &str = "sprites/ball_blue_large.png";
 const BALL_Z_INDEX: f32 = 1_f32;
-const BALL_SPAWN_LATERAL_RANDOMNESS_FACTOR: f32 = 3_f32;
 
 /// Handles Ball presentation and movement.
 pub(crate) struct BallPlugin;
@@ -43,7 +43,7 @@ impl BallPlugin {
     //
 
     /// Implements frame-by-frame movement of the Ball along the direction specified in the
-    /// BallComponent direction field. See BallComponent.
+    /// BallComponent's get_direction() function. See BallComponent.
     fn move_ball(mut ball_query: Query<(&mut Transform, &BallComponent)>, time: Res<Time>) {
         if let Ok((mut transform, ball)) = ball_query.get_single_mut() {
             let translation = ball.get_direction() * BALL_SPEED * time.delta_seconds();
@@ -51,10 +51,10 @@ impl BallPlugin {
         }
     }
 
-    /// Spawns the Ball and provides it with its initial direction.
+    /// Spawns the Ball and sets its initial direction.
     fn spawn_ball(
-        mut commands: Commands,
         asset_server: Res<AssetServer>,
+        mut commands: Commands,
         window_query: Query<&Window, With<PrimaryWindow>>,
     ) {
         //
@@ -62,6 +62,7 @@ impl BallPlugin {
         if let Ok(window) = window_query.get_single() {
             //
 
+            // Start from the top-middle of the view
             let start_point: Vec3 = Vec3::new(
                 window.width() / 2.0,
                 window.height() - BALL_DIAMETER,
@@ -78,6 +79,7 @@ impl BallPlugin {
             let initial_x_direction = random::<f32>() / BALL_SPAWN_LATERAL_RANDOMNESS_FACTOR;
             let initial_y_direction = DIRECTION_BACKWARD * random::<f32>();
             let initial_direction = Vec2::new(initial_x_direction, initial_y_direction).normalize();
+
             commands.spawn((sprite_bundle, BallComponent::new(initial_direction)));
         }
     }

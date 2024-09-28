@@ -15,7 +15,7 @@ pub(crate) enum GamePlayState {
     Paused,
 }
 
-/// Specifies whether Game sound is to play.
+/// Specifies whether Game sounds are on or off.
 #[derive(Clone, Debug, Hash, Eq, PartialEq, States)]
 pub(crate) enum SoundSetting {
     On,

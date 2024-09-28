@@ -10,6 +10,7 @@ use bevy::window::PrimaryWindow;
 
 pub(crate) struct PongCameraPlugin;
 
+/// Handles Camera creation and placement.
 impl Plugin for PongCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, Self::spawn_camera);
