@@ -123,7 +123,7 @@ mod ui {
 
     use crate::game_controller::game_controller_plugin::ButtonPurpose;
 
-    /// Sets up and then spawns the UI widgets.
+    /// Sets up and then spawns the Game Controller's UI widgets.
     pub(super) fn spawn_buttons(mut commands: Commands, asset_server: Res<AssetServer>) {
         //
 

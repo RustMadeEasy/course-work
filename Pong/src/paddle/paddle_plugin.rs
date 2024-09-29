@@ -25,6 +25,7 @@ const PADDLE_SPRITE: &str = "sprites/paddle_12.png";
 
 pub(crate) struct PaddlePlugin;
 
+/// Renders and controls the movement of the Paddle with which the ball is hit.
 impl Plugin for PaddlePlugin {
     fn build(&self, app: &mut App) {
         app //
@@ -69,14 +70,14 @@ impl PaddlePlugin {
             let new_position_x = paddle_transform.translation.x
                 + (new_direction * PADDLE_SPEED * time.delta_seconds());
 
-            // Constrain the Paddle to the window
+            // Constrain the Paddle to the window's viewport.
             let new_position_x = new_position_x.clamp(left_edge, right_edge);
 
             paddle_transform.translation.x = new_position_x;
         }
     }
 
-    /// Creates the Paddle entity.
+    /// Spawns the Paddle entity.
     fn spawn_paddle(
         mut commands: Commands,
         asset_server: Res<AssetServer>,

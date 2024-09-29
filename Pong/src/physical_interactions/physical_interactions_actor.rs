@@ -4,7 +4,7 @@
 //
 // @author JoelDavisEngineering@Gmail.com
 
-/// Specifies the actors that may interact with one another.
+/// Specifies the actors that may physically interact with one another.
 #[derive(Clone, PartialEq)]
 pub(crate) enum PhysicalInteractionActor {
     Ball,

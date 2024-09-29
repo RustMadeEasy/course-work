@@ -18,10 +18,12 @@ use crate::paddle::paddle_plugin::{PADDLE_HEIGHT, PADDLE_WIDTH};
 use crate::physical_interactions::collision_event::CollisionEvent;
 use crate::physical_interactions::physical_interactions_actor::PhysicalInteractionActor;
 
-/// Handles the movement and interactions between the Ball, the Paddle and the walls.
+/// Manages the movements and interactions between the Ball, Ceiling, Floor, and Walls. This
+/// includes controlling the ball direction, providing hit-detection, and invoking collision sounds.
 pub(crate) struct PhysicalInteractionsPlugin;
 
 impl Plugin for PhysicalInteractionsPlugin {
+    // Constructs the plugin.
     fn build(&self, app: &mut App) {
         app //
             .add_event::<CollisionEvent>()
@@ -39,8 +41,8 @@ impl Plugin for PhysicalInteractionsPlugin {
 impl PhysicalInteractionsPlugin {
     //
 
-    /// Handles the interaction between the Ball and the Ceiling, Floor, and Walls. This includes
-    /// hit-detection, invocation of collision sound, and scoring.
+    /// Handles the interaction between the Ball, Ceiling, Floor, and Walls. This includes
+    /// hit-detection, and invocation of collision sounds.
     fn ball_and_wall_interaction(
         mut ball_query: Query<(&Transform, &mut BallComponent)>,
         mut event_writer: EventWriter<CollisionEvent>,
@@ -54,49 +56,44 @@ impl PhysicalInteractionsPlugin {
             //
 
             let mut collision_occurred = false;
-
+            let mut new_ball_direction: Vec2 = ball.get_direction();
             let mut target: PhysicalInteractionActor = PhysicalInteractionActor::None;
 
-            let mut new_ball_direction: Vec2 = ball.get_direction();
-
             // Do we need to change the X direction?
-            if Self::is_left(&new_ball_direction)
+            if DirectionDetector::does_vector_point_left(&new_ball_direction)
                 && ((transform.translation.x - BALL_RADIUS) <= 0_f32)
             {
                 // If the ball is traveling towards the left wall and has hit it, then reverse the x-direction
                 new_ball_direction.x = -new_ball_direction.x;
                 collision_occurred = true;
-                target = crate::physical_interactions::physical_interactions_plugin::PhysicalInteractionActor::SideWall;
-            } else if Self::is_right(&ball.get_direction())
+                target = PhysicalInteractionActor::SideWall;
+            } else if DirectionDetector::does_vector_point_right(&ball.get_direction())
                 && ((transform.translation.x + BALL_RADIUS) >= window.width())
             {
                 // If the ball is traveling towards the right wall and has hit it, then reverse the x-direction
                 new_ball_direction.x = -new_ball_direction.x;
                 collision_occurred = true;
-                target = crate::physical_interactions::physical_interactions_plugin::PhysicalInteractionActor::SideWall;
+                target = PhysicalInteractionActor::SideWall;
             }
 
             // Do we need to change the Y direction?
-            if Self::is_up(&new_ball_direction)
+            if DirectionDetector::does_vector_point_up(&new_ball_direction)
                 && ((transform.translation.y + BALL_RADIUS) >= window.height())
             {
                 // If the ball is traveling towards the ceiling and has hit it, then reverse the y-direction
                 new_ball_direction.y = -new_ball_direction.y;
                 collision_occurred = true;
                 target = crate::physical_interactions::physical_interactions_plugin::PhysicalInteractionActor::Ceiling;
-            } else if Self::is_down(&ball.get_direction())
+            } else if DirectionDetector::does_vector_point_down(&ball.get_direction())
                 && ((transform.translation.y - BALL_RADIUS) <= 0_f32)
             {
                 //
-
-                // TODO: JD: send event instead of directly changing the score. The scoreboard
-                // will respond and act accordingly.
 
                 // If the ball is traveling towards the bottom wall and has hit it, then reverse the y-direction
                 new_ball_direction.y = -new_ball_direction.y;
                 collision_occurred = true;
 
-                target = crate::physical_interactions::physical_interactions_plugin::PhysicalInteractionActor::Floor;
+                target = PhysicalInteractionActor::Floor;
             }
 
             if collision_occurred {
@@ -104,8 +101,9 @@ impl PhysicalInteractionsPlugin {
 
                 ball.set_direction(new_ball_direction);
 
+                // Post an event so that the other areas of the code know that the Ball has
+                // hit one the confines of the room.
                 event_writer.send(CollisionEvent::new(
-                    1.0,
                     PhysicalInteractionActor::Ball,
                     target,
                 ));
@@ -113,8 +111,8 @@ impl PhysicalInteractionsPlugin {
         }
     }
 
-    /// Handles the interaction between the Ball and the Paddle. This includes hit-detection, invocation
-    /// of collision sound, and scoring.
+    /// Handles the interaction between the Ball and the Paddle. This includes hit-detection,
+    /// and invocation of collision sounds.
     fn ball_and_paddle_interaction(
         mut ball_query: Query<(&Transform, &mut BallComponent)>,
         mut event_writer: EventWriter<CollisionEvent>,
@@ -128,10 +126,11 @@ impl PhysicalInteractionsPlugin {
             if let Ok(paddle_transform) = paddle_query.get_single() {
                 //
 
-                // NOTE: Unfortunately, we can't use the translation::distance() function to detect
-                // proximity (collision) because we are not working wth two spherical shapes.
-
                 // *** Manually test for intersection of the Ball into the bounds of the Paddle. ***
+
+                // NOTE: Unfortunately, we can't use Bevy's built-in translation::distance()
+                // function to detect proximity (collision) because we are not working wth two
+                // spherical shapes.
 
                 let paddle_position = Vec2::new(
                     paddle_transform.translation.x,
@@ -146,9 +145,11 @@ impl PhysicalInteractionsPlugin {
 
                 let mut new_ball_direction: Vec2 = ball.get_direction();
 
-                // If they are touching, then reverse the Ball's vertical direction
+                // Are they touching?
                 if ball_bounds.intersects(&paddle_bounds) {
                     //
+
+                    // *** Reverse the Ball's vertical direction ***
 
                     // Prevent Ball jitter by only changing the direction upwards
                     let previous_vertical_direction = new_ball_direction.y;
@@ -159,8 +160,9 @@ impl PhysicalInteractionsPlugin {
 
                         ball.set_direction(new_ball_direction);
 
+                        // Post an event so that the other areas of the code know that the Ball has
+                        // hit the Paddle.
                         event_writer.send(CollisionEvent::new(
-                            1.0,
                             PhysicalInteractionActor::Ball,
                             PhysicalInteractionActor::Paddle,
                         ));
@@ -171,26 +173,29 @@ impl PhysicalInteractionsPlugin {
     }
 }
 
-impl PhysicalInteractionsPlugin {
+/// Determines the direction of a vector.
+pub(crate) struct DirectionDetector;
+
+impl DirectionDetector {
     //
 
-    /// Determines whether the specified direction is Down.
-    fn is_down(direction: &Vec2) -> bool {
+    /// Determines whether the specified vector points Down.
+    fn does_vector_point_down(direction: &Vec2) -> bool {
         direction.y < 0_f32
     }
 
-    /// Determines whether the specified direction is Left.
-    fn is_left(direction: &Vec2) -> bool {
+    /// Determines whether the specified vector points Left.
+    fn does_vector_point_left(direction: &Vec2) -> bool {
         direction.x < 0_f32
     }
 
-    /// Determines whether the specified direction is Right.
-    fn is_right(direction: &Vec2) -> bool {
+    /// Determines whether the specified vector points Right.
+    fn does_vector_point_right(direction: &Vec2) -> bool {
         direction.x > 0_f32
     }
 
-    /// Determines whether the specified direction is Up.
-    fn is_up(direction: &Vec2) -> bool {
+    /// Determines whether the specified vector points Up.
+    fn does_vector_point_up(direction: &Vec2) -> bool {
         direction.y > 0_f32
     }
 }

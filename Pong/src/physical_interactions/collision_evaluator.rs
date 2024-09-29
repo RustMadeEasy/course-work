@@ -7,7 +7,7 @@
 use crate::physical_interactions::collision_event::CollisionEvent;
 use crate::physical_interactions::physical_interactions_actor::PhysicalInteractionActor;
 
-/// Provides plain-language evaluation of collision events. It can be used as follows:
+/// Provides plain-language evaluation of Collision Events. It can be used as follows:
 ///
 /// ```
 ///     let evaluator = CollisionEvaluator::new(collision_event);
@@ -64,11 +64,12 @@ impl CollisionEvaluator {
         {
             collision.source == actor1 && self.collision_targets.contains(&collision.target)
         } else {
-            // Warn if the function were not called properly.
-            println!("WARNING: check() called before requisite call to did(), with() and/or or()!");
+            // Warn if the functions were not called properly.
+            println!("WARNING: evaluate() called before requisite call to did(), collide_with() and/or or()!");
             false
         };
 
+        // Prepare for a new evaluation
         self.collision_source = None;
         self.collision_targets.clear();
 
