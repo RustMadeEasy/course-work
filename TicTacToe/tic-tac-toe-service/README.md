@@ -143,9 +143,8 @@ This service is accessible on the following port: `50020`
 ## Future Roadmap
 
 1. Authentication.
-2. Docker deployment.
-3. Automatic cleanup of older or abandoned Games.
-4. Central persistence, e.g. Surreal DB, Redis, etc.
-5. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
+2. Automatic cleanup of older or abandoned Games.
+3. Central persistence, e.g. Surreal DB, Redis, etc.
+4. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
    invitation is no longer required for rematches within a Gaming Session.
-6. Implement an AI model so that users can play against the service.
+5. Implement an AI model so that users can play against the service.
