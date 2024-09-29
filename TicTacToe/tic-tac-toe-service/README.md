@@ -2,7 +2,8 @@
 
 ## Description
 
-Provides 2-client Tic-Tac-Toe game play.
+Provides 2-client Tic-Tac-Toe game play. This includes game setup, invitation, turn-taking, and realtime notifications 
+of game state changes.
 
 _NOTE: This sample code is part of the RustMadeEasy.com, Intro to Rust course and is not meant for
 production use. For example, the end-points are not secured and the game state is not persisted in a centralized
@@ -15,11 +16,11 @@ and scalable._
 
 ### Performance
 
-Services written in Rust typically have 1/10th the container size and 1/10th the memory footprint of comparable services
-written, for example, in SpringBoot. Rust services also, generally, have a lower latency and can process more request
+Services written in Rust typically have 1/10th the deployment size and 1/10th the memory footprint of comparable services
+written, for example, in SpringBoot. Rust services also, generally, have a lower latency and can process more requests
 per second.
 
-These attributes can be leveraged to substantially lower operating costs and/or achieve greater platform performance.
+These attributes can be leveraged to achieve greater platform performance and/or to substantially lower operating costs.
 
 See the
 latest [Tech Empower benchmarks here](https://www.techempower.com/benchmarks/#hw=ph&test=fortune&section=data-r22).
@@ -40,14 +41,13 @@ lifetime of references at compile time."
 
 ### Swagger UI
 
-This service supports automatically generated Swagger UI documentation. To view the documentation, run the service and
-point your browser to:
+This service supports Swagger UI documentation. To view the documentation, run the service and point your browser to:
 
 http://localhost:50020/v1/swagger-ui/
 
 Here is a screenshot:
 
-![](./SwaggerUI-Screenshot.png)
+![](./readme-content/SwaggerUI-Screenshot.png)
 
 ### Code-Level Documentation
 
@@ -61,25 +61,24 @@ Then open the resulting JavaDoc style documentation. For example, in macOS you c
 
 Here is a screenshot:
 
-![](./RustCodeDocs-Screenshot.png)
+![](./readme-content/RustCodeDocs-Screenshot.png)
 
 ### Usage Overview
 
-![](./Tic-Tac-Toe_Call_Sequence.png)
+![](./readme-content/TicTacToeSequence.png)
 
 1. The first client (Player One) starts a new Game by posting to Create Game (POST /v1/games).
 2. The first client subscribes to game-change updates via MQTT, updating the UI rendering and the state of the client
    app.
 3. Player One invites Player Two to the game by sharing the Game Invitation Code with Player Two. The invitation code is
-   in the response returned by Get Game Info.
+   supplied in the response to Create Game.
 4. The second client (Player Two) joins the Game by using the Game Invitation Code and the Second Player's info to post
-   to Add Player (POST /v1/games/players). The Add Player responds with Game Info which contains the Game ID required
-   for all
-   subsequent calls.
+   to Add Player (POST /v1/games/players). The Add Player responds with New Game Info which contains the Game ID required
+   for all subsequent calls.
 5. The second client subscribes to game-change updates via MQTT, updating the UI rendering and the state of the client
    app.
 6. Each client takes turns on behalf of its Player by calling Take Turn (PUT /v1/games/{game_id}/turns).
-7. When the game state indicates the that is won or stalemated, the clients show this visually and disallow further game
+7. When the game state indicates a win or stalemate, the clients show this visually and disallow further game
    play.
 8. The first client calls End Game (DELETE /v1/games/{game_id}).
 
