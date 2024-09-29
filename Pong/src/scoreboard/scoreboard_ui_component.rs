@@ -6,5 +6,6 @@
 
 use bevy::prelude::Component;
 
+/// Marker for entities added to the Scoreboard UI.
 #[derive(Component)]
 pub(super) struct ScoreBoardUiComponent;

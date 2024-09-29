@@ -6,6 +6,7 @@
 
 use bevy::prelude::Resource;
 
+/// Models the info needed to represent the Game score in the UI.
 #[derive(Default, Resource)]
 pub(super) struct ScoreboardResource {
     pub(super) score: i64,

@@ -24,11 +24,7 @@ use crate::physical_interactions::physical_interactions_actor::PhysicalInteracti
 use crate::scoreboard::scoreboard_resource::ScoreboardResource;
 use crate::scoreboard::scoreboard_ui_component::ScoreBoardUiComponent;
 
-// Scoring
-const MAX_DEMERITS_FOR_MISSING_BALL: i64 = 5;
-const MAX_POINTS_TO_GRANT_FOR_RETURNING_BALL: i64 = 5;
-
-// Scoring (current regimen):
+// Scoring (current scheme):
 // Points are granted for each Ball return.
 // Points are taken away for missing the Ball.
 
@@ -39,15 +35,21 @@ const MAX_POINTS_TO_GRANT_FOR_RETURNING_BALL: i64 = 5;
 // Decrease the Paddle speed over time.
 // Decrease the Paddle width over time.
 
+// Scoring parameters
+const MAX_DEMERITS_FOR_MISSING_BALL: i64 = 5;
+const MAX_POINTS_TO_GRANT_FOR_RETURNING_BALL: i64 = 5;
+
+const SCOREBOARD_FONT_SIZE: f32 = 35.0;
+
 lazy_static! {
     static ref SCOREBOARD_TEXT_COLOR: Color = Color::hex("2f2f2f").unwrap();
 }
 
-const SCOREBOARD_FONT_SIZE: f32 = 35.0;
-
 pub(crate) struct ScoreboardPlugin;
 
+/// Displays the game score in realtime.
 impl Plugin for ScoreboardPlugin {
+    /// Constructs the plugin.
     fn build(&self, app: &mut App) {
         app //
             .insert_resource(ScoreboardResource::default())
@@ -67,15 +69,17 @@ impl Plugin for ScoreboardPlugin {
 impl ScoreboardPlugin {
     //
 
-    /// Updates the score resource based on how the Paddle and Ball are interacting with the
-    /// environment.
+    /// Listens for collision event and updates the score resource based on how the Paddle and Ball
+    /// are interacting with the environment.
     fn handle_physical_interaction_events(
-        mut scoreboard_resource: ResMut<ScoreboardResource>,
         mut event_reader: EventReader<CollisionEvent>,
+        mut scoreboard_resource: ResMut<ScoreboardResource>,
     ) {
         //
 
-        // Look for the following situations: the Ball hitting the Floor, the Paddle returning the Ball.
+        // Look for the following situations:
+        // a) The Ball hitting the Floor.
+        // b) The Paddle returning the Ball.
         for collision_event in event_reader.read() {
             //
 
@@ -97,6 +101,7 @@ impl ScoreboardPlugin {
         }
     }
 
+    /// Spawns the scoreboard UI.
     fn spawn_scoreboard_ui(
         mut commands: Commands,
         _window_query: Query<&Window, With<PrimaryWindow>>,
@@ -135,7 +140,7 @@ impl ScoreboardPlugin {
         commands.spawn((text_bundle, ScoreBoardUiComponent {}));
     }
 
-    /// Keeps the Scoreboard updated with the latest score.
+    /// Keeps the Scoreboard UI updated with the latest score.
     fn update_scoreboard(
         scoreboard_resource: Res<ScoreboardResource>,
         mut text_query: Query<&mut Text, With<ScoreBoardUiComponent>>,

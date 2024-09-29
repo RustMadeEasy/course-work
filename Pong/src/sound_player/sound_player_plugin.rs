@@ -7,21 +7,23 @@
 use bevy::app::{App, FixedUpdate, Startup};
 use bevy::asset::{AssetServer, Handle};
 use bevy::audio::{AudioBundle, AudioSource, PlaybackSettings};
-use bevy::prelude::{in_state, Commands, EventReader, IntoSystemConfigs, Plugin, Res, Resource};
+use bevy::prelude::{in_state, Commands, EventReader, IntoSystemConfigs, Plugin, Res};
 
 use crate::game_controller::{GamePlayState, SoundSetting};
 use crate::physical_interactions::collision_evaluator::CollisionEvaluator;
 use crate::physical_interactions::collision_event::CollisionEvent;
 use crate::physical_interactions::physical_interactions_actor::PhysicalInteractionActor::*;
+use crate::sound_player::collision_sounds_resource::CollisionSoundsResource;
 
 const SOUND_BALL_MISSED: &str = "audio/impactBell_heavy_001.ogg";
 const SOUND_PADDLE_HIT: &str = "audio/impactGlass_medium_000.ogg";
 const SOUND_TOP_OR_SIDE_WALL_HIT: &str = "audio/impactMetal_medium_004.ogg";
 
-/// Listens for specific events and plays the appropriate sound effect.
+/// Listens for specific Game events and plays the appropriate sound effect.
 pub(crate) struct SoundPlayerPlugin;
 
 impl Plugin for SoundPlayerPlugin {
+    /// Constructs the plugin.
     fn build(&self, app: &mut App) {
         app //
             .add_systems(Startup, preload_sound_effects)
@@ -37,11 +39,11 @@ impl Plugin for SoundPlayerPlugin {
 impl SoundPlayerPlugin {
     //
 
-    /// Plays sound effects based on the incoming interaction events.
+    /// Plays sound effects based on the incoming Game interaction events.
     fn handle_physical_interaction_events(
+        mut event_reader: EventReader<CollisionEvent>,
         collision_sounds_resource: Res<CollisionSoundsResource>,
         mut commands: Commands,
-        mut event_reader: EventReader<CollisionEvent>,
     ) {
         //
 
@@ -63,13 +65,6 @@ impl SoundPlayerPlugin {
             }
         }
     }
-}
-
-#[derive(Resource)]
-struct CollisionSoundsResource {
-    ball_missed: Handle<AudioSource>,
-    paddle_hit: Handle<AudioSource>,
-    ceiling_or_side_wall_hit: Handle<AudioSource>,
 }
 
 fn preload_sound_effects(mut commands: Commands, asset_server: Res<AssetServer>) {
