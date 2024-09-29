@@ -1,8 +1,8 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::time::Duration;
 
 use log::warn;
-use mqtt_publisher_lib::broker_config::{MqttProtocolVersion, PublisherConfig};
+use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
 use mqtt_publisher_lib::publisher::Publisher;
 use mqtt_publisher_lib::publisher_qos::PublisherQoS;
 
@@ -121,10 +121,9 @@ impl<T: GameTrait + Clone> GamesManager<T> {
 
     /// Creates a new GamesManager instance.
     pub(crate) fn new() -> Self {
-        let mut configs = HashSet::new();
-        configs.insert(PublisherConfig::new(MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT, MqttProtocolVersion::V5));
+        let config = BrokerInfo::new(MQTT_BROKER_ADDRESS.to_string(), 10, MQTT_PORT, Duration::from_secs(60), MqttProtocolVersion::V5);
         Self {
-            event_publisher: Publisher::new(configs, Duration::from_secs(60), 10),
+            event_publisher: Publisher::new(config),
             games: Default::default(),
         }
     }
