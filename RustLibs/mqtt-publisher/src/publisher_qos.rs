@@ -1,3 +1,9 @@
+// MQTT Publisher
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use rumqttc::v5::mqttbytes::QoS as QoSV5;
 use rumqttc::QoS as QoSV3;
 

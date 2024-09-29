@@ -1,3 +1,9 @@
+// MQTT Publisher
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use std::time::Duration;
 
 use log::{debug, error, trace};
@@ -5,11 +11,11 @@ use rumqttc::v5::{AsyncClient as AsyncClientV5, EventLoop as EventLoopV5, MqttOp
 use rumqttc::{AsyncClient as AsyncClientV3, EventLoop as EventLoopV3, MqttOptions as MqttOptionsV3};
 use uuid::Uuid;
 
-use crate::broker_config::{MqttProtocolVersion, PublisherConfig};
+use crate::broker_info::{MqttProtocolVersion, BrokerInfo};
 use crate::publisher_error::PublisherError;
 use crate::publisher_qos::PublisherQoS;
 
-/// Provides unified access to multiple client implementations of the MQTT protocol.
+/// Provides unified access to multiple client versions of the MQTT protocol.
 #[derive(Clone)]
 pub(crate) struct AsyncMqttClient {
     client_v3: Option<AsyncClientV3>,
@@ -20,7 +26,7 @@ impl AsyncMqttClient {
     //
 
     /// Constructs a new AsyncMqttClient instance.
-    pub fn new(config: PublisherConfig, keep_alive: Duration, capacity: usize) -> Self {
+    pub fn new(config: BrokerInfo) -> Self {
         //
 
         // Which version of the client is being requested?
@@ -32,9 +38,9 @@ impl AsyncMqttClient {
                 let mut client_options = MqttOptionsV3::new(Uuid::new_v4().to_string(),
                                                             config.broker_address.clone(),
                                                             config.broker_port);
-                client_options.set_keep_alive(keep_alive);
+                client_options.set_keep_alive(config.keep_alive);
 
-                let (client, event_loop) = AsyncClientV3::new(client_options, capacity);
+                let (client, event_loop) = AsyncClientV3::new(client_options, config.capacity);
 
                 tokio::spawn(async move {
                     AsyncMqttClient::enter_event_loop_v3(event_loop).await;
@@ -51,9 +57,9 @@ impl AsyncMqttClient {
                 let mut client_options = MqttOptionsV5::new(Uuid::new_v4().to_string(),
                                                             config.broker_address.clone(),
                                                             config.broker_port);
-                client_options.set_keep_alive(keep_alive);
+                client_options.set_keep_alive(config.keep_alive);
 
-                let (client, event_loop) = AsyncClientV5::new(client_options, capacity);
+                let (client, event_loop) = AsyncClientV5::new(client_options, config.capacity);
 
                 tokio::spawn(async move {
                     AsyncMqttClient::enter_event_loop_v5(event_loop).await;

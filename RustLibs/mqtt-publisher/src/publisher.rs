@@ -1,14 +1,20 @@
+// MQTT Publisher
+//
+// © 2024 Rust Made Easy. All rights reserved.
+//
+// @author JoelDavisEngineering@Gmail.com
+
 use std::collections::HashSet;
 use std::time::Duration;
 
 use crate::async_mqtt_client::AsyncMqttClient;
-use crate::broker_config::PublisherConfig;
+use crate::broker_info::BrokerInfo;
 use crate::publisher_error::PublisherError;
 use crate::publisher_qos::PublisherQoS;
 use log::error;
 
 /// Provides MQTT message publishing functionality, including simulcast to disparate brokers and
-/// different version of the MQTT protocol.
+/// different versions of the MQTT protocol.
 #[derive(Clone)]
 pub struct Publisher {
     clients: Vec<AsyncMqttClient>,
@@ -18,16 +24,21 @@ pub struct Publisher {
 impl Publisher {
     //
 
-    /// Constructs a new Publisher instance.
-    pub fn new(configurations: HashSet<PublisherConfig>, keep_alive: Duration, capacity: usize) -> Self {
-        //
-
+    /// Constructs a new Publisher instance for broadcasting via a single broker.
+    pub fn new(broker: BrokerInfo) -> Self {
         let mut clients: Vec<AsyncMqttClient> = vec!();
-
-        for config in configurations {
-            clients.push(AsyncMqttClient::new(config, keep_alive, capacity))
+        clients.push(AsyncMqttClient::new(broker));
+        Self {
+            clients,
         }
+    }
 
+    /// Constructs a new Publisher instance for simulcasting via multiple brokers.
+    pub fn new_for_simulcast(brokers: HashSet<BrokerInfo>) -> Self {
+        let mut clients: Vec<AsyncMqttClient> = vec!();
+        for config in brokers {
+            clients.push(AsyncMqttClient::new(config))
+        }
         Self {
             clients,
         }
