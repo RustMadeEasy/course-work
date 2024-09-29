@@ -1,4 +1,10 @@
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+// Tic-Tac-Toe Service
+//
+// Provides 2-client game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 /**
  * Defines and implements the public Gaming contract for this service.
  *
@@ -6,8 +12,10 @@ use actix_web::{delete, get, post, web, HttpResponse, Responder};
  * @author JoelDavisEngineering@Gmail.com
  */
 
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use std::sync::Mutex;
 use validator::Validate;
+
 
 use crate::game_state::GameState;
 use crate::games_manager::GamesManager;

@@ -1,3 +1,10 @@
+// Tic-Tac-Toe Service
+//
+// Provides 2-client game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 extern crate core;
 
 use std::net::Ipv4Addr;
@@ -32,13 +39,6 @@ mod verification_code_generator;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;
-
-// Tic-Tac-Toe Service
-//
-// Provides 2-client game-play of Tic-Tac-Toe.
-//
-// © 2024 Rust Made Easy. All rights reserved.
-// @author JoelDavisEngineering@Gmail.com
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

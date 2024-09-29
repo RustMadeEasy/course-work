@@ -1,3 +1,10 @@
+// Tic-Tac-Toe Service
+//
+// Provides 2-client game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 use actix_web::http::header::ContentType;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
