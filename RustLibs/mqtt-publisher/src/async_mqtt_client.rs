@@ -4,8 +4,6 @@
 //
 // @author JoelDavisEngineering@Gmail.com
 
-use std::time::Duration;
-
 use log::{debug, error, trace};
 use rumqttc::v5::{AsyncClient as AsyncClientV5, EventLoop as EventLoopV5, MqttOptions as MqttOptionsV5};
 use rumqttc::{AsyncClient as AsyncClientV3, EventLoop as EventLoopV3, MqttOptions as MqttOptionsV3};

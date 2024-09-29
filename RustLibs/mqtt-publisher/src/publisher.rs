@@ -5,7 +5,6 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use std::collections::HashSet;
-use std::time::Duration;
 
 use crate::async_mqtt_client::AsyncMqttClient;
 use crate::broker_info::BrokerInfo;
@@ -26,11 +25,7 @@ impl Publisher {
 
     /// Constructs a new Publisher instance for broadcasting via a single broker.
     pub fn new(broker: BrokerInfo) -> Self {
-        let mut clients: Vec<AsyncMqttClient> = vec!();
-        clients.push(AsyncMqttClient::new(broker));
-        Self {
-            clients,
-        }
+        Self { clients: vec!(AsyncMqttClient::new(broker)) }
     }
 
     /// Constructs a new Publisher instance for simulcasting via multiple brokers.
@@ -49,8 +44,7 @@ impl Publisher {
         self.publish_with_payload("", topic, qos).await
     }
 
-    /// Publishes a message with the specified payload to the specified topic. The message is
-    /// published to all the clients that have been setup on initialization.
+    /// Publishes a message with the specified payload to the specified topic.
     pub async fn publish_with_payload(&self, payload: &str, topic: &str, qos: PublisherQoS) -> Result<(), Vec<PublisherError>> {
         //
 

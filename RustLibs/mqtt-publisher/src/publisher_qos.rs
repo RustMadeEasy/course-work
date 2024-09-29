@@ -9,7 +9,7 @@ use rumqttc::QoS as QoSV3;
 
 /// Enumerates the Quality of Service options for message publishing. These options correspond
 /// 1-to-1 with those of MQTT. IMPORTANT NOTE: This redundant enum exists so that users of this
-/// library are not tightly-coupled to whichever MQTT implementation we utilize.
+/// library are not tightly-coupled to whichever MQTT implementation this library utilizes.
 #[derive(Clone)]
 pub enum PublisherQoS {
     AtMostOnce = 0,
