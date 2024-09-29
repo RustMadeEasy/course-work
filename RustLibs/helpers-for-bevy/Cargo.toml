@@ -3,5 +3,9 @@ name = "helpers-for-bevy"
 version = "0.3.0"
 edition = "2021"
 
+description = "Tools and constructs to aid in building games in Bevy"
+authors = ["Joel Davis <JoelDavisEngineering@Gmail.com>"]
+license = "GPL-3"
+
 [dependencies]
 bevy = "0.13.2"
