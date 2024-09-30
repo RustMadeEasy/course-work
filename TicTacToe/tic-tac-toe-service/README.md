@@ -17,8 +17,8 @@ and scalable._
 ### Performance
 
 Services written in Rust typically have 1/10th the deployment size and 1/10th the memory footprint of comparable services
-written, for example, in SpringBoot. Rust services also, generally, have a lower latency and can process more requests
-per second.
+written, for example, in SpringBoot. Rust services also, generally, have a lower latency, quicker spin up, and can 
+process more requests per second.
 
 These attributes can be leveraged to achieve greater platform performance and/or to substantially lower operating costs.
 
@@ -143,7 +143,7 @@ This service is accessible on the following port: `50020`
 
 1. Authentication.
 2. Automatic cleanup of older or abandoned Games.
-3. Central persistence, e.g. Surreal DB, Redis, etc.
+3. Central persistence, e.g., Surreal DB, Redis, etc.
 4. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
    invitation is no longer required for rematches within a Gaming Session.
 5. Implement an AI model so that users can play against the service.
