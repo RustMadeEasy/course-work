@@ -17,8 +17,8 @@ and scalable._
 ### Performance
 
 Services written in Rust typically have 1/10th the deployment size and 1/10th the memory footprint of comparable services
-written, for example, in SpringBoot. Rust services also, generally, have a lower latency, quicker spin up, and can 
-process more requests per second.
+written, for example, in SpringBoot. Rust services also, generally, spin up quicker, have a lower request latency, and 
+can process more requests per second.
 
 These attributes can be leveraged to achieve greater platform performance and/or to substantially lower operating costs.
 
