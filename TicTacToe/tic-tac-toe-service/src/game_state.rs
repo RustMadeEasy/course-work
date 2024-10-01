@@ -31,14 +31,18 @@ use crate::models::PlayerInfo;
 use crate::play_outcome::PlayOutcome;
 use crate::play_status::PlayStatus;
 
-/// Models the state of a game at a particular Move.
+/// Models the state of a game at a particular Move (turn).
 #[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
 pub(crate) struct GameState {
     /// ID of the Player who made this Move.
     id_of_player_who_made_move: String,
+    /// The board on which the Game is played.
     pub(crate) game_board: [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS],
+    /// The current status of the Game.
     pub(crate) play_status: PlayStatus,
+    /// If the Game has ended in a win, this contains the winning board positions.
     pub(crate) winning_locations: Option<Vec<BoardPosition>>,
+    /// If the Game has ended in a win, this indicates the ID of the winning Player.
     pub(crate) winning_player_id: Option<String>,
 }
 
@@ -57,7 +61,7 @@ impl GameState {
         }
     }
 
-    /// Creates an initial GameState instance using a PlayStatus.
+    /// Creates an initial GameState instance using a player and a PlayStatus.
     pub(crate) fn new_with_initial_play_status(
         current_player_id: &str,
         play_status: &PlayStatus,

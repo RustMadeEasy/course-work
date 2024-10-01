@@ -1,0 +1,10 @@
+[package]
+name = "verification-code-gen"
+version = "0.1.0"
+edition = "2021"
+
+description = "Verification Code Generator Library"
+authors = ["Joel Davis <JoelDavisEngineering@Gmail.com>"]
+
+[dependencies]
+rand = "0.9.0-alpha.2"

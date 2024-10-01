@@ -12,7 +12,7 @@ use log::warn;
 use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
 use mqtt_publisher_lib::publisher::Publisher;
 use mqtt_publisher_lib::publisher_qos::PublisherQoS;
-
+use verification_code_gen::verification_code_generator::VerificationCodeGenerator;
 use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
@@ -20,23 +20,15 @@ use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams};
 use crate::play_status::PlayStatus;
 use crate::tic_tac_toe_game::TicTacToeGame;
-use crate::verification_code_generator::VerificationCodeGenerator;
 
 pub(crate) type TicTacToeGamesManager = GamesManager<TicTacToeGame>;
 
 const MQTT_BROKER_ADDRESS: &str = "test.mosquitto.org";
 const MQTT_PORT: u16 = 1883;
 
-/**
- * Manages all the Game instances played on this service.
- *
- * © 2024 Rust Made Easy. All rights reserved.
- * @author JoelDavisEngineering@Gmail.com
- */
-
 /// Manages all the Game instances played on this service.
 ///
-/// NOTE: this is sample code.
+/// NOTE: This is sample code.
 ///
 /// NOTE: Production-grade code would persist the gaming info to a mem cache or database so that
 /// multiple instances of the service can be run.
@@ -55,10 +47,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
     //
 
     /// Adds a Player to the Game.
-    pub(crate) async fn add_player(
-        &mut self,
-        second_player_params: &AddPlayerParams,
-    ) -> Result<T, GameError> {
+    pub(crate) async fn add_player(&mut self, second_player_params: &AddPlayerParams) -> Result<T, GameError> {
         //
 
         // Find the Game instance via the game_invitation_code.
@@ -82,10 +71,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
     }
 
     /// Creates a new Game instance.
-    pub(crate) fn create_game(
-        &mut self,
-        params: &NewGameParams,
-    ) -> Result<T, GameError> {
+    pub(crate) fn create_game(&mut self, params: &NewGameParams) -> Result<T, GameError> {
         //
 
         let invitation_code = self.generate_invitation_code();
@@ -186,7 +172,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
     /// Creates a unique, 6-digit code for use as a Game Invitation.
     ///
     /// NOTE: We use a 6-digit Game Invitation instead of performing the game setup handshaking
-    /// with the Game ID for 2 reasons:
+    /// with the Game ID for two reasons:
     ///     1) We don't want to expose the Game ID to clients that are not party to the Game.
     ///     2) A 6-digit code is practical for end-users to utilize.
     fn generate_invitation_code(&self) -> String {

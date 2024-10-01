@@ -121,8 +121,7 @@ pub(crate) async fn end_game(
 }
 
 /// Retrieves the history of the Game States from the initial move (turn) to the latest
-/// Game State. This can be used, for instance, for the client to provide an animation that
-/// shows a time-lapse of the game play.
+/// Game State. This can be used, for instance, to create an animated time-lapse of the game play.
 #[utoipa::path(
     get,
     tag = "TicTacToe",
@@ -148,7 +147,7 @@ pub(crate) async fn get_game_history(
     }
 }
 
-/// Retrieves the specified Game info.
+/// Retrieves details of the specified Game.
 #[utoipa::path(
     get,
     tag = "TicTacToe",
@@ -219,6 +218,7 @@ pub(crate) async fn take_turn(
     }
 }
 
+/// Verifies that the specified Game ID is formatted properly.
 fn validate_game_id(game_id: &str) -> actix_web::Result<()> {
     if game_id.is_empty() {
         Err(actix_web::error::ErrorBadRequest("Game ID is empty"))

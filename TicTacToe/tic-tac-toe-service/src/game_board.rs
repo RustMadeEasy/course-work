@@ -2,6 +2,8 @@
 //
 // Provides 2-client game-play of Tic-Tac-Toe.
 //
+// This file defines Game Board related structs, types, enums, and constants.
+//
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
@@ -9,22 +11,16 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
-/**
- * Defines Game Board related structs, types, enums, and constants.
- *
- * © 2024 Rust Made Easy. All rights reserved.
- * @author JoelDavisEngineering@Gmail.com
- */
-
-/// Tic-Tac-Toe is played on a 3-by-3 grid.
+/* Tic-Tac-Toe is played on a 3-by-3 grid. */
 pub(crate) const MAX_BOARD_COLUMNS: usize = 3;
 pub(crate) const MAX_BOARD_ROWS: usize = 3;
 
 /// Specifies the locations of the game pieces in Row/Column grid format.
 pub(crate) type GameBoard = [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS];
 
-/// Binary representation of various patterns on a game board. This allows for very performant
-/// checks for the winning move, for stalemate situations, etc.
+/* The following constants are various patterns on a game board. These binary representations
+    allow for very performant checks for winning moves, stalemate situations, etc.
+*/
 pub(crate) const BIN_FULL_BOARD: i16 = 0b_111_111_111;
 pub(crate) const BIN_THREE_ACROSS_HORIZONTAL_TOP: i16 = 0b_111_000_000;
 pub(crate) const BIN_THREE_ACROSS_HORIZONTAL_MIDDLE: i16 = 0b_000_111_000;

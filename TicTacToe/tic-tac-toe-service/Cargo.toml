@@ -11,6 +11,7 @@ license = "GPL-3"
 
 # *** Rust Made Easy dependencies ***
 mqtt-publisher-lib = { path = "../../RustLibs/mqtt-publisher" }
+verification-code-gen = { path = "../../RustLibs/verification-code-gen" }
 
 # *** Outside dependencies ***
 actix-web = "4.5.1"

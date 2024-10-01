@@ -17,7 +17,7 @@ use crate::models::PlayerInfo;
  * @author JoelDavisEngineering@Gmail.com
  */
 
-/// Defines the behavior of a Game.
+/// Defines the general behavior of a Game.
 pub(crate) trait GameTrait: Sized {
     //
 
@@ -29,10 +29,11 @@ pub(crate) trait GameTrait: Sized {
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;
 
-    /// Returns the Event Channel ID
+    /// Returns the Event Channel ID. This is used to form the topics for publishing game state
+    /// change notifications.
     fn get_event_channel_id(&self) -> String;
 
-    /// Returns the Game ID
+    /// Returns the Game ID.
     fn get_id(&self) -> String;
 
     /// Returns the Game Invitation Code. This code is used to add a new client app to the Game.

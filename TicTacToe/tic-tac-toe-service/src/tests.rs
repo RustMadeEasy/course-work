@@ -62,32 +62,6 @@ mod game_board_tests {
     use crate::play_status::PlayStatus;
 
     #[test]
-    fn test_occupied_piece_placement() {
-        //
-
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
-
-        // Place an X at 0:0
-        let board_state = GameState::new();
-        let new_board_state =
-            match board_state.place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
-            {
-                Ok(board_state) => board_state,
-                Err(_) => {
-                    panic!()
-                }
-            };
-
-        // Have Player Two attempt to move to the same space (0:0)
-        let result =
-            new_board_state.place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one);
-        if result.is_ok() {
-            panic!()
-        }
-    }
-
-    #[test]
     fn test_in_progress_status() {
         //
 
@@ -141,6 +115,32 @@ mod game_board_tests {
             .place_game_piece(&BoardPosition::new(30, 30), &player_one, &player_two)
             .is_ok()
         {
+            panic!()
+        }
+    }
+
+    #[test]
+    fn test_occupied_piece_placement() {
+        //
+
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+
+        // Place an X at 0:0
+        let board_state = GameState::new();
+        let new_board_state =
+            match board_state.place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
+            {
+                Ok(board_state) => board_state,
+                Err(_) => {
+                    panic!()
+                }
+            };
+
+        // Have Player Two attempt to move to the same space (0:0)
+        let result =
+            new_board_state.place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one);
+        if result.is_ok() {
             panic!()
         }
     }

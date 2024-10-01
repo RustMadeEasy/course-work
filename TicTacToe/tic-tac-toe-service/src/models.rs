@@ -27,7 +27,7 @@ pub mod event_plane {
 
     const DOMAIN_NAME: &str = "RustMadeEasy.com";
 
-    /// Models the configuration required for clients subscribe to real-time game state updates.
+    /// Models the configuration required for clients to subscribe to real-time game state updates.
     #[derive(Clone, Deserialize, Serialize, ToSchema)]
     pub struct EventPlaneConfig {
         //
@@ -43,6 +43,7 @@ pub mod event_plane {
     }
 
     impl EventPlaneConfig {
+        /// Creates a new EventPlaneConfig instance.
         pub(crate) fn new(broker_address: String, broker_port: u16) -> Self {
             Self {
                 broker_address,
@@ -52,8 +53,8 @@ pub mod event_plane {
         }
     }
 
-    /// Names of the subscription topics used in the real-time messaging event plane. A full topic
-    /// takes the form:
+    /// Defines the names of the subscription topics used in the real-time messaging event plane.
+    /// A full topic takes the form:
     ///
     /// `[topic_prefix]/[event topic name]`
     ///
@@ -62,13 +63,17 @@ pub mod event_plane {
     /// player to a Game.
     #[derive(Deserialize, Serialize, ToSchema)]
     pub enum EventPlaneTopicNames {
-        /// Called when the game has ended in a stalemate. The client can call Get Game Info to retrieve the details.
+        /// Called when the game has ended in a stalemate. The client can call Get Game Info to
+        /// retrieve the details.
         GameEndedInStalemate,
-        /// Called when the game has ended in a win. The client can call Get Game Info to retrieve the details.
+        /// Called when the game has ended in a win. The client can call Get Game Info to retrieve
+        /// the details.
         GameEndedInWin,
-        /// Published when a new player has been added the game. The client can call Get Game Info to retrieve the details.
+        /// Published when a new player has been added the game. The client can call Get Game Info
+        /// to retrieve the details.
         PlayerAdded,
-        /// Published when a player has taken a new turn. The client can call Get Game Info to retrieve the new board state.
+        /// Published when a player has taken a new turn. The client can call Get Game Info to
+        /// retrieve the new board state.
         TurnTaken,
     }
 
@@ -178,7 +183,7 @@ pub mod responses {
     use crate::models::PlayerInfo;
     use crate::tic_tac_toe_game::TicTacToeGame;
 
-    /// Models the view of a Game.
+    /// Models the current view of a Game.
     #[derive(Deserialize, Serialize, ToSchema)]
     pub struct GameInfo {
         //
