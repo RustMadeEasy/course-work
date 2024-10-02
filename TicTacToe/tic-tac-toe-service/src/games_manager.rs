@@ -8,11 +8,6 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use log::warn;
-use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
-use mqtt_publisher_lib::publisher::Publisher;
-use mqtt_publisher_lib::publisher_qos::PublisherQoS;
-use verification_code_gen::verification_code_generator::VerificationCodeGenerator;
 use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
@@ -20,6 +15,11 @@ use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams};
 use crate::play_status::PlayStatus;
 use crate::tic_tac_toe_game::TicTacToeGame;
+use log::warn;
+use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
+use mqtt_publisher_lib::publisher::Publisher;
+use mqtt_publisher_lib::publisher_qos::PublisherQoS;
+use verification_code_gen::verification_code_generator::VerificationCodeGenerator;
 
 pub(crate) type TicTacToeGamesManager = GamesManager<TicTacToeGame>;
 

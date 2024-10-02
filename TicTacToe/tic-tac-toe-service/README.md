@@ -2,7 +2,7 @@
 
 ## Description
 
-Provides 2-client Tic-Tac-Toe game play. This includes game setup, invitation, turn-taking, and realtime notifications 
+Provides 2-client Tic-Tac-Toe game play. This includes game setup, invitation, turn-taking, and realtime notifications
 of game state changes.
 
 _NOTE: This sample code is part of the RustMadeEasy.com, Intro to Rust course and is not meant for
@@ -16,8 +16,9 @@ and scalable._
 
 ### Performance
 
-Services written in Rust typically have 1/10th the deployment size and 1/10th the memory footprint of comparable services
-written, for example, in SpringBoot. Rust services also, generally, spin up quicker, have a lower request latency, and 
+Services written in Rust typically have 1/10th the deployment size and 1/10th the memory footprint of comparable
+services
+written, for example, in SpringBoot. Rust services also, generally, spin up quicker, have a lower request latency, and
 can process more requests per second.
 
 These attributes can be leveraged to achieve greater platform performance and/or to substantially lower operating costs.
@@ -73,7 +74,8 @@ Here is a screenshot:
 3. Player One invites Player Two to the game by sharing the Game Invitation Code with Player Two. The invitation code is
    supplied in the response to Create Game.
 4. The second client (Player Two) joins the Game by using the Game Invitation Code and the Second Player's info to post
-   to Add Player (POST /v1/games/players). The Add Player responds with New Game Info which contains the Game ID required
+   to Add Player (POST /v1/games/players). The Add Player responds with New Game Info which contains the Game ID
+   required
    for all subsequent calls.
 5. The second client subscribes to game-change updates via MQTT, updating the UI rendering and the state of the client
    app.
