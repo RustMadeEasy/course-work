@@ -145,7 +145,7 @@ This service is accessible on the following port: `50020`
 
 1. Authentication.
 2. Automatic cleanup of older or abandoned Games.
-3. Central persistence, e.g., Surreal DB, Redis, etc.
+3. Central persistence, e.g., Our Mem Cache, Surreal DB, Redis, etc.
 4. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
    invitation is no longer required for rematches within a Gaming Session.
 5. Implement an AI model so that users can play against the service.
