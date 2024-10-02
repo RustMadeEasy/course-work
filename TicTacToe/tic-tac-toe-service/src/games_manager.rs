@@ -1,6 +1,6 @@
 // Tic-Tac-Toe Service
 //
-// Provides 2-client game-play of Tic-Tac-Toe.
+// Provides 2-client Game-play of Tic-Tac-Toe.
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
@@ -39,7 +39,7 @@ pub(crate) struct GamesManager<T: GameTrait + Clone> {
     /// Provides MQTT message publishing functionality.
     event_publisher: Publisher,
 
-    /// The games being managed by this instance. They are stored by game ID.
+    /// The Games being managed by this instance. They are stored by Game ID.
     games: HashMap<String, T>,
 }
 
@@ -50,7 +50,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
     pub(crate) async fn add_player(&mut self, second_player_params: &AddPlayerParams) -> Result<T, GameError> {
         //
 
-        // Find the Game instance via the game_invitation_code.
+        // Find the Game instance via the Game_invitation_code.
         let mut game = match self.get_game_by_invitation_code(&second_player_params.game_invitation_code) {
             None => {
                 return Err(GameError::InvitationCodeNotFound);
@@ -85,7 +85,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
         Ok(game.clone())
     }
 
-    /// Closes down the specified game instance.
+    /// Closes down the specified Game instance.
     pub(crate) fn end_game(&mut self, game_id: &String) -> Result<(), GameError> {
         //
 
@@ -106,7 +106,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
 
     /// Retrieves the history of the Game States from the initial creation through to the current
     /// Game State. This can be used, for instance, the client could provide an animation that
-    /// shows a time-lapse of the game play.
+    /// shows a time-lapse of the Game play.
     pub(crate) fn get_game_history(&self, game_id: &String) -> Result<Vec<GameState>, GameError> {
         let game = self.get_game_instance(game_id)?;
         Ok(game.get_play_history())
@@ -132,7 +132,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
         let mut game = self.get_game_instance(game_id)?;
         let new_game_state = game.take_turn(game_turn_info)?;
 
-        // Update our game instance.
+        // Update our Game instance.
         self.games.insert(game.get_id().clone(), game.clone());
 
         // Inform the listening clients that a Player has taken a new turn.
@@ -140,7 +140,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
         let topic = EventPlaneTopicNames::TurnTaken.build(event_channel_id.as_str());
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
 
-        // If the game has ended, let the listening clients know how it ended.
+        // If the Game has ended, let the listening clients know how it ended.
         match new_game_state.get_play_status() {
             PlayStatus::EndedInStalemate => {
                 let topic = EventPlaneTopicNames::GameEndedInStalemate.build(event_channel_id.as_str());
@@ -161,7 +161,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
 impl<T: GameTrait + Clone> GamesManager<T> {
     //
 
-    /// Retrieves a game by its invitation code.
+    /// Retrieves a Game by its invitation code.
     fn get_game_by_invitation_code(&self, invitation_code: &String) -> Option<T> {
         self.games
             .iter()
@@ -171,7 +171,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
 
     /// Creates a unique, 6-digit code for use as a Game Invitation.
     ///
-    /// NOTE: We use a 6-digit Game Invitation instead of performing the game setup handshaking
+    /// NOTE: We use a 6-digit Game Invitation instead of performing the Game setup handshaking
     /// with the Game ID for two reasons:
     ///     1) We don't want to expose the Game ID to clients that are not party to the Game.
     ///     2) A 6-digit code is practical for end-users to utilize.

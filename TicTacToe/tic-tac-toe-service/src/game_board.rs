@@ -1,6 +1,6 @@
 // Tic-Tac-Toe Service
 //
-// Provides 2-client game-play of Tic-Tac-Toe.
+// Provides 2-client Game-play of Tic-Tac-Toe.
 //
 // This file defines Game Board related structs, types, enums, and constants.
 //
@@ -15,10 +15,10 @@ use validator::Validate;
 pub(crate) const MAX_BOARD_COLUMNS: usize = 3;
 pub(crate) const MAX_BOARD_ROWS: usize = 3;
 
-/// Specifies the locations of the game pieces in Row/Column grid format.
+/// Specifies the locations of the Game pieces in Row/Column grid format.
 pub(crate) type GameBoard = [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS];
 
-/* The following constants are various patterns on a game board. These binary representations
+/* The following constants are various patterns on a Game board. These binary representations
     allow for very performant checks for winning moves, stalemate situations, etc.
 */
 pub(crate) const BIN_FULL_BOARD: i16 = 0b_111_111_111;
@@ -31,7 +31,7 @@ pub(crate) const BIN_THREE_ACROSS_VERTICAL_RIGHT: i16 = 0b_001_001_001;
 pub(crate) const BIN_THREE_ACROSS_DIAGONAL_1: i16 = 0b_100_010_001;
 pub(crate) const BIN_THREE_ACROSS_DIAGONAL_2: i16 = 0b_001_010_100;
 
-/// Models a position on the game board.
+/// Models a position on the Game board.
 #[derive(Clone, Default, Deserialize, Serialize, ToSchema, Validate)]
 pub struct BoardPosition {
     #[validate(range(min = 0, max = 2))]
@@ -48,7 +48,7 @@ impl BoardPosition {
     }
 }
 
-/// Models a Game Piece with which the Tic-Tac-Toe game is played.
+/// Models a Game Piece with which the Tic-Tac-Toe Game is played.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema)]
 pub(crate) enum GamePiece {
     #[default]

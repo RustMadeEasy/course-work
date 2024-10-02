@@ -84,7 +84,7 @@ mod game_board_tests {
         board_state = board_state
             .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
             .unwrap();
-        // Make sure that the Play Status game indicates InProgress since the game has not ended
+        // Make sure that the Play Status Game indicates InProgress since the Game has not ended
         assert_eq!(board_state.play_status, PlayStatus::InProgress);
     }
 
@@ -183,7 +183,7 @@ mod game_board_tests {
         board_state = board_state
             .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
-        // Make sure the game ended in a Stalemate
+        // Make sure the Game ended in a Stalemate
         assert_eq!(board_state.play_status, PlayStatus::EndedInStalemate);
     }
 
@@ -496,7 +496,7 @@ mod game_manager_tests {
                         panic!()
                     }
                     Some(player_info) => {
-                        // Make sure the game piece is different from that of Player One
+                        // Make sure the Game piece is different from that of Player One
                         assert_ne!(
                             game.players.first().unwrap().game_piece,
                             player_info.game_piece
@@ -537,7 +537,7 @@ mod game_manager_tests {
                         panic!()
                     }
                     Some(player_info) => {
-                        // Make sure the game piece is different from that of Player One
+                        // Make sure the Game piece is different from that of Player One
                         assert_ne!(
                             game.players.first().unwrap().game_piece,
                             player_info.game_piece
@@ -562,7 +562,7 @@ mod game_manager_tests {
                         panic!()
                     }
                     Some(player_info) => {
-                        // Make sure the game piece is different from that of Player One
+                        // Make sure the Game piece is different from that of Player One
                         assert_ne!(
                             game.players.first().unwrap().game_piece,
                             player_info.game_piece
@@ -603,7 +603,7 @@ mod game_manager_tests {
                         panic!()
                     }
                     Some(player_info) => {
-                        // Make sure the game piece is different from that of Player One
+                        // Make sure the Game piece is different from that of Player One
                         assert_ne!(
                             game.players.first().unwrap().game_piece,
                             player_info.game_piece
@@ -644,7 +644,7 @@ mod game_manager_tests {
                         panic!()
                     }
                     Some(player_info) => {
-                        // Make sure the game piece is different from that of Player One
+                        // Make sure the Game piece is different from that of Player One
                         assert_ne!(
                             game.players.first().unwrap().game_piece,
                             player_info.game_piece

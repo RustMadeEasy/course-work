@@ -1,6 +1,6 @@
 // Tic-Tac-Toe Service
 //
-// Provides 2-client game-play of Tic-Tac-Toe.
+// Provides 2-client Game-play of Tic-Tac-Toe.
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
@@ -31,7 +31,7 @@ use crate::models::PlayerInfo;
 use crate::play_outcome::PlayOutcome;
 use crate::play_status::PlayStatus;
 
-/// Models the state of a game at a particular Move (turn).
+/// Models the state of a Game at a particular Move (turn).
 #[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
 pub(crate) struct GameState {
     /// ID of the Player who made this Move.
@@ -61,7 +61,7 @@ impl GameState {
         }
     }
 
-    /// Creates an initial GameState instance using a player and a PlayStatus.
+    /// Creates an initial GameState instance using a Player and a PlayStatus.
     pub(crate) fn new_with_initial_play_status(
         current_player_id: &str,
         play_status: &PlayStatus,
@@ -80,7 +80,7 @@ impl GameState {
 impl GameState {
     //
 
-    /// Returns the ID of the player who made the move at this Game State.
+    /// Returns the ID of the Player who made the move at this Game State.
     #[allow(dead_code)]
     pub(crate) fn get_id_of_player_who_made_move(&self) -> String {
         self.id_of_player_who_made_move.clone()
@@ -96,7 +96,7 @@ impl GameState {
         self.play_status.clone()
     }
 
-    /// Determines whether the game has ended.
+    /// Determines whether the Game has ended.
     pub(crate) fn has_ended(&self) -> bool {
         match self.play_status {
             PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => true,
@@ -109,7 +109,7 @@ impl GameState {
 impl GameState {
     //
 
-    /// Places the Player's game piece at the specified board position.
+    /// Places the Player's Game piece at the specified board position.
     pub(crate) fn place_game_piece(
         self,
         position: &BoardPosition,
@@ -128,7 +128,7 @@ impl GameState {
             return Err(WrongPlayerTakingTurn);
         }
 
-        // Disallow any further changes once the game has ended. Just forward our current state.
+        // Disallow any further changes once the Game has ended. Just forward our current state.
         match self.play_status {
             PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
                 return Ok(self.clone());
@@ -155,7 +155,7 @@ impl GameState {
             &other_player.game_piece,
         );
 
-        // Return a new game board state
+        // Return a new Game board state
         Ok(Self {
             id_of_player_who_made_move: current_player.player_id.clone(),
             game_board,
@@ -173,8 +173,8 @@ impl GameState {
     /// Generates binary representations of piece placements on a Game Board.
     ///
     /// Returns a tuple whose first element is the binary representation of placements for
-    /// game_piece_one and the second element is the binary representation of placements for
-    /// game_piece_two.
+    /// Game_piece_one and the second element is the binary representation of placements for
+    /// Game_piece_two.
     pub(crate) fn binary_representation_for_piece_placement(
         grid: &GameBoard,
         game_piece_one: &GamePiece,
@@ -205,7 +205,7 @@ impl GameState {
     }
 
     /// Determines the status of the GameBoard relative to a particular Game Piece. Returns the
-    /// status and, if the game has been won, returns the board positions that indicate the winning
+    /// status and, if the Game has been won, returns the board positions that indicate the winning
     /// move.
     ///
     /// Returns PlayOutcome.
@@ -223,7 +223,7 @@ impl GameState {
             other_player_game_piece,
         );
 
-        // If there are no spaces filled, then the game has not started.
+        // If there are no spaces filled, then the Game has not started.
         if as_binary.0 == 0 && as_binary.1 == 0 {
             return PlayOutcome::new(&PlayStatus::NotStarted);
         }
@@ -263,7 +263,7 @@ impl GameState {
         }
     }
 
-    /// Determines whether the specified position is a valid for the Tic-Tac-Toe game board.
+    /// Determines whether the specified position is a valid for the Tic-Tac-Toe Game board.
     pub(crate) fn is_valid_board_position(position: &BoardPosition) -> bool {
         if position.column > (MAX_BOARD_COLUMNS - 1) || position.row > (MAX_BOARD_ROWS - 1) {
             return false;

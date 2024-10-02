@@ -1,6 +1,6 @@
 // Tic-Tac-Toe Service
 //
-// Provides 2-client game-play of Tic-Tac-Toe.
+// Provides 2-client Game-play of Tic-Tac-Toe.
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
@@ -19,24 +19,24 @@ use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
 
 /**
- * Provides Tic-Tac-Toe game play functionality.
+ * Provides Tic-Tac-Toe Game play functionality.
  *
  * © 2024 Rust Made Easy. All rights reserved.
  * @author JoelDavisEngineering@Gmail.com
  */
 
-/// Provides Tic-Tac-Toe game play functionality.
+/// Provides Tic-Tac-Toe Game play functionality.
 #[derive(Clone, Serialize)]
 pub(crate) struct TicTacToeGame {
     //
 
-    /// The Player who can currently make a game move
+    /// The Player who can currently make a Game move
     pub(crate) current_player: Option<PlayerInfo>,
 
-    /// Provide the configuration required for clients to subscribe to game updates via MQTT
+    /// Provide the configuration required for clients to subscribe to Game updates via MQTT
     pub(crate) event_plane_config: EventPlaneConfig,
 
-    /// Code used to invite the second player to the game
+    /// Code used to invite the second Player to the Game
     pub(crate) game_invitation_code: String,
 
     /// Unique ID of the Game
@@ -52,7 +52,7 @@ pub(crate) struct TicTacToeGame {
 impl TicTacToeGame {
     //
 
-    /// Determines whether the specified board location is occupied by a game piece.
+    /// Determines whether the specified board location is occupied by a Game piece.
     fn is_location_occupied(game_board: &GameBoard, position: &BoardPosition) -> bool {
         if !GameState::is_valid_board_position(position) {
             return false;
@@ -87,7 +87,7 @@ impl GameTrait for TicTacToeGame {
                 }
             }
             _ => {
-                // Tic-Tac-Toe is a 2-player game. No more players can be added.
+                // Tic-Tac-Toe is a 2-Player Game. No more Players can be added.
                 return Err(GameError::MaximumPlayersAlreadyAdded);
             }
         }
@@ -111,9 +111,9 @@ impl GameTrait for TicTacToeGame {
         } else {
             //
 
-            // This is a brand-new game...
+            // This is a brand-new Game...
 
-            // If we have both Players, then the game has begun!
+            // If we have both Players, then the Game has begun!
             if self.players.len() > 1 {
                 GameState::new_with_initial_play_status(
                     &self.players.first().unwrap().player_id,
@@ -173,13 +173,13 @@ impl GameTrait for TicTacToeGame {
         Ok(game)
     }
 
-    /// Make a game move for the specified Player.
+    /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError> {
         //
 
         let board_state = self.get_current_game_state();
 
-        // Do not allow game moves when the game has already been completed.
+        // Do not allow Game moves when the Game has already been completed.
         if board_state.has_ended() {
             return Err(GameError::GameHasAlreadyEnded);
         }

@@ -1,6 +1,6 @@
 // Tic-Tac-Toe Service
 //
-// Provides 2-client game-play of Tic-Tac-Toe.
+// Provides 2-client Game-play of Tic-Tac-Toe.
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
@@ -112,7 +112,7 @@ pub(crate) async fn end_game(
         return HttpResponse::BadRequest().body("Game ID exceeds maximum length");
     }
 
-    // TODO: JD: only allow Players who is part of the game to end the game.
+    // TODO: JD: only allow Players who is part of the Game to end the Game.
 
     match games_manager.lock().unwrap().end_game(&game_id) {
         Ok(_) => HttpResponse::Ok().finish(),
@@ -121,7 +121,7 @@ pub(crate) async fn end_game(
 }
 
 /// Retrieves the history of the Game States from the initial move (turn) to the latest
-/// Game State. This can be used, for instance, to create an animated time-lapse of the game play.
+/// Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
 #[utoipa::path(
     get,
     tag = "TicTacToe",
@@ -181,7 +181,7 @@ pub(crate) async fn get_game_info(
     }
 }
 
-/// Make a game move (turn) for the specified Player.
+/// Make a Game move (turn) for the specified Player.
 #[utoipa::path(
     post,
     tag = "TicTacToe",

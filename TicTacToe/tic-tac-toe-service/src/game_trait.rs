@@ -1,6 +1,6 @@
 // Tic-Tac-Toe Service
 //
-// Provides 2-client game-play of Tic-Tac-Toe.
+// Provides 2-client Game-play of Tic-Tac-Toe.
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
@@ -29,7 +29,7 @@ pub(crate) trait GameTrait: Sized {
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;
 
-    /// Returns the Event Channel ID. This is used to form the topics for publishing game state
+    /// Returns the Event Channel ID. This is used to form the topics for publishing Game state
     /// change notifications.
     fn get_event_channel_id(&self) -> String;
 
@@ -51,6 +51,6 @@ pub(crate) trait GameTrait: Sized {
            mqtt_port: u16,
            invitation_code: impl Into<String>) -> Result<Self, GameError>;
 
-    /// Make a game move for the specified Player.
+    /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError>;
 }

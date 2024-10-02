@@ -1,6 +1,6 @@
 // Tic-Tac-Toe Service
 //
-// Provides 2-client game-play of Tic-Tac-Toe.
+// Provides 2-client Game-play of Tic-Tac-Toe.
 //
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
@@ -27,7 +27,7 @@ pub mod event_plane {
 
     const DOMAIN_NAME: &str = "RustMadeEasy.com";
 
-    /// Models the configuration required for clients to subscribe to real-time game state updates.
+    /// Models the configuration required for clients to subscribe to real-time Game state updates.
     #[derive(Clone, Deserialize, Serialize, ToSchema)]
     pub struct EventPlaneConfig {
         //
@@ -38,7 +38,7 @@ pub mod event_plane {
         /// Broker port number of the real-time messaging broker.
         pub(crate) broker_port: u16,
 
-        /// The topic prefix that allows the clients to subscribe to real-time game state updates.
+        /// The topic prefix that allows the clients to subscribe to real-time Game state updates.
         pub(crate) topic_prefix: String,
     }
 
@@ -54,25 +54,26 @@ pub mod event_plane {
     }
 
     /// Defines the names of the subscription topics used in the real-time messaging event plane.
+    ///
     /// A full topic takes the form:
     ///
     /// `[topic_prefix]/[event topic name]`
     ///
     /// NOTE: The topic_prefix can be obtained from the event_plane_config field of the
-    /// GameCreationResult model that is returned when creating a new game or when adding a new
-    /// player to a Game.
+    /// GameCreationResult model that is returned when creating a new Game or when adding a new
+    /// Player to a Game.
     #[derive(Deserialize, Serialize, ToSchema)]
     pub enum EventPlaneTopicNames {
-        /// Called when the game has ended in a stalemate. The client can call Get Game Info to
+        /// Called when the Game has ended in a stalemate. The client can call Get Game Info to
         /// retrieve the details.
         GameEndedInStalemate,
-        /// Called when the game has ended in a win. The client can call Get Game Info to retrieve
+        /// Called when the Game has ended in a win. The client can call Get Game Info to retrieve
         /// the details.
         GameEndedInWin,
-        /// Published when a new player has been added the game. The client can call Get Game Info
+        /// Published when a new Player has been added the Game. The client can call Get Game Info
         /// to retrieve the details.
         PlayerAdded,
-        /// Published when a player has taken a new turn. The client can call Get Game Info to
+        /// Published when a Player has taken a new turn. The client can call Get Game Info to
         /// retrieve the new board state.
         TurnTaken,
     }
@@ -97,11 +98,14 @@ pub mod event_plane {
     }
 }
 
-/// Models a Tic-Tac-Toe game Player.
+/// Models a Tic-Tac-Toe Game Player.
 #[derive(Clone, Deserialize, Serialize, ToSchema)]
 pub(crate) struct PlayerInfo {
+    /// Name of the Player.
     pub(crate) display_name: String,
+    /// The Game Piece with which the Tic-Tac-Toe Game is played.
     pub(crate) game_piece: GamePiece,
+    /// Unique ID of the Player.
     pub(crate) player_id: String,
 }
 
@@ -147,7 +151,7 @@ pub mod requests {
     const NAME_LENGTH_MAX: u64 = 40;
     const NAME_LENGTH_MIN: u64 = 1;
 
-    /// Models info needed to add a Player to a game.
+    /// Models info needed to add a Player to a Game.
     #[derive(Deserialize, ToSchema, Validate)]
     pub struct AddPlayerParams {
         #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
@@ -156,7 +160,7 @@ pub mod requests {
         pub player_display_name: String,
     }
 
-    /// Models info needed to perform a game turn.
+    /// Models info needed to perform a Game turn.
     #[derive(Deserialize, ToSchema, Validate)]
     pub struct GameTurnInfo {
         pub destination: BoardPosition,
@@ -220,13 +224,13 @@ pub mod responses {
     pub struct GameCreationResult {
         //
 
-        /// The initial game state.
+        /// The initial Game state.
         pub(crate) game_info: GameInfo,
 
-        /// Configuration required for clients subscribe to real-time game state updates.
+        /// Configuration required for clients subscribe to real-time Game state updates.
         pub(crate) event_plane_config: EventPlaneConfig,
 
-        /// Code used to invite the second player to the game
+        /// Code used to invite the second Player to the Game
         pub(crate) game_invitation_code: String,
     }
 
