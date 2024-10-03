@@ -5,6 +5,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
+use chrono::{DateTime, Utc};
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -150,6 +151,10 @@ impl GameTrait for TicTacToeGame {
             None => Err(GameError::PlayerNotFound),
             Some(player) => Ok(player.clone()),
         }
+    }
+
+    fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>> {
+        self.play_history.last().map(|game_state| game_state.created_date)
     }
 
     /// Creates a new Game instance.

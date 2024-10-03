@@ -5,6 +5,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
+use chrono::{DateTime, Utc};
 /**
  * Defines Game State related structs and enums.
  *
@@ -30,10 +31,14 @@ use crate::game_board::{
 use crate::models::PlayerInfo;
 use crate::play_outcome::PlayOutcome;
 use crate::play_status::PlayStatus;
+use chrono::serde::ts_seconds;
 
 /// Models the state of a Game at a particular Move (turn).
-#[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Deserialize, Serialize, ToSchema)]
 pub(crate) struct GameState {
+    /// The time at which this Game State was created.
+    #[serde(with = "ts_seconds")]
+    pub(crate) created_date: DateTime<Utc>,
     /// ID of the Player who made this Move.
     id_of_player_who_made_move: String,
     /// The board on which the Game is played.
@@ -53,6 +58,7 @@ impl GameState {
     /// Creates a new GameState instance.
     pub(crate) fn new() -> Self {
         Self {
+            created_date: Utc::now(),
             id_of_player_who_made_move: "".to_string(),
             game_board: Default::default(),
             play_status: PlayStatus::NotStarted,
@@ -67,6 +73,7 @@ impl GameState {
         play_status: &PlayStatus,
     ) -> Self {
         Self {
+            created_date: Utc::now(),
             id_of_player_who_made_move: current_player_id.to_string(),
             game_board: Default::default(),
             play_status: play_status.clone(),
@@ -157,6 +164,7 @@ impl GameState {
 
         // Return a new Game board state
         Ok(Self {
+            created_date: Utc::now(),
             id_of_player_who_made_move: current_player.player_id.clone(),
             game_board,
             play_status: outcome.play_status,

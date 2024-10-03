@@ -5,9 +5,6 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use std::collections::HashMap;
-use std::time::Duration;
-
 use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
@@ -15,16 +12,24 @@ use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams};
 use crate::play_status::PlayStatus;
 use crate::tic_tac_toe_game::TicTacToeGame;
-use log::warn;
+use chrono::Utc;
+use log::{debug, warn};
 use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
 use mqtt_publisher_lib::publisher::Publisher;
 use mqtt_publisher_lib::publisher_qos::PublisherQoS;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 use verification_code_gen::verification_code_generator::VerificationCodeGenerator;
 
 pub(crate) type TicTacToeGamesManager = GamesManager<TicTacToeGame>;
 
+const ABANDONED_GAME_TTL_MS: i64 = (SECOND_IN_AN_HOUR * 1000) as i64;
+const CLEANUP_INTERVAL: Duration = Duration::from_secs(SECOND_IN_AN_HOUR / 2);
 const MQTT_BROKER_ADDRESS: &str = "test.mosquitto.org";
 const MQTT_PORT: u16 = 1883;
+const SECOND_IN_AN_HOUR: u64 = 60;
 
 /// Manages all the Game instances played on this service.
 ///
@@ -32,18 +37,17 @@ const MQTT_PORT: u16 = 1883;
 ///
 /// NOTE: Production-grade code would persist the gaming info to a mem cache or database so that
 /// multiple instances of the service can be run.
-#[derive(Clone)]
-pub(crate) struct GamesManager<T: GameTrait + Clone> {
+pub(crate) struct GamesManager<T: GameTrait + Clone + Send + 'static> {
     //
 
     /// Provides MQTT message publishing functionality.
     event_publisher: Publisher,
 
     /// The Games being managed by this instance. They are stored by Game ID.
-    games: HashMap<String, T>,
+    games: Arc<Mutex<HashMap<String, T>>>,
 }
 
-impl<T: GameTrait + Clone> GamesManager<T> {
+impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
     //
 
     /// Adds a Player to the Game.
@@ -61,13 +65,67 @@ impl<T: GameTrait + Clone> GamesManager<T> {
         game.add_player(&second_player_params.player_display_name)?;
 
         // Update the Game instance in the list.
-        self.games.insert(game.get_id(), game.clone());
+        self.games.lock().unwrap().insert(game.get_id(), game.clone());
 
         // Inform the listening clients that a Player has been added.
         let topic = EventPlaneTopicNames::PlayerAdded.build(game.get_event_channel_id().as_str());
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
 
         Ok(game)
+    }
+
+    /// Background task that regularly cleans up abandoned and completed Games.
+    fn auto_cleanup(games: Arc<Mutex<HashMap<String, T>>>, ttl: i64, interval: Duration) {
+        //
+
+        // TODO: JD: test
+
+        thread::spawn(move || {
+            //
+
+            loop {
+                //
+
+                debug!("Cleanup thread: Waking.");
+
+                let mut non_expired_games: HashMap<String, T> = HashMap::new();
+                let mut games = games.lock().unwrap();
+                let mut games_expired: u64 = 0;
+
+                // Remove any Game that is abandoned or has not been updated in a long time.
+                let cutoff_time = Utc::now().timestamp_millis() - ttl;
+                for game in games.values().clone() {
+                    match game.get_time_of_latest_move() {
+                        None => {}
+                        Some(time_last_move) => {
+                            if time_last_move.timestamp_millis() > cutoff_time {
+                                // Keep this Game.
+                                non_expired_games.insert(game.get_id(), game.clone());
+                            } else {
+                                if !game.get_current_game_state().has_ended() {
+                                    // TODO: JD: properly end each abandoned game
+                                }
+                                games_expired += 1;
+                            }
+                        }
+                    }
+                }
+                *games = non_expired_games;
+
+                if games_expired > 0 {
+                    debug!("Cleanup thread: Complete. Removed {} expired games. Going back to sleep.", games_expired);
+                } else {
+                    debug!("Cleanup thread: Complete. Going back to sleep.");
+                }
+
+                drop(games);
+
+                // Sleep until the next cleanup.
+                thread::sleep(interval);
+
+                // TODO: JD: exit when service is shutting down
+            }
+        });
     }
 
     /// Creates a new Game instance.
@@ -80,7 +138,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
                           MQTT_PORT,
                           invitation_code)?;
 
-        self.games.insert(game.get_id().clone(), game.clone());
+        self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
 
         Ok(game.clone())
     }
@@ -91,14 +149,14 @@ impl<T: GameTrait + Clone> GamesManager<T> {
 
         let game = self.get_game_instance(game_id)?;
 
-        self.games.remove(&game.get_id());
+        self.games.lock().unwrap().remove(&game.get_id());
 
         Ok(())
     }
 
     /// Retrieves the specified Game instance.
     pub(crate) fn get_game_instance(&self, game_id: impl Into<String>) -> Result<T, GameError> {
-        match self.games.get(&game_id.into()) {
+        match self.games.lock().unwrap().get(&game_id.into()) {
             None => Err(GameError::GameNotFound),
             Some(game) => Ok(game.clone()),
         }
@@ -114,11 +172,17 @@ impl<T: GameTrait + Clone> GamesManager<T> {
 
     /// Creates a new GamesManager instance.
     pub(crate) fn new() -> Self {
+        //
+
         let config = BrokerInfo::new(MQTT_BROKER_ADDRESS.to_string(), 10, MQTT_PORT, Duration::from_secs(60), MqttProtocolVersion::V5);
-        Self {
+        let instance = Self {
             event_publisher: Publisher::new(config),
             games: Default::default(),
-        }
+        };
+
+        Self::auto_cleanup(instance.games.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
+
+        instance
     }
 
     /// Takes a turn for the specified Player.
@@ -133,7 +197,7 @@ impl<T: GameTrait + Clone> GamesManager<T> {
         let new_game_state = game.take_turn(game_turn_info)?;
 
         // Update our Game instance.
-        self.games.insert(game.get_id().clone(), game.clone());
+        self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
 
         // Inform the listening clients that a Player has taken a new turn.
         let event_channel_id = game.get_event_channel_id();
@@ -158,12 +222,14 @@ impl<T: GameTrait + Clone> GamesManager<T> {
 }
 
 // Invitation code handling
-impl<T: GameTrait + Clone> GamesManager<T> {
+impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
     //
 
     /// Retrieves a Game by its invitation code.
     fn get_game_by_invitation_code(&self, invitation_code: &String) -> Option<T> {
         self.games
+            .lock()
+            .unwrap()
             .iter()
             .find(|it| it.1.get_invitation_code() == *invitation_code)
             .map(|it| it.1.clone())

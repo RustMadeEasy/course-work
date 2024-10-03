@@ -9,6 +9,7 @@ use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::models::requests::{GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
+use chrono::{DateTime, Utc};
 
 /**
  * Defines the behavior of a Game.
@@ -44,6 +45,9 @@ pub(crate) trait GameTrait: Sized {
 
     /// Returns the specified Player.
     fn get_player_info_by_id(&self, player_id: impl Into<String>) -> Result<PlayerInfo, GameError>;
+
+    /// Returns the date/time of the Game's latest move.
+    fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
 
     /// Creates a new Game instance.
     fn new(params: &NewGameParams,
