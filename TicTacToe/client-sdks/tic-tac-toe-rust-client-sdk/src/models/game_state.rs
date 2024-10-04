@@ -21,9 +21,19 @@ pub struct GameState {
     pub id_of_player_who_made_move: String,
     #[serde(rename = "play_status")]
     pub play_status: models::PlayStatus,
-    #[serde(rename = "winning_locations", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "winning_locations",
+        default,
+        with = "::serde_with::rust::double_option",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub winning_locations: Option<Option<Vec<models::BoardPosition>>>,
-    #[serde(rename = "winning_player_id", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "winning_player_id",
+        default,
+        with = "::serde_with::rust::double_option",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub winning_player_id: Option<Option<String>>,
 }
 

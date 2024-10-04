@@ -13,7 +13,7 @@ use bevy::text::{Text, TextStyle};
 use bevy::ui::{Style, Val};
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 
 use crate::game_controller::GamePlayState;
 use crate::physical_interactions::collision_evaluator::CollisionEvaluator;
@@ -41,9 +41,7 @@ const MAX_POINTS_TO_GRANT_FOR_RETURNING_BALL: i64 = 5;
 
 const SCOREBOARD_FONT_SIZE: f32 = 35.0;
 
-lazy_static! {
-    static ref SCOREBOARD_TEXT_COLOR: Color = Color::hex("2f2f2f").unwrap();
-}
+static SCOREBOARD_TEXT_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::hex("2f2f2f").unwrap() });
 
 pub(crate) struct ScoreboardPlugin;
 

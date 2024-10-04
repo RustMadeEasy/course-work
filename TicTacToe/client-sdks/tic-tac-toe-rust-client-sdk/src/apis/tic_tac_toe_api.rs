@@ -9,10 +9,10 @@
  */
 
 
+use super::{configuration, Error};
+use crate::{apis::ResponseContent, models};
 use reqwest;
 use serde::{Deserialize, Serialize};
-use crate::{apis::ResponseContent, models};
-use super::{Error, configuration};
 
 
 /// struct for typed errors of method [`add_player`]
@@ -141,7 +141,7 @@ pub fn end_game(configuration: &configuration::Configuration, game_id: &str) -> 
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/v1/games/{game_id}", local_var_configuration.base_path, game_id=crate::apis::urlencode(game_id));
+    let local_var_uri_str = format!("{}/v1/games/{game_id}", local_var_configuration.base_path, game_id = crate::apis::urlencode(game_id));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::DELETE, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -169,7 +169,7 @@ pub fn get_game_history(configuration: &configuration::Configuration, game_id: &
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/v1/games/{game_id}/turns", local_var_configuration.base_path, game_id=crate::apis::urlencode(game_id));
+    let local_var_uri_str = format!("{}/v1/games/{game_id}/turns", local_var_configuration.base_path, game_id = crate::apis::urlencode(game_id));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -197,7 +197,7 @@ pub fn get_game_info(configuration: &configuration::Configuration, game_id: &str
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/v1/games/{game_id}", local_var_configuration.base_path, game_id=crate::apis::urlencode(game_id));
+    let local_var_uri_str = format!("{}/v1/games/{game_id}", local_var_configuration.base_path, game_id = crate::apis::urlencode(game_id));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::GET, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
@@ -225,7 +225,7 @@ pub fn take_turn(configuration: &configuration::Configuration, game_id: &str, ga
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/v1/games/{game_id}/turns", local_var_configuration.base_path, game_id=crate::apis::urlencode(game_id));
+    let local_var_uri_str = format!("{}/v1/games/{game_id}/turns", local_var_configuration.base_path, game_id = crate::apis::urlencode(game_id));
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::POST, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {

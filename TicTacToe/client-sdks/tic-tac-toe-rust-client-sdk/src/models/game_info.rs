@@ -14,7 +14,12 @@ use serde::{Deserialize, Serialize};
 /// GameInfo : Models the view of a Game.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameInfo {
-    #[serde(rename = "current_player", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "current_player",
+        default,
+        with = "::serde_with::rust::double_option",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub current_player: Option<Option<models::PlayerInfo>>,
     #[serde(rename = "game_state")]
     pub game_state: models::GameState,

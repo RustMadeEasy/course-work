@@ -18,6 +18,7 @@ use crate::shared::local_models::local_grid_position::LocalGridPosition;
 use crate::shared::local_models::local_player_info::LocalPlayerInfo;
 use crate::shared::local_service_client::helper_functions::remote_players_to_local_players;
 use crate::shared::local_service_client::service_client::helpers::{GameInfoResult, AUTO_UPDATE_INFO, SDK_CONFIG};
+// use crate::shared::local_service_client::service_client::helpers::{GameInfoResult, AUTO_UPDATE_INFO, SDK_CONFIG};
 
 /// Serves as a local client to the Tic-Tac-Toe service. This struct also caches the Game Info so
 /// that it is accessed directly from memory. This prevents networking-induced lag in the game frame
@@ -195,25 +196,18 @@ impl LocalServiceClient {
 mod helpers {
     use crate::shared::local_models::local_game_state::LocalGameStateResource;
     use crate::shared::local_models::local_player_info::LocalPlayerInfo;
-    use lazy_static::lazy_static;
-    use std::sync::Mutex;
+    use std::sync::{LazyLock, Mutex};
     use std::time::Duration;
     use tic_tac_toe_rust_client_sdk::apis::configuration::Configuration;
     use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetGameInfoError;
 
-    lazy_static! {
-        //
+    pub(crate) static SDK_CONFIG: LazyLock<Configuration> = LazyLock::new(|| Configuration {
+        base_path: "http://127.0.0.1:50020".to_string(), // TODO: JD: set this to the address of the load balancer.
+        user_agent: Some("Tic-Tac-Toe Rust Client".to_string()),
+        ..Default::default()
+    });
 
-        pub(crate) static ref SDK_CONFIG: Configuration = {
-            Configuration {
-                base_path: "http://127.0.0.1:50020".to_string(), // TODO: JD: set this to the address of the load balancer.
-                user_agent: Some("Tic-Tac-Toe Rust Client".to_string()),
-                ..Default::default()
-            }
-        };
-
-        pub(crate) static ref AUTO_UPDATE_INFO: Mutex<AutoUpdateInfo> = Mutex::new(AutoUpdateInfo::default());
-    }
+    pub(crate) static AUTO_UPDATE_INFO: LazyLock<Mutex<AutoUpdateInfo>> = LazyLock::new(|| { Mutex::new(AutoUpdateInfo::default()) });
 
     pub(crate) type GameInfoResult = Result<(LocalGameStateResource, Vec<LocalPlayerInfo>), GetGameInfoError>;
 

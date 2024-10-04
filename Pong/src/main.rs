@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use lazy_static::lazy_static;
 
 use physical_interactions::physical_interactions_plugin::PhysicalInteractionsPlugin;
 
@@ -10,6 +9,7 @@ use crate::game_controller::{GamePlayState, SoundSetting};
 use crate::paddle::paddle_plugin::PaddlePlugin;
 use crate::scoreboard::scoreboard_plugin::ScoreboardPlugin;
 use crate::sound_player::sound_player_plugin::SoundPlayerPlugin;
+use std::sync::LazyLock;
 
 mod ball;
 mod camera;
@@ -25,12 +25,11 @@ mod sound_player;
 //
 // @author JoelDavisEngineering@Gmail.com
 
-lazy_static! {
-    static ref BACKGROUND_COLOR: Color = Color::hex("6d2abc").unwrap();
-}
+static BACKGROUND_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::hex("6d2abc").unwrap() });
 
 fn main() {
     //
+
 
     // Set the window title and initial size.
     let window_plugin = WindowPlugin {

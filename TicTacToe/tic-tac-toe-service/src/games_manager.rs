@@ -93,12 +93,13 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
                 let mut games_expired: u64 = 0;
 
                 // Remove any Game that is abandoned or has not been updated in a long time.
-                let cutoff_time = Utc::now().timestamp_millis() - ttl;
+                let now  = Utc::now().timestamp_millis();
                 for game in games.values().clone() {
                     match game.get_time_of_latest_move() {
                         None => {}
                         Some(time_last_move) => {
-                            if time_last_move.timestamp_millis() > cutoff_time {
+                            let game_age = now - time_last_move.timestamp_millis();
+                            if game_age < ttl {
                                 // Keep this Game.
                                 non_expired_games.insert(game.get_id(), game.clone());
                             } else {
@@ -110,7 +111,9 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
                         }
                     }
                 }
-                *games = non_expired_games;
+                if games_expired > 0 {
+                    *games = non_expired_games;
+                }
 
                 if games_expired > 0 {
                     debug!("Cleanup thread: Complete. Removed {} expired games. Going back to sleep.", games_expired);
@@ -180,7 +183,11 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
             games: Default::default(),
         };
 
-        Self::auto_cleanup(instance.games.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
+        // TODO: JD: remove this test line
+        Self::auto_cleanup(instance.games.clone(), 30000, Duration::from_secs(1));
+
+        // TODO: JD: uncomment this line
+        // Self::auto_cleanup(instance.games.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
 
         instance
     }

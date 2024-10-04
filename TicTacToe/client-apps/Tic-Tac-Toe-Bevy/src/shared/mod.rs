@@ -1,5 +1,5 @@
 use bevy::prelude::{Color, Commands, Component, Entity, Query, With};
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 
 pub(crate) mod app_mode;
 pub(crate) mod app_state;
@@ -11,14 +11,12 @@ pub(crate) mod local_service_client;
 //  © 2024 Rust Made Easy. All rights reserved.
 //  @author JoelDavisEngineering@Gmail.com
 
-lazy_static! {
-    pub(crate) static ref BACKGROUND_COLOR: Color = Color::hex("521c93").unwrap_or_default();
-    pub(crate) static ref FOREGROUND_COLOR: Color = Color::hex("ff7e79").unwrap_or_default();
-    pub(crate) static ref BUTTON_COLOR_NORMAL: Color = Color::hex("875eb5").unwrap_or_default();
-    pub(crate) static ref BUTTON_COLOR_HOVERED: Color = Color::hex("976ec5").unwrap_or_default();
-    pub(crate) static ref BUTTON_COLOR_PRESSED: Color = Color::hex("774ea5").unwrap_or_default();
-    pub(crate) static ref TEXT_COLOR: Color = Color::WHITE;
-}
+pub(crate) static BACKGROUND_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::hex("521c93").unwrap() });
+pub(crate) static FOREGROUND_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::hex("ff7e79").unwrap() });
+pub(crate) static BUTTON_COLOR_NORMAL: LazyLock<Color> = LazyLock::new(|| { Color::hex("875eb5").unwrap() });
+pub(crate) static BUTTON_COLOR_HOVERED: LazyLock<Color> = LazyLock::new(|| { Color::hex("976ec5").unwrap() });
+pub(crate) static BUTTON_COLOR_PRESSED: LazyLock<Color> = LazyLock::new(|| { Color::hex("774ea5").unwrap() });
+pub(crate) static TEXT_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::WHITE });
 
 pub(crate) const FONT_SIZE: f32 = 15.0;
 

@@ -15,7 +15,6 @@ use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy::text::{Text, Text2dBundle};
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
-use lazy_static::lazy_static;
 
 use crate::game_play_screen::tile_components::{
     TileDetailsComponent, TileHighlightComponent, TileLabelComponent,
@@ -33,13 +32,6 @@ const TILE_PADDING: f32 = 1.;
 const TILE_HIGHLIGHT_Z_ORDER: f32 = 1_f32;
 const TILE_TEXT_Z_ORDER: f32 = 3_f32;
 const TILE_Z_ORDER: f32 = 2_f32;
-
-lazy_static! {
-    static ref POS_TOP_LEFT: LocalGridPosition = LocalGridPosition::new(0, 0);
-    static ref POS_TOP_RIGHT: LocalGridPosition = LocalGridPosition::new(0, 2);
-    static ref POS_BOTTOM_LEFT: LocalGridPosition = LocalGridPosition::new(2, 0);
-    static ref POS_BOTTOM_RIGHT: LocalGridPosition = LocalGridPosition::new(2, 2);
-}
 
 /// Provides TicTacToe tile UI entities as well as functionality, e.g. hit-testing.
 pub(super) struct TilesPlugin;

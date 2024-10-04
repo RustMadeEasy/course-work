@@ -9,7 +9,7 @@ use rumqttc::v5::{AsyncClient as AsyncClientV5, EventLoop as EventLoopV5, MqttOp
 use rumqttc::{AsyncClient as AsyncClientV3, EventLoop as EventLoopV3, MqttOptions as MqttOptionsV3};
 use uuid::Uuid;
 
-use crate::broker_info::{MqttProtocolVersion, BrokerInfo};
+use crate::broker_info::{BrokerInfo, MqttProtocolVersion};
 use crate::publisher_error::PublisherError;
 use crate::publisher_qos::PublisherQoS;
 
