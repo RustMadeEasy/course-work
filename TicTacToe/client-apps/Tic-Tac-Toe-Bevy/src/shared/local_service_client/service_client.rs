@@ -5,20 +5,16 @@
 
 use std::time::Duration;
 
-use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::{
-    AddPlayerError, CreateGameError, GetGameInfoError, TakeTurnError,
-};
-use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
-use tic_tac_toe_rust_client_sdk::models::{
-    AddPlayerParams, BoardPosition, GameTurnInfo, NewGameParams,
-};
-
 use crate::shared::local_models::local_game_state::LocalGameStateResource;
 use crate::shared::local_models::local_grid_position::LocalGridPosition;
 use crate::shared::local_models::local_player_info::LocalPlayerInfo;
 use crate::shared::local_service_client::helper_functions::remote_players_to_local_players;
 use crate::shared::local_service_client::service_client::helpers::{GameInfoResult, AUTO_UPDATE_INFO, SDK_CONFIG};
-// use crate::shared::local_service_client::service_client::helpers::{GameInfoResult, AUTO_UPDATE_INFO, SDK_CONFIG};
+use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::{
+    AddPlayerError, CreateGameError, GetGameInfoError, TakeTurnError,
+};
+use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
+use tic_tac_toe_rust_client_sdk::models::{AddPlayerParams, BoardPosition, GameMode, GameTurnInfo, NewGameParams, SkillLevel};
 
 /// Serves as a local client to the Tic-Tac-Toe service. This struct also caches the Game Info so
 /// that it is accessed directly from memory. This prevents networking-induced lag in the game frame
@@ -39,7 +35,9 @@ impl LocalServiceClient {
         //
 
         let params = NewGameParams {
+            game_mode: GameMode::SinglePlayer,
             player_one_display_name: local_player_display_name.to_string(),
+            single_player_skill_level: Some(Some(SkillLevel::Beginner)),
         };
 
         let creation_result = match tic_tac_toe_api::create_game(&SDK_CONFIG, params) {

@@ -5,12 +5,11 @@ use crate::models::requests::GameTurnInfo;
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
 use async_trait::async_trait;
+use log::error;
 use serde::Deserialize;
 use std::marker::PhantomData;
-use log::error;
 use tokio::time::{sleep, Duration};
 use utoipa::ToSchema;
-
 
 /// AutoPlayer can play a game of Tic-Tac-Toe at various skill levels.
 pub(crate) struct AutoPlayer<T: GameTrait + Clone + Send + Sync> {
@@ -180,4 +179,3 @@ pub(crate) enum SkillLevel {
     /// wrong moves.
     Master,
 }
-

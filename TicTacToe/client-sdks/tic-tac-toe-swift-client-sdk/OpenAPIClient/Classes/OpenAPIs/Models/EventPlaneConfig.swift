@@ -18,18 +18,22 @@ public struct EventPlaneConfig: Codable, JSONEncodable, Hashable {
     public var brokerAddress: String
     /** Broker port number of the real-time messaging broker. */
     public var brokerPort: Int
+    /** Channel used to namespace the messaging. */
+    public var channelId: String
     /** The topic prefix that allows the clients to subscribe to real-time Game state updates. */
     public var topicPrefix: String
 
-    public init(brokerAddress: String, brokerPort: Int, topicPrefix: String) {
+    public init(brokerAddress: String, brokerPort: Int, channelId: String, topicPrefix: String) {
         self.brokerAddress = brokerAddress
         self.brokerPort = brokerPort
+        self.channelId = channelId
         self.topicPrefix = topicPrefix
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case brokerAddress = "broker_address"
         case brokerPort = "broker_port"
+        case channelId = "channel_id"
         case topicPrefix = "topic_prefix"
     }
 
@@ -39,6 +43,7 @@ public struct EventPlaneConfig: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(brokerAddress, forKey: .brokerAddress)
         try container.encode(brokerPort, forKey: .brokerPort)
+        try container.encode(channelId, forKey: .channelId)
         try container.encode(topicPrefix, forKey: .topicPrefix)
     }
 }

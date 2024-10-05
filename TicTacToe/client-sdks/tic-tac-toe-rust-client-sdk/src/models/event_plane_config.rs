@@ -20,6 +20,9 @@ pub struct EventPlaneConfig {
     /// Broker port number of the real-time messaging broker.
     #[serde(rename = "broker_port")]
     pub broker_port: i32,
+    /// Channel used to namespace the messaging.
+    #[serde(rename = "channel_id")]
+    pub channel_id: String,
     /// The topic prefix that allows the clients to subscribe to real-time Game state updates.
     #[serde(rename = "topic_prefix")]
     pub topic_prefix: String,
@@ -27,10 +30,11 @@ pub struct EventPlaneConfig {
 
 impl EventPlaneConfig {
     /// Models the configuration required for clients to subscribe to real-time Game state updates.
-    pub fn new(broker_address: String, broker_port: i32, topic_prefix: String) -> EventPlaneConfig {
+    pub fn new(broker_address: String, broker_port: i32, channel_id: String, topic_prefix: String) -> EventPlaneConfig {
         EventPlaneConfig {
             broker_address,
             broker_port,
+            channel_id,
             topic_prefix,
         }
     }
