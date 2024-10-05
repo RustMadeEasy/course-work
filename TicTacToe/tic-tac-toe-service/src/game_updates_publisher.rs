@@ -29,10 +29,10 @@ impl GameUpdatesPublisher {
 }
 
 #[async_trait]
-impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for GameUpdatesPublisher {
+impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for GameUpdatesPublisher {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, game: &mut T) {
+    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
         //
 
         let topic: String;

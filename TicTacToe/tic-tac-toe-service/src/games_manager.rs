@@ -39,8 +39,6 @@ const MQTT_PORT: u16 = 1883;
 pub(crate) struct GamesManager<T: GameTrait + Clone + Send + Sync + 'static> {
     //
 
-    auto_player: Option<AutoPlayer<T>>,
-
     /// The Games being managed by this instance. They are stored by Game ID.
     games: Arc<Mutex<HashMap<String, T>>>,
 
@@ -50,9 +48,9 @@ pub(crate) struct GamesManager<T: GameTrait + Clone + Send + Sync + 'static> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     //
 
-    async fn notify_observers(&self, game_state_change: GameStateChange, game: &mut T) {
+    async fn notify_observers(&mut self, game_state_change: GameStateChange, game: &T) {
         for observer in self.observers.iter() {
-            observer.game_updated(&game_state_change, game).await;
+            let _ = observer.game_updated(&game_state_change, game).await;
         }
     }
 
@@ -136,7 +134,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     }
 
     /// Creates a new Game instance.
-    pub(crate) fn create_game(&mut self, params: &NewGameParams) -> Result<T, GameError> {
+    pub(crate) async fn create_game(&mut self, params: &NewGameParams) -> Result<T, GameError> {
         //
 
         let invitation_code = if params.game_mode == GameMode::TwoPlayers {
@@ -147,18 +145,19 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         let mut game = T::new(params, invitation_code, MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT)?;
 
-        self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
-
         // Also, if this is human vs. computer, add the computer opponent now
         if params.game_mode == GameMode::SinglePlayer {
             game.add_player("Reema", true)?;
             let second_player = game.get_players().last().unwrap().clone();
             let skill_level = params.single_player_skill_level.clone().unwrap_or_default();
-            self.auto_player = Some(AutoPlayer::<T>::new(second_player, skill_level))
-        } else {
-            self.auto_player = None;
+
+            let auto_player = AutoPlayer::<T>::new(second_player, skill_level);
+
+            // TODO: JD: we have to clean up the auto_player from the list of observers when this game is removed
+            self.observers.push(Box::new(auto_player));
         }
 
+        self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
 
         Ok(game.clone())
     }
@@ -195,7 +194,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
         //
 
         let mut instance = Self {
-            auto_player: None,
             observers: vec![],
             games: Default::default(),
         };

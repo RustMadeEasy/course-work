@@ -167,7 +167,7 @@ pub mod requests {
     }
 
     /// Models info needed to perform a Game turn.
-    #[derive(Deserialize, ToSchema, Validate)]
+    #[derive(Deserialize, Serialize, ToSchema, Validate)]
     pub struct GameTurnInfo {
         pub destination: BoardPosition,
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]

@@ -86,7 +86,7 @@ pub(crate) async fn create_game(
 
     let mut games_manager = games_manager.lock().unwrap();
 
-    match games_manager.create_game(&new_game_params) {
+    match games_manager.create_game(&new_game_params).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),

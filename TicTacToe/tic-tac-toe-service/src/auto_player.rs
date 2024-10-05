@@ -7,7 +7,10 @@ use crate::play_status::PlayStatus;
 use async_trait::async_trait;
 use serde::Deserialize;
 use std::marker::PhantomData;
+use log::error;
+use tokio::time::{sleep, Duration};
 use utoipa::ToSchema;
+
 
 /// AutoPlayer can play a game of Tic-Tac-Toe at various skill levels.
 pub(crate) struct AutoPlayer<T: GameTrait + Clone + Send + Sync> {
@@ -46,6 +49,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
 
     fn take_turn_as_an_intermediate(&self, _game_board: GameBoard) -> Option<BoardPosition> {
         // TODO: JD: finish
+        // TODO: JD: consider blocking the opponent from winning
         None
     }
 
@@ -63,7 +67,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     //
 
-    pub(crate) fn take_turn(&self, game: &mut T) {
+    pub(crate) async fn take_turn(&self, game: &T) {
         //
 
         let game_board = game.get_current_game_state().game_board;
@@ -74,11 +78,34 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
             SkillLevel::Expert => self.take_turn_as_an_expert(game_board),
             SkillLevel::Master => self.take_turn_as_a_master(game_board),
         } {
-            let game_turn_info = GameTurnInfo {
-                destination: new_board_position,
-                player_id: self.player_info.player_id.clone(),
-            };
-            let _ = game.take_turn(&game_turn_info);
+            let game_id = game.get_id();
+            let player_id = self.player_info.player_id.clone();
+
+            tokio::spawn(async move {
+
+                // Make the service feel like it is deliberating on the move for some time.
+                // We wait anywhere between 1 and 4 seconds.
+                let wait_time_secs = (rand::random::<f32>() * 4_f32).floor() as usize + 1;
+                sleep(Duration::from_secs(wait_time_secs as u64)).await;
+
+                // *** Control the service via the API in the same way clients do. ***
+
+                let url = format!("http://127.0.0.1:50020/v1/games/{}/turns", game_id);
+                let client = reqwest::Client::new();
+
+                let game_turn_info = GameTurnInfo { destination: new_board_position, player_id };
+                let result = client.post(url)
+                    .json(&game_turn_info)
+                    .send()
+                    .await;
+
+                match result {
+                    Ok(_) => {}
+                    Err(error) => {
+                        error!("Failed to send game turn. Error {}", error);
+                    }
+                }
+            });
         }
     }
 }
@@ -113,10 +140,10 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
 }
 
 #[async_trait]
-impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for AutoPlayer<T> {
+impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutoPlayer<T> {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, game: &mut T) {
+    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
         //
 
         match game_state_change {
@@ -128,7 +155,7 @@ impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for AutoPlayer<T> 
                         // Is it my turn?
                         if let Some(current_player) = game.get_current_player() {
                             if current_player.player_id == self.player_info.player_id {
-                                self.take_turn(game);
+                                self.take_turn(game).await;
                             }
                         }
                     }
