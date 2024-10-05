@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models a Game Piece with which the Tic-Tac-Toe game is played. */
+/** Models a Game Piece with which the Tic-Tac-Toe Game is played. */
 public enum GamePiece: String, Codable, CaseIterable {
     case _none = "None"
     case x = "X"

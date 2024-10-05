@@ -13,7 +13,7 @@ import AnyCodable
 open class TicTacToeAPI {
 
     /**
-     Adds a Player to the Game. Returns Game Creation Result.
+     Adds a Player to the Game. Returns the result of the initial Game Creation.
      
      - parameter addPlayerParams: (body)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
@@ -32,9 +32,9 @@ open class TicTacToeAPI {
     }
 
     /**
-     Adds a Player to the Game. Returns Game Creation Result.
+     Adds a Player to the Game. Returns the result of the initial Game Creation.
      - POST /v1/games/players
-     - Adds a Player to the Game. Returns Game Creation Result.
+     - Adds a Player to the Game. Returns the result of the initial Game Creation.
      - parameter addPlayerParams: (body)  
      - returns: RequestBuilder<GameCreationResult> 
      */
@@ -148,7 +148,7 @@ open class TicTacToeAPI {
     }
 
     /**
-     Retrieves the history of the Game States from the initial move (turn) to the latest.
+     Retrieves the history of the Game States from the initial move (turn) to the latest
      
      - parameter gameId: (path)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
@@ -167,9 +167,9 @@ open class TicTacToeAPI {
     }
 
     /**
-     Retrieves the history of the Game States from the initial move (turn) to the latest.
+     Retrieves the history of the Game States from the initial move (turn) to the latest
      - GET /v1/games/{game_id}/turns
-     - Retrieves the history of the Game States from the initial move (turn) to the latest. Game State. This can be used, for instance, for the client to provide an animation that shows a time-lapse of the game play.
+     - Retrieves the history of the Game States from the initial move (turn) to the latest Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
      - parameter gameId: (path)  
      - returns: RequestBuilder<[GameState]> 
      */
@@ -195,7 +195,7 @@ open class TicTacToeAPI {
     }
 
     /**
-     Retrieves the specified Game info.
+     Retrieves details of the specified Game.
      
      - parameter gameId: (path) Game ID 
      - parameter apiResponseQueue: The queue on which api response is dispatched.
@@ -214,9 +214,9 @@ open class TicTacToeAPI {
     }
 
     /**
-     Retrieves the specified Game info.
+     Retrieves details of the specified Game.
      - GET /v1/games/{game_id}
-     - Retrieves the specified Game info.
+     - Retrieves details of the specified Game.
      - parameter gameId: (path) Game ID 
      - returns: RequestBuilder<GameInfo> 
      */
@@ -242,7 +242,7 @@ open class TicTacToeAPI {
     }
 
     /**
-     Make a game move (turn) for the specified Player.
+     Make a Game move (turn) for the specified Player.
      
      - parameter gameId: (path)  
      - parameter gameTurnInfo: (body)  
@@ -262,9 +262,9 @@ open class TicTacToeAPI {
     }
 
     /**
-     Make a game move (turn) for the specified Player.
+     Make a Game move (turn) for the specified Player.
      - POST /v1/games/{game_id}/turns
-     - Make a game move (turn) for the specified Player.
+     - Make a Game move (turn) for the specified Player.
      - parameter gameId: (path)  
      - parameter gameTurnInfo: (body)  
      - returns: RequestBuilder<Void> 

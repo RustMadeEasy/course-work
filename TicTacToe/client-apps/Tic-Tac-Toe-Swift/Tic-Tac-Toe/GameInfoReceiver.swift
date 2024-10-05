@@ -41,16 +41,16 @@ class GameInfoReceiver {
 extension GameInfoReceiver {
     
     /// Builds a full topic string based on the specified topic name.
-    private func buildTopic(topic: EventTopicNames) -> String {
+    private func buildTopic(topic: EventPlaneTopicNames) -> String {
         String(format: "%@/%@", self.eventPlaneConfig.topicPrefix, topic.rawValue)
     }
     
     /// Pre-builds the topics so that we are not parsing each time a message is received.
     private func prebuildTopics() {
-        self.topicGameEndedInStalemate = buildTopic(topic: EventTopicNames.gameEndedInStalemate)
-        self.topicGameEndedInWin = buildTopic(topic: EventTopicNames.gameEndedInWin)
-        self.topicPlayerAdded = buildTopic(topic: EventTopicNames.playerAdded)
-        self.topicTurnTaken = buildTopic(topic: EventTopicNames.turnTaken)
+        self.topicGameEndedInStalemate = buildTopic(topic: EventPlaneTopicNames.gameEndedInStalemate)
+        self.topicGameEndedInWin = buildTopic(topic: EventPlaneTopicNames.gameEndedInWin)
+        self.topicPlayerAdded = buildTopic(topic: EventPlaneTopicNames.playerAdded)
+        self.topicTurnTaken = buildTopic(topic: EventPlaneTopicNames.turnTaken)
     }
 
     /// Initializes the MQTT client and sets up the callbacks used to inform the delegate.

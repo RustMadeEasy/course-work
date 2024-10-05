@@ -11,9 +11,10 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
-/// GameState : Models the state of a game at a particular move.
+/// GameState : Models the state of a Game at a particular Move (turn).
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameState {
+    /// The board on which the Game is played.
     #[serde(rename = "game_board")]
     pub game_board: Vec<Vec<models::GamePiece>>,
     /// ID of the Player who made this Move.
@@ -21,24 +22,16 @@ pub struct GameState {
     pub id_of_player_who_made_move: String,
     #[serde(rename = "play_status")]
     pub play_status: models::PlayStatus,
-    #[serde(
-        rename = "winning_locations",
-        default,
-        with = "::serde_with::rust::double_option",
-        skip_serializing_if = "Option::is_none"
-    )]
+    /// If the Game has ended in a win, this contains the winning board positions.
+    #[serde(rename = "winning_locations", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub winning_locations: Option<Option<Vec<models::BoardPosition>>>,
-    #[serde(
-        rename = "winning_player_id",
-        default,
-        with = "::serde_with::rust::double_option",
-        skip_serializing_if = "Option::is_none"
-    )]
+    /// If the Game has ended in a win, this indicates the ID of the winning Player.
+    #[serde(rename = "winning_player_id", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub winning_player_id: Option<Option<String>>,
 }
 
 impl GameState {
-    /// Models the state of a game at a particular move.
+    /// Models the state of a Game at a particular Move (turn).
     pub fn new(game_board: Vec<Vec<models::GamePiece>>, id_of_player_who_made_move: String, play_status: models::PlayStatus) -> GameState {
         GameState {
             game_board,

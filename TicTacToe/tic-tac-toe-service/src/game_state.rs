@@ -31,13 +31,12 @@ use crate::game_board::{
 use crate::models::PlayerInfo;
 use crate::play_outcome::PlayOutcome;
 use crate::play_status::PlayStatus;
-use chrono::serde::ts_seconds;
 
 /// Models the state of a Game at a particular Move (turn).
 #[derive(Clone, Deserialize, Serialize, ToSchema)]
 pub(crate) struct GameState {
     /// The time at which this Game State was created.
-    #[serde(with = "ts_seconds")]
+    #[serde(skip)]
     pub(crate) created_date: DateTime<Utc>,
     /// ID of the Player who made this Move.
     id_of_player_who_made_move: String,

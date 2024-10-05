@@ -105,6 +105,8 @@ pub(crate) struct PlayerInfo {
     pub(crate) display_name: String,
     /// The Game Piece with which the Tic-Tac-Toe Game is played.
     pub(crate) game_piece: GamePiece,
+    /// Indicates that this Player's moves are automated, i.e., guided by this service.
+    pub(crate) is_automated: bool,
     /// Unique ID of the Player.
     pub(crate) player_id: String,
 }
@@ -129,21 +131,22 @@ impl PlayerInfo {
     }
 
     /// Creates a new PlayerInfo instance.
-    pub(crate) fn new(display_name: impl Into<String>, game_piece: &GamePiece) -> Self {
+    pub(crate) fn new(display_name: impl Into<String>, game_piece: &GamePiece, is_automated: bool) -> Self {
         Self {
             display_name: display_name.into(),
-            player_id: Uuid::new_v4().to_string(),
             game_piece: game_piece.clone(),
+            is_automated,
+            player_id: Uuid::new_v4().to_string(),
         }
     }
 }
 
 pub mod requests {
-    use serde::Deserialize;
+    use crate::auto_player::SkillLevel;
+    use crate::game_board::BoardPosition;
+    use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
-
-    use crate::game_board::BoardPosition;
 
     pub(crate) const ID_LENGTH_MAX: u64 = 36;
     const ID_LENGTH_MIN: u64 = 1;
@@ -168,11 +171,20 @@ pub mod requests {
         pub player_id: String,
     }
 
+    /// Specifies the type of Game - single player or two players.
+    #[derive(Deserialize, PartialEq, Serialize, ToSchema)]
+    pub enum GameMode {
+        SinglePlayer,
+        TwoPlayers,
+    }
+
     /// Models info needed to start a new Game.
     #[derive(Deserialize, ToSchema, Validate)]
     pub struct NewGameParams {
+        pub game_mode: GameMode,
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
         pub player_one_display_name: String,
+        pub single_player_skill_level: Option<SkillLevel>,
     }
 }
 

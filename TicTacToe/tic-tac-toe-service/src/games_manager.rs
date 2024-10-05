@@ -9,7 +9,7 @@ use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneTopicNames;
-use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams};
+use crate::models::requests::{AddPlayerParams, GameMode, GameTurnInfo, NewGameParams};
 use crate::play_status::PlayStatus;
 use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
@@ -62,7 +62,7 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
             Some(game) => game,
         };
 
-        game.add_player(&second_player_params.player_display_name)?;
+        game.add_player(&second_player_params.player_display_name, false)?;
 
         // Update the Game instance in the list.
         self.games.lock().unwrap().insert(game.get_id(), game.clone());
@@ -93,7 +93,7 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
                 let mut games_expired: u64 = 0;
 
                 // Remove any Game that is abandoned or has not been updated in a long time.
-                let now  = Utc::now().timestamp_millis();
+                let now = Utc::now().timestamp_millis();
                 for game in games.values().clone() {
                     match game.get_time_of_latest_move() {
                         None => {}
@@ -135,7 +135,12 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
     pub(crate) fn create_game(&mut self, params: &NewGameParams) -> Result<T, GameError> {
         //
 
-        let invitation_code = self.generate_invitation_code();
+        let invitation_code = if params.game_mode == GameMode::TwoPlayers {
+            self.generate_invitation_code()
+        } else {
+            "".to_string()
+        };
+
         let game = T::new(params,
                           MQTT_BROKER_ADDRESS,
                           MQTT_PORT,
@@ -183,11 +188,7 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
             games: Default::default(),
         };
 
-        // TODO: JD: remove this test line
-        Self::auto_cleanup(instance.games.clone(), 30000, Duration::from_secs(1));
-
-        // TODO: JD: uncomment this line
-        // Self::auto_cleanup(instance.games.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
+        Self::auto_cleanup(instance.games.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
 
         instance
     }

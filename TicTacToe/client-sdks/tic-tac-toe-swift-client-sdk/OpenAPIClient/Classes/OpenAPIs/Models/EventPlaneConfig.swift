@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models the configuration required for clients subscribe to real-time game state updates. */
+/** Models the configuration required for clients to subscribe to real-time Game state updates. */
 public struct EventPlaneConfig: Codable, JSONEncodable, Hashable {
 
     static let brokerPortRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: nil, exclusiveMaximum: false, multipleOf: nil)
@@ -18,7 +18,7 @@ public struct EventPlaneConfig: Codable, JSONEncodable, Hashable {
     public var brokerAddress: String
     /** Broker port number of the real-time messaging broker. */
     public var brokerPort: Int
-    /** The topic prefix that allows the clients to subscribe to real-time game state updates. */
+    /** The topic prefix that allows the clients to subscribe to real-time Game state updates. */
     public var topicPrefix: String
 
     public init(brokerAddress: String, brokerPort: Int, topicPrefix: String) {

@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models a position on the game board. */
+/** Models a position on the Game board. */
 public struct BoardPosition: Codable, JSONEncodable, Hashable {
 
     static let columnRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: nil, exclusiveMaximum: false, multipleOf: nil)

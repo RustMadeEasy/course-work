@@ -15,7 +15,7 @@ use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneConfig;
-use crate::models::requests::{GameTurnInfo, NewGameParams};
+use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
 
@@ -66,7 +66,7 @@ impl GameTrait for TicTacToeGame {
     //
 
     /// Adds a Player to the Game.
-    fn add_player(&mut self, display_name: impl Into<String> + Copy) -> Result<(), GameError> {
+    fn add_player(&mut self, display_name: impl Into<String> + Copy, is_automated: bool) -> Result<(), GameError> {
         //
 
         let game_piece: GamePiece;
@@ -93,7 +93,7 @@ impl GameTrait for TicTacToeGame {
             }
         }
 
-        let player_info = PlayerInfo::new(display_name, &game_piece);
+        let player_info = PlayerInfo::new(display_name, &game_piece, is_automated);
 
         self.players.push(player_info);
 
@@ -173,7 +173,13 @@ impl GameTrait for TicTacToeGame {
             event_plane_config: EventPlaneConfig::new(mqtt_broker_address.into(), mqtt_port),
         };
 
-        game.add_player(&params.player_one_display_name)?;
+        // Add the human player
+        game.add_player(&params.player_one_display_name, false)?;
+
+        // Also, if this is human vs. computer, add the computer opponent now
+        if params.game_mode == GameMode::SinglePlayer {
+            game.add_player("Reema", true)?;
+        }
 
         Ok(game)
     }

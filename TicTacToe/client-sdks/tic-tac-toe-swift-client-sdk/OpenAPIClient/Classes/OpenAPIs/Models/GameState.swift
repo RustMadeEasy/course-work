@@ -10,14 +10,17 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models the state of a game at a particular move. */
+/** Models the state of a Game at a particular Move (turn). */
 public struct GameState: Codable, JSONEncodable, Hashable {
 
+    /** The board on which the Game is played. */
     public var gameBoard: [[GamePiece]]
     /** ID of the Player who made this Move. */
     public var idOfPlayerWhoMadeMove: String
     public var playStatus: PlayStatus
+    /** If the Game has ended in a win, this contains the winning board positions. */
     public var winningLocations: [BoardPosition]?
+    /** If the Game has ended in a win, this indicates the ID of the winning Player. */
     public var winningPlayerId: String?
 
     public init(gameBoard: [[GamePiece]], idOfPlayerWhoMadeMove: String, playStatus: PlayStatus, winningLocations: [BoardPosition]? = nil, winningPlayerId: String? = nil) {

@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models info needed to perform a game turn. */
+/** Models info needed to perform a Game turn. */
 public struct GameTurnInfo: Codable, JSONEncodable, Hashable {
 
     public var destination: BoardPosition

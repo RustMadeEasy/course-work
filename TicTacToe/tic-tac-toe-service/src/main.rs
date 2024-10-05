@@ -35,6 +35,7 @@ mod models;
 mod play_outcome;
 mod play_status;
 mod tests;
+mod auto_player;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;

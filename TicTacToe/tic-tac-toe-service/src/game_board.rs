@@ -32,7 +32,7 @@ pub(crate) const BIN_THREE_ACROSS_DIAGONAL_1: i16 = 0b_100_010_001;
 pub(crate) const BIN_THREE_ACROSS_DIAGONAL_2: i16 = 0b_001_010_100;
 
 /// Models a position on the Game board.
-#[derive(Clone, Default, Deserialize, Serialize, ToSchema, Validate)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema, Validate)]
 pub struct BoardPosition {
     #[validate(range(min = 0, max = 2))]
     pub(crate) row: usize,
@@ -42,7 +42,6 @@ pub struct BoardPosition {
 
 impl BoardPosition {
     /// Creates a new BoardPosition instance.
-    #[cfg(test)]
     pub(crate) fn new(row: usize, column: usize) -> Self {
         Self { row, column }
     }

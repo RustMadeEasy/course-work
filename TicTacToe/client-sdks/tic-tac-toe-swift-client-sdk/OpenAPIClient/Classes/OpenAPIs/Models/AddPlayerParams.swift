@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models info needed to add a player to a game. */
+/** Models info needed to add a Player to a Game. */
 public struct AddPlayerParams: Codable, JSONEncodable, Hashable {
 
     public var gameInvitationCode: String

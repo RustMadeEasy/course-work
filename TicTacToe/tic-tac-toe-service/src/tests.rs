@@ -1,24 +1,19 @@
 #[cfg(test)]
-mod game_state_tests {
+mod auto_player_tests {
+    use crate::auto_player::AutoPlayer;
     use crate::game_board::{BoardPosition, GamePiece};
     use crate::game_state::GameState;
     use crate::models::PlayerInfo;
     use uuid::Uuid;
 
     #[test]
-    fn test_binary_representation_for_piece_placement() {
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+    fn test_get_empty_locations() {
+        //
 
-        /*
-        X  -  -
-        -  -  -
-        -  -  -     */
-        let board_state = GameState::new()
-            .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
-            .unwrap();
-        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
-        assert_eq!(binary_representation.0, 0b_100_000_000);
+        //
+
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
 
         /*
         X  -  X
@@ -46,11 +41,13 @@ mod game_state_tests {
             .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
 
-        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
-        assert_eq!(binary_representation.0, 0b_101_010_001);
-        assert_eq!(binary_representation.1, 0b_000_001_110);
+        // Make sure AutoPlayer can detect the empty locations.
+        let empty_locations = AutoPlayer::determine_empty_locations(&board_state.game_board).unwrap();
+        assert_eq!(empty_locations[0], BoardPosition::new(0, 1));
+        assert_eq!(empty_locations[1], BoardPosition::new(1, 0));
     }
 }
+
 
 #[cfg(test)]
 mod game_board_tests {
@@ -65,8 +62,8 @@ mod game_board_tests {
     fn test_in_progress_status() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
 
         /*
         O  O  X
@@ -93,8 +90,8 @@ mod game_board_tests {
         //
 
         // Invalid column
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
         if GameState::new()
             .place_game_piece(&BoardPosition::new(10, 0), &player_one, &player_two)
             .is_ok()
@@ -123,8 +120,8 @@ mod game_board_tests {
     fn test_occupied_piece_placement() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
 
         // Place an X at 0:0
         let board_state = GameState::new();
@@ -149,8 +146,8 @@ mod game_board_tests {
     fn test_stalemate() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
 
         /*
         O  O  X
@@ -191,8 +188,8 @@ mod game_board_tests {
     fn test_valid_piece_placement() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
         match GameState::new().place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
         {
             Ok(board_state) => {
@@ -209,8 +206,8 @@ mod game_board_tests {
     fn test_winning_moves() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
 
         /*
         X  -  X
@@ -274,200 +271,12 @@ mod game_board_tests {
 }
 
 #[cfg(test)]
-mod game_tests {
-    use uuid::Uuid;
-
-    use crate::game_board::{BoardPosition, GamePiece};
-    use crate::game_trait::GameTrait;
-    use crate::models::requests::{GameTurnInfo, NewGameParams};
-    use crate::play_status::PlayStatus;
-    use crate::tic_tac_toe_game::TicTacToeGame;
-
-    #[test]
-    fn test_get_current_board_state() {
-        //
-
-        // Start a new Game
-        let params = NewGameParams {
-            player_one_display_name: "Player One".to_string(),
-        };
-        let mqtt_broker_address = "test.mosquitto.org";
-        let mqtt_port = 1883;
-        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
-        let player_one_id = game.players.first().unwrap().player_id.clone();
-
-        // Add the Second Player
-        match game.add_player("Player Two") {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        };
-        let player_two_id = game.players.last().unwrap().player_id.clone();
-
-        // Let Player One take their turn
-        let turn_info = GameTurnInfo {
-            destination: BoardPosition::new(0, 0),
-            player_id: player_one_id.clone(),
-        };
-        match game.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
-
-        // Check the board state
-        let game_state = game.get_current_game_state();
-        assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
-        assert_eq!(game_state.get_id_of_player_who_made_move(), player_one_id);
-
-        // Let Player Two take their turn
-        let turn_info = GameTurnInfo {
-            destination: BoardPosition::new(0, 1),
-            player_id: player_two_id.clone(),
-        };
-        match game.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
-
-        // Check the board state
-        let game_state = game.get_current_game_state();
-        assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
-        assert_eq!(game_state.get_id_of_player_who_made_move(), player_two_id);
-    }
-
-    #[test]
-    fn test_get_play_history() {
-        //
-
-        // Start a new Game
-        let params = NewGameParams {
-            player_one_display_name: "Player One".to_string(),
-        };
-        let mqtt_broker_address = "test.mosquitto.org";
-        let mqtt_port = 1883;
-        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
-        let player_one_id = game.players.first().unwrap().player_id.clone();
-
-        // Add the Second Player
-        match game.add_player("Player Two") {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        };
-        let player_two_id = game.players.last().unwrap().player_id.clone();
-
-        // There should be no moves in the history at this point
-        assert_eq!(game.play_history.len(), 0);
-
-        // Let Player One take their turn
-        let turn_info = GameTurnInfo {
-            destination: BoardPosition::new(0, 0),
-            player_id: player_one_id.clone(),
-        };
-        match game.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
-
-        // There should be exactly one move in the history
-        assert_eq!(game.play_history.len(), 1);
-
-        // Let Player Two take their turn
-        let turn_info = GameTurnInfo {
-            destination: BoardPosition::new(0, 1),
-            player_id: player_two_id.clone(),
-        };
-        match game.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
-
-        // There should be exactly two moves in the history
-        assert_eq!(game.play_history.len(), 2);
-    }
-
-    #[test]
-    fn test_take_turn() {
-        //
-
-        // Start a new Game
-        let params = NewGameParams {
-            player_one_display_name: "Player One".to_string(),
-        };
-        let mqtt_broker_address = "test.mosquitto.org";
-        let mqtt_port = 1883;
-        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
-        let player_one_id = game.players.first().unwrap().player_id.clone();
-
-        // Add the Second Player
-        match game.add_player("Player Two") {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        };
-        let player_two_id = game.players.last().unwrap().player_id.clone();
-
-        let player_one_destination = BoardPosition::new(0, 0);
-        let player_two_destination = BoardPosition::new(1, 1);
-
-        // Let Player One take their turn, placing an X at 0:0
-        let turn_info = GameTurnInfo {
-            destination: player_one_destination.clone(),
-            player_id: player_one_id.clone(),
-        };
-        match game.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
-
-        // There should be an X at 0:0
-        assert_eq!(
-            game.get_current_game_state().get_game_board()[player_one_destination.row]
-                [player_one_destination.column],
-            GamePiece::X
-        );
-
-        // Let Player Two take their turn, placing an O at 1:1
-        let turn_info = GameTurnInfo {
-            destination: player_two_destination.clone(),
-            player_id: player_two_id.clone(),
-        };
-        match game.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
-
-        // There should be an O at 1:1
-        assert_eq!(
-            game.get_current_game_state().get_game_board()[player_two_destination.row]
-                [player_two_destination.column],
-            GamePiece::O
-        );
-    }
-}
-
-#[cfg(test)]
 mod game_manager_tests {
     use uuid::Uuid;
 
     use crate::errors::GameError;
     use crate::games_manager::TicTacToeGamesManager;
-    use crate::models::requests::{AddPlayerParams, NewGameParams};
+    use crate::models::requests::{AddPlayerParams, GameMode, NewGameParams};
 
     #[tokio::test]
     async fn test_add_second_player() {
@@ -475,7 +284,9 @@ mod game_manager_tests {
 
         let display_name = Uuid::new_v4().to_string();
         let params = NewGameParams {
+            game_mode: GameMode::TwoPlayers,
             player_one_display_name: display_name.clone(),
+            single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_game(&params) {
@@ -516,7 +327,9 @@ mod game_manager_tests {
 
         let display_name = Uuid::new_v4().to_string();
         let params = NewGameParams {
+            game_mode: GameMode::TwoPlayers,
             player_one_display_name: display_name.clone(),
+            single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_game(&params) {
@@ -582,7 +395,9 @@ mod game_manager_tests {
 
         let player_one_display_name = Uuid::new_v4().to_string();
         let params = NewGameParams {
+            game_mode: GameMode::TwoPlayers,
             player_one_display_name: player_one_display_name.clone(),
+            single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_game(&params) {
@@ -623,7 +438,9 @@ mod game_manager_tests {
 
         let display_name = Uuid::new_v4().to_string();
         let params = NewGameParams {
+            game_mode: GameMode::TwoPlayers,
             player_one_display_name: display_name.clone(),
+            single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_game(&params) {
@@ -656,5 +473,253 @@ mod game_manager_tests {
                 assert_eq!(error, GameError::InvitationCodeNotFound)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod game_play_tests {
+    use uuid::Uuid;
+
+    use crate::game_board::{BoardPosition, GamePiece};
+    use crate::game_trait::GameTrait;
+    use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
+    use crate::play_status::PlayStatus;
+    use crate::tic_tac_toe_game::TicTacToeGame;
+
+    #[test]
+    fn test_get_current_board_state() {
+        //
+
+        // Start a new Game
+        let params = NewGameParams {
+            game_mode: GameMode::TwoPlayers,
+            player_one_display_name: "Player One".to_string(),
+            single_player_skill_level: None,
+        };
+        let mqtt_broker_address = "test.mosquitto.org";
+        let mqtt_port = 1883;
+        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let player_one_id = game.players.first().unwrap().player_id.clone();
+
+        // Add the Second Player
+        match game.add_player("Player Two", false) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        };
+        let player_two_id = game.players.last().unwrap().player_id.clone();
+
+        // Let Player One take their turn
+        let turn_info = GameTurnInfo {
+            destination: BoardPosition::new(0, 0),
+            player_id: player_one_id.clone(),
+        };
+        match game.take_turn(&turn_info) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        }
+
+        // Check the board state
+        let game_state = game.get_current_game_state();
+        assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
+        assert_eq!(game_state.get_id_of_player_who_made_move(), player_one_id);
+
+        // Let Player Two take their turn
+        let turn_info = GameTurnInfo {
+            destination: BoardPosition::new(0, 1),
+            player_id: player_two_id.clone(),
+        };
+        match game.take_turn(&turn_info) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        }
+
+        // Check the board state
+        let game_state = game.get_current_game_state();
+        assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
+        assert_eq!(game_state.get_id_of_player_who_made_move(), player_two_id);
+    }
+
+    #[test]
+    fn test_get_play_history() {
+        //
+
+        // Start a new Game
+        let params = NewGameParams {
+            game_mode: GameMode::TwoPlayers,
+            player_one_display_name: "Player One".to_string(),
+            single_player_skill_level: None,
+        };
+        let mqtt_broker_address = "test.mosquitto.org";
+        let mqtt_port = 1883;
+        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let player_one_id = game.players.first().unwrap().player_id.clone();
+
+        // Add the Second Player
+        match game.add_player("Player Two", false) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        };
+        let player_two_id = game.players.last().unwrap().player_id.clone();
+
+        // There should be no moves in the history at this point
+        assert_eq!(game.play_history.len(), 0);
+
+        // Let Player One take their turn
+        let turn_info = GameTurnInfo {
+            destination: BoardPosition::new(0, 0),
+            player_id: player_one_id.clone(),
+        };
+        match game.take_turn(&turn_info) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        }
+
+        // There should be exactly one move in the history
+        assert_eq!(game.play_history.len(), 1);
+
+        // Let Player Two take their turn
+        let turn_info = GameTurnInfo {
+            destination: BoardPosition::new(0, 1),
+            player_id: player_two_id.clone(),
+        };
+        match game.take_turn(&turn_info) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        }
+
+        // There should be exactly two moves in the history
+        assert_eq!(game.play_history.len(), 2);
+    }
+
+    #[test]
+    fn test_take_turn() {
+        //
+
+        // Start a new Game
+        let params = NewGameParams {
+            game_mode: GameMode::TwoPlayers,
+            player_one_display_name: "Player One".to_string(),
+            single_player_skill_level: None,
+        };
+        let mqtt_broker_address = "test.mosquitto.org";
+        let mqtt_port = 1883;
+        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let player_one_id = game.players.first().unwrap().player_id.clone();
+
+        // Add the Second Player
+        match game.add_player("Player Two", false) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        };
+        let player_two_id = game.players.last().unwrap().player_id.clone();
+
+        let player_one_destination = BoardPosition::new(0, 0);
+        let player_two_destination = BoardPosition::new(1, 1);
+
+        // Let Player One take their turn, placing an X at 0:0
+        let turn_info = GameTurnInfo {
+            destination: player_one_destination.clone(),
+            player_id: player_one_id.clone(),
+        };
+        match game.take_turn(&turn_info) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        }
+
+        // There should be an X at 0:0
+        assert_eq!(
+            game.get_current_game_state().get_game_board()[player_one_destination.row]
+                [player_one_destination.column],
+            GamePiece::X
+        );
+
+        // Let Player Two take their turn, placing an O at 1:1
+        let turn_info = GameTurnInfo {
+            destination: player_two_destination.clone(),
+            player_id: player_two_id.clone(),
+        };
+        match game.take_turn(&turn_info) {
+            Ok(_) => {}
+            Err(_) => {
+                panic!();
+            }
+        }
+
+        // There should be an O at 1:1
+        assert_eq!(
+            game.get_current_game_state().get_game_board()[player_two_destination.row]
+                [player_two_destination.column],
+            GamePiece::O
+        );
+    }
+}
+
+#[cfg(test)]
+mod game_state_tests {
+    use crate::game_board::{BoardPosition, GamePiece};
+    use crate::game_state::GameState;
+    use crate::models::PlayerInfo;
+    use uuid::Uuid;
+
+    #[test]
+    fn test_binary_representation_for_piece_placement() {
+        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+
+        /*
+        X  -  -
+        -  -  -
+        -  -  -     */
+        let board_state = GameState::new()
+            .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
+            .unwrap();
+        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        assert_eq!(binary_representation.0, 0b_100_000_000);
+
+        /*
+        X  -  X
+        -  X  O
+        O  O  X     */
+        let mut board_state = GameState::new()
+            .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .unwrap();
+
+        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        assert_eq!(binary_representation.0, 0b_101_010_001);
+        assert_eq!(binary_representation.1, 0b_000_001_110);
     }
 }

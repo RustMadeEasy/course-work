@@ -11,19 +11,14 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
-/// GameInfo : Models the view of a Game.
+/// GameInfo : Models the current view of a Game.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameInfo {
-    #[serde(
-        rename = "current_player",
-        default,
-        with = "::serde_with::rust::double_option",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "current_player", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub current_player: Option<Option<models::PlayerInfo>>,
     #[serde(rename = "game_state")]
     pub game_state: models::GameState,
-    /// Unique ID of the Game Engine
+    /// Unique ID of the Game instance
     #[serde(rename = "id")]
     pub id: String,
     /// List of Players
@@ -32,7 +27,7 @@ pub struct GameInfo {
 }
 
 impl GameInfo {
-    /// Models the view of a Game.
+    /// Models the current view of a Game.
     pub fn new(game_state: models::GameState, id: String, players: Vec<models::PlayerInfo>) -> GameInfo {
         GameInfo {
             current_player: None,

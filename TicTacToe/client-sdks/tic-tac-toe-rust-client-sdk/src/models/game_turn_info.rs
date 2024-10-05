@@ -11,7 +11,7 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
-/// GameTurnInfo : Models info needed to perform a game turn.
+/// GameTurnInfo : Models info needed to perform a Game turn.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameTurnInfo {
     #[serde(rename = "destination")]
@@ -21,7 +21,7 @@ pub struct GameTurnInfo {
 }
 
 impl GameTurnInfo {
-    /// Models info needed to perform a game turn.
+    /// Models info needed to perform a Game turn.
     pub fn new(destination: models::BoardPosition, player_id: String) -> GameTurnInfo {
         GameTurnInfo {
             destination,

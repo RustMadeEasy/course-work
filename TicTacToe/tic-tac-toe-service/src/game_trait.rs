@@ -25,7 +25,7 @@ pub(crate) trait GameTrait: Sized {
     // TODO: HD: generalize GameState, GameTurnInfo, NewGameParams, and PlayerInfo.
 
     /// Adds a Player to the Game.
-    fn add_player(&mut self, display_name: impl Into<String> + Copy) -> Result<(), GameError>;
+    fn add_player(&mut self, display_name: impl Into<String> + Copy, is_automated: bool) -> Result<(), GameError>;
 
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;

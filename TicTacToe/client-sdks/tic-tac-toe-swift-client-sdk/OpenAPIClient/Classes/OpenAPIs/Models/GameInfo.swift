@@ -10,12 +10,12 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models the view of a Game. */
+/** Models the current view of a Game. */
 public struct GameInfo: Codable, JSONEncodable, Hashable {
 
     public var currentPlayer: PlayerInfo?
     public var gameState: GameState
-    /** Unique ID of the Game Engine */
+    /** Unique ID of the Game instance */
     public var id: String
     /** List of Players */
     public var players: [PlayerInfo]

@@ -10,12 +10,14 @@ use utoipa::openapi::ContactBuilder;
 use utoipa::OpenApi;
 
 use crate::api_gaming::*;
+use crate::auto_player::SkillLevel;
 use crate::game_board::BoardPosition;
 use crate::game_board::GamePiece;
 use crate::game_state::GameState;
 use crate::models::event_plane::EventPlaneConfig;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::requests::AddPlayerParams;
+use crate::models::requests::GameMode;
 use crate::models::requests::GameTurnInfo;
 use crate::models::requests::NewGameParams;
 use crate::models::responses::GameCreationResult;
@@ -48,12 +50,14 @@ use crate::play_status::PlayStatus;
         EventPlaneTopicNames,
         GameCreationResult,
         GameInfo,
+        GameMode,
         GamePiece,
         GameState,
         GameTurnInfo,
         NewGameParams,
         PlayerInfo,
-        PlayStatus
+        PlayStatus,
+        SkillLevel,
     ))
 )]
 pub(crate) struct ApiDoc;

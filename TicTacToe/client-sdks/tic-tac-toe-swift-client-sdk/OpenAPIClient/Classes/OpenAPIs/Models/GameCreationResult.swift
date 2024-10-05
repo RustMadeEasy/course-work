@@ -10,12 +10,12 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models the results of a call to the Create Game endpoint. */
+/** Models the results of a call to the Create Game and Add Player endpoints. */
 public struct GameCreationResult: Codable, JSONEncodable, Hashable {
 
     public var eventPlaneConfig: EventPlaneConfig
     public var gameInfo: GameInfo
-    /** Code used to invite the second player to the game */
+    /** Code used to invite the second Player to the Game */
     public var gameInvitationCode: String
 
     public init(eventPlaneConfig: EventPlaneConfig, gameInfo: GameInfo, gameInvitationCode: String) {

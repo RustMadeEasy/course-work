@@ -18,7 +18,7 @@ pub struct GameCreationResult {
     pub event_plane_config: models::EventPlaneConfig,
     #[serde(rename = "game_info")]
     pub game_info: models::GameInfo,
-    /// Code used to invite the second player to the game
+    /// Code used to invite the second Player to the Game
     #[serde(rename = "game_invitation_code")]
     pub game_invitation_code: String,
 }

@@ -13,21 +13,29 @@ import AnyCodable
 /** Models info needed to start a new Game. */
 public struct NewGameParams: Codable, JSONEncodable, Hashable {
 
+    public var gameMode: GameMode
     public var playerOneDisplayName: String
+    public var singlePlayerSkillLevel: SkillLevel?
 
-    public init(playerOneDisplayName: String) {
+    public init(gameMode: GameMode, playerOneDisplayName: String, singlePlayerSkillLevel: SkillLevel? = nil) {
+        self.gameMode = gameMode
         self.playerOneDisplayName = playerOneDisplayName
+        self.singlePlayerSkillLevel = singlePlayerSkillLevel
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
+        case gameMode = "game_mode"
         case playerOneDisplayName = "player_one_display_name"
+        case singlePlayerSkillLevel = "single_player_skill_level"
     }
 
     // Encodable protocol methods
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(gameMode, forKey: .gameMode)
         try container.encode(playerOneDisplayName, forKey: .playerOneDisplayName)
+        try container.encodeIfPresent(singlePlayerSkillLevel, forKey: .singlePlayerSkillLevel)
     }
 }
 

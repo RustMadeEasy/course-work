@@ -29,7 +29,7 @@ class GameInfoService {
         do {
 
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                let params = NewGameParams(playerOneDisplayName: playerName)
+                let params = NewGameParams(gameMode: GameMode.twoPlayers, playerOneDisplayName: playerName)
                 TicTacToeAPI.createGame(newGameParams: params) { data, error in
                     if error == nil {
                         if data != nil {
