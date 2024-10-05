@@ -18,6 +18,7 @@ use validator::Validate;
 
 
 use crate::game_state::GameState;
+use crate::game_trait::GameTrait;
 use crate::games_manager::GamesManager;
 use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo};
@@ -46,14 +47,13 @@ pub(crate) async fn add_player(
     }
 
     let mut games_manager = games_manager.lock().unwrap();
-    let event_plane_config = games_manager.event_plane_config.clone();
 
     match games_manager.add_player(&second_player_params.into_inner()).await
     {
         Ok(game) => {
             let game_creation_result = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
-                event_plane_config,
+                event_plane_config: game.get_event_plane_config(),
                 game_invitation_code: game.game_invitation_code.clone(),
             };
 
@@ -85,17 +85,16 @@ pub(crate) async fn create_game(
     }
 
     let mut games_manager = games_manager.lock().unwrap();
-    let event_plane_config = games_manager.event_plane_config.clone();
 
     match games_manager.create_game(&new_game_params) {
         Ok(game) => {
-            let new_game_info = crate::models::responses::GameCreationResult {
+            let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
-                event_plane_config,
-                game_invitation_code: "".to_string(),
+                event_plane_config: game.get_event_plane_config(),
+                game_invitation_code: game.game_invitation_code,
             };
             Ok(web::Json(new_game_info))
-        },
+        }
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
 }

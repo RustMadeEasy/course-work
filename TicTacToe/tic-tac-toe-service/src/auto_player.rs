@@ -95,7 +95,7 @@ impl AutoPlayer {
 
 #[async_trait]
 impl GameObserverTrait for AutoPlayer {
-    async fn game_updated(&self, _game_state_change: &GameStateChange, _new_game_state: &GameState) {
+    async fn game_updated(&self, _game_state_change: &GameStateChange, _new_game_state: &GameState, game_event_channel: &String) {
         // TODO: JD: finish
     }
 }

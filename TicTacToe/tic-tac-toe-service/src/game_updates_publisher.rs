@@ -1,6 +1,7 @@
 use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
 use crate::game_state::GameState;
 use crate::models::event_plane::EventPlaneTopicNames;
+use crate::play_status::PlayStatus;
 use async_trait::async_trait;
 use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
 use mqtt_publisher_lib::publisher::Publisher;
@@ -10,8 +11,6 @@ use std::time::Duration;
 pub(crate) struct GameUpdatesPublisher {
     //
 
-    event_channel_id: String,
-
     /// Provides MQTT message publishing functionality.
     event_publisher: Publisher,
 }
@@ -19,19 +18,13 @@ pub(crate) struct GameUpdatesPublisher {
 impl GameUpdatesPublisher {
     //
 
-    pub(crate) fn new(event_channel_id: String,
-                      mqtt_broker_address: impl Into<String>,
-                      mqtt_port: u16,
-    ) -> Self {
-        let config = BrokerInfo::new(mqtt_broker_address.into(),
+    pub(crate) fn new(broker_address: String, broker_port: u16) -> Self {
+        let config = BrokerInfo::new(broker_address,
                                      10,
-                                     mqtt_port,
+                                     broker_port,
                                      Duration::from_secs(60),
                                      MqttProtocolVersion::V5);
-        Self {
-            event_channel_id,
-            event_publisher: Publisher::new(config),
-        }
+        Self { event_publisher: Publisher::new(config) }
     }
 }
 
@@ -39,26 +32,25 @@ impl GameUpdatesPublisher {
 impl GameObserverTrait for GameUpdatesPublisher {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, _new_game_state: &GameState) {
+    async fn game_updated(&self, game_state_change: &GameStateChange, _new_game_state: &GameState, game_event_channel: &String) {
+        //
+
+        let topic: String;
+
         match game_state_change {
-            GameStateChange::GameEndedInStalemate => {
-                let topic = EventPlaneTopicNames::GameEndedInStalemate.build(self.event_channel_id.as_str());
-                let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
-            }
-            GameStateChange::GameEndedInWin => {
-                let topic = EventPlaneTopicNames::GameEndedInWin.build(self.event_channel_id.as_str());
-                let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
-            }
             GameStateChange::PlayerAdded => {
-                // Inform the listening clients that a Player has been added.
-                let topic = EventPlaneTopicNames::PlayerAdded.build(self.event_channel_id.as_str());
-                let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
+                topic = EventPlaneTopicNames::PlayerAdded.build(game_event_channel);
             }
             GameStateChange::TurnTaken => {
-                // Inform the listening clients that a Player has taken a new turn.
-                let topic = EventPlaneTopicNames::TurnTaken.build(self.event_channel_id.as_str());
-                let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
+                match _new_game_state.play_status {
+                    PlayStatus::EndedInStalemate => topic = EventPlaneTopicNames::GameEndedInStalemate.build(game_event_channel),
+                    PlayStatus::EndedInWin => topic = EventPlaneTopicNames::GameEndedInWin.build(game_event_channel),
+                    PlayStatus::InProgress => topic = EventPlaneTopicNames::TurnTaken.build(game_event_channel),
+                    PlayStatus::NotStarted => return, // Early return. Nothing to publish.
+                }
             }
         }
+
+        let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
     }
 }

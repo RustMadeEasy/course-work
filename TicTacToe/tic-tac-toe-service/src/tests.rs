@@ -532,7 +532,7 @@ mod game_play_tests {
             player_one_display_name: "Player One".to_string(),
             single_player_skill_level: None,
         };
-        let mut game = TicTacToeGame::new(&params, Uuid::new_v4()).unwrap();
+        let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -589,7 +589,7 @@ mod game_play_tests {
             player_one_display_name: "Player One".to_string(),
             single_player_skill_level: None,
         };
-        let mut game = TicTacToeGame::new(&params, Uuid::new_v4()).unwrap();
+        let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -645,7 +645,7 @@ mod game_play_tests {
             player_one_display_name: "Player One".to_string(),
             single_player_skill_level: None,
         };
-        let mut game = TicTacToeGame::new(&params, Uuid::new_v4()).unwrap();
+        let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player

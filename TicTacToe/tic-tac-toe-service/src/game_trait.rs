@@ -7,6 +7,7 @@
 
 use crate::errors::GameError;
 use crate::game_state::GameState;
+use crate::models::event_plane::EventPlaneConfig;
 use crate::models::requests::{GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
 use chrono::{DateTime, Utc};
@@ -33,6 +34,9 @@ pub(crate) trait GameTrait: Sized {
     /// Returns the Game ID.
     fn get_id(&self) -> String;
 
+    /// Returns the configuration clients can use to subscribe to game change events.
+    fn get_event_plane_config(&self) -> EventPlaneConfig;
+
     /// Returns the Game Invitation Code. This code is used to add a new client app to the Game.
     fn get_invitation_code(&self) -> String;
 
@@ -46,8 +50,7 @@ pub(crate) trait GameTrait: Sized {
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
 
     /// Creates a new Game instance.
-    fn new(params: &NewGameParams,
-           invitation_code: impl Into<String>) -> Result<Self, GameError>;
+    fn new(params: &NewGameParams, invitation_code: impl Into<String>, broker_address: String, broker_port: u16) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError>;

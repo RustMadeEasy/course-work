@@ -23,7 +23,6 @@ use crate::game_board::GamePiece;
 pub mod event_plane {
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
-    use uuid::Uuid;
 
     const DOMAIN_NAME: &str = "RustMadeEasy.com";
 
@@ -44,11 +43,11 @@ pub mod event_plane {
 
     impl EventPlaneConfig {
         /// Creates a new EventPlaneConfig instance.
-        pub(crate) fn new(broker_address: String, broker_port: u16) -> Self {
+        pub(crate) fn new(broker_address: String, broker_port: u16, channel_id: String) -> Self {
             Self {
                 broker_address,
                 broker_port,
-                topic_prefix: EventPlaneTopicNames::build_topic_prefix(Uuid::new_v4().to_string()),
+                topic_prefix: EventPlaneTopicNames::build_topic_prefix(&channel_id),
             }
         }
     }
@@ -92,7 +91,7 @@ pub mod event_plane {
         }
 
         /// Constructs a topic prefix specific to the Channel ID.
-        pub(crate) fn build_topic_prefix(event_channel_id: String) -> String {
+        pub(crate) fn build_topic_prefix(event_channel_id: &String) -> String {
             format!("{DOMAIN_NAME}/Channels/{event_channel_id}")
         }
     }
@@ -242,16 +241,4 @@ pub mod responses {
         /// Code used to invite the second Player to the Game
         pub(crate) game_invitation_code: String,
     }
-
-    // impl From<TicTacToeGame> for GameCreationResult {
-    //
-    //     fn from(game: TicTacToeGame) -> GameCreationResult {
-    //         let game_invitation_code = game.game_invitation_code.clone();
-    //         GameCreationResult {
-    //             game_info: GameInfo::from(game.clone()),
-    //             event_plane_config: game.event_plane_config,
-    //             game_invitation_code,
-    //         }
-    //     }
-    // }
 }
