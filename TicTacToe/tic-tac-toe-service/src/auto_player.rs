@@ -1,6 +1,6 @@
 use crate::game_board::{BoardPosition, GameBoard, GamePiece, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
 use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
-use crate::game_state::GameState;
+use crate::game_trait::GameTrait;
 use crate::models::PlayerInfo;
 use async_trait::async_trait;
 use serde::Deserialize;
@@ -94,9 +94,24 @@ impl AutoPlayer {
 }
 
 #[async_trait]
-impl GameObserverTrait for AutoPlayer {
-    async fn game_updated(&self, _game_state_change: &GameStateChange, _new_game_state: &GameState, game_event_channel: &String) {
-        // TODO: JD: finish
+impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for AutoPlayer {
+    //
+
+    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
+        //
+
+        match game_state_change {
+            GameStateChange::PlayerAdded => {}
+            GameStateChange::TurnTaken => {
+                // match game.play_status {
+                //     PlayStatus::InProgress => {
+                //         // if new_game_state.
+                //     }
+                //     PlayStatus::NotStarted => {} // Early return. Nothing to do.
+                //     _ => {}
+                // }
+            }
+        }
     }
 }
 
@@ -112,3 +127,4 @@ pub(crate) enum SkillLevel {
     /// wrong moves.
     Master,
 }
+

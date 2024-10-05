@@ -34,6 +34,9 @@ pub mod event_plane {
         /// Address of the real-time messaging broker.
         pub(crate) broker_address: String,
 
+        /// Channel used to namespace the messaging.
+        pub(crate) channel_id: String,
+
         /// Broker port number of the real-time messaging broker.
         pub(crate) broker_port: u16,
 
@@ -46,6 +49,7 @@ pub mod event_plane {
         pub(crate) fn new(broker_address: String, broker_port: u16, channel_id: String) -> Self {
             Self {
                 broker_address,
+                channel_id: channel_id.clone(),
                 broker_port,
                 topic_prefix: EventPlaneTopicNames::build_topic_prefix(&channel_id),
             }

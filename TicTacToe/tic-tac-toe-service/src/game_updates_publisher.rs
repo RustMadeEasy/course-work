@@ -1,5 +1,5 @@
 use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
-use crate::game_state::GameState;
+use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::play_status::PlayStatus;
 use async_trait::async_trait;
@@ -29,23 +29,25 @@ impl GameUpdatesPublisher {
 }
 
 #[async_trait]
-impl GameObserverTrait for GameUpdatesPublisher {
+impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for GameUpdatesPublisher {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, _new_game_state: &GameState, game_event_channel: &String) {
+    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
         //
 
         let topic: String;
+        let topic_prefix = game.get_event_plane_config().topic_prefix;
+        let topic_prefix = topic_prefix.as_str();
 
         match game_state_change {
             GameStateChange::PlayerAdded => {
-                topic = EventPlaneTopicNames::PlayerAdded.build(game_event_channel);
+                topic = EventPlaneTopicNames::PlayerAdded.build(topic_prefix);
             }
             GameStateChange::TurnTaken => {
-                match _new_game_state.play_status {
-                    PlayStatus::EndedInStalemate => topic = EventPlaneTopicNames::GameEndedInStalemate.build(game_event_channel),
-                    PlayStatus::EndedInWin => topic = EventPlaneTopicNames::GameEndedInWin.build(game_event_channel),
-                    PlayStatus::InProgress => topic = EventPlaneTopicNames::TurnTaken.build(game_event_channel),
+                match game.get_current_game_state().play_status {
+                    PlayStatus::EndedInStalemate => topic = EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
+                    PlayStatus::EndedInWin => topic = EventPlaneTopicNames::GameEndedInWin.build(topic_prefix),
+                    PlayStatus::InProgress => topic = EventPlaneTopicNames::TurnTaken.build(topic_prefix),
                     PlayStatus::NotStarted => return, // Early return. Nothing to publish.
                 }
             }

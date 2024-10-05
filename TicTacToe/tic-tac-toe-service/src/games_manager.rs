@@ -11,6 +11,7 @@ use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::game_updates_publisher::GameUpdatesPublisher;
 use crate::models::requests::{AddPlayerParams, GameMode, GameTurnInfo, NewGameParams};
+use crate::models::PlayerInfo;
 use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
 use log::{debug, warn};
@@ -35,21 +36,21 @@ const MQTT_PORT: u16 = 1883;
 ///
 /// NOTE: Production-grade code would persist the gaming info to a mem cache or database so that
 /// multiple instances of the service can be run.
-pub(crate) struct GamesManager<T: GameTrait + Clone + Send + 'static> {
+pub(crate) struct GamesManager<T: GameTrait + Clone + Send + Sync + 'static> {
     //
 
     /// The Games being managed by this instance. They are stored by Game ID.
     games: Arc<Mutex<HashMap<String, T>>>,
 
-    observers: Vec<Box<dyn GameObserverTrait + Send>>,
+    observers: Vec<Box<dyn GameObserverTrait<T> + Send>>,
 }
 
-impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
+impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     //
 
-    async fn notify_observers(&self, game_state_change: GameStateChange, new_game_state: GameState, game_event_channel: &String) {
+    async fn notify_observers(&self, game_state_change: GameStateChange, game: &T) {
         for observer in self.observers.iter() {
-            observer.game_updated(&game_state_change, &new_game_state, &game_event_channel).await;
+            observer.game_updated(&game_state_change, &game).await;
         }
     }
 
@@ -70,9 +71,7 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
         // Update the Game instance in the list.
         self.games.lock().unwrap().insert(game.get_id(), game.clone());
 
-        self.notify_observers(GameStateChange::PlayerAdded,
-                              game.get_current_game_state().clone(),
-                              &game.get_event_plane_config().topic_prefix).await;
+        self.notify_observers(GameStateChange::PlayerAdded, &game).await;
 
         Ok(game)
     }
@@ -210,16 +209,14 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
         // Update our Game instance.
         self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
 
-        self.notify_observers(GameStateChange::TurnTaken,
-                              game.get_current_game_state().clone(),
-                              &game.get_event_plane_config().topic_prefix).await;
+        self.notify_observers(GameStateChange::TurnTaken, &game).await;
 
         Ok(new_game_state)
     }
 }
 
 // Invitation code handling
-impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
+impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     //
 
     /// Retrieves a Game by its invitation code.
