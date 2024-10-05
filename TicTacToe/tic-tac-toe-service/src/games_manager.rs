@@ -6,17 +6,14 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::errors::GameError;
+use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
-use crate::models::event_plane::EventPlaneTopicNames;
+use crate::models::event_plane::EventPlaneConfig;
 use crate::models::requests::{AddPlayerParams, GameMode, GameTurnInfo, NewGameParams};
-use crate::play_status::PlayStatus;
 use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
 use log::{debug, warn};
-use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
-use mqtt_publisher_lib::publisher::Publisher;
-use mqtt_publisher_lib::publisher_qos::PublisherQoS;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -27,9 +24,10 @@ pub(crate) type TicTacToeGamesManager = GamesManager<TicTacToeGame>;
 
 const ABANDONED_GAME_TTL_MS: i64 = (SECOND_IN_AN_HOUR * 1000) as i64;
 const CLEANUP_INTERVAL: Duration = Duration::from_secs(SECOND_IN_AN_HOUR / 2);
+const SECOND_IN_AN_HOUR: u64 = 60;
+
 const MQTT_BROKER_ADDRESS: &str = "test.mosquitto.org";
 const MQTT_PORT: u16 = 1883;
-const SECOND_IN_AN_HOUR: u64 = 60;
 
 /// Manages all the Game instances played on this service.
 ///
@@ -40,15 +38,23 @@ const SECOND_IN_AN_HOUR: u64 = 60;
 pub(crate) struct GamesManager<T: GameTrait + Clone + Send + 'static> {
     //
 
-    /// Provides MQTT message publishing functionality.
-    event_publisher: Publisher,
+    /// Provide the configuration required for clients to subscribe to Game updates via MQTT
+    pub(crate) event_plane_config: EventPlaneConfig,
 
     /// The Games being managed by this instance. They are stored by Game ID.
     games: Arc<Mutex<HashMap<String, T>>>,
+
+    observers: Vec<Box<dyn GameObserverTrait + Send>>,
 }
 
 impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
     //
+
+    async fn notify_observers(&self, game_state_change: GameStateChange, new_game_state: GameState) {
+        for observer in self.observers.iter() {
+            observer.game_updated(&game_state_change, &new_game_state).await;
+        }
+    }
 
     /// Adds a Player to the Game.
     pub(crate) async fn add_player(&mut self, second_player_params: &AddPlayerParams) -> Result<T, GameError> {
@@ -67,9 +73,7 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
         // Update the Game instance in the list.
         self.games.lock().unwrap().insert(game.get_id(), game.clone());
 
-        // Inform the listening clients that a Player has been added.
-        let topic = EventPlaneTopicNames::PlayerAdded.build(game.get_event_channel_id().as_str());
-        let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
+        self.notify_observers(GameStateChange::PlayerAdded, game.get_current_game_state().clone()).await;
 
         Ok(game)
     }
@@ -141,10 +145,7 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
             "".to_string()
         };
 
-        let game = T::new(params,
-                          MQTT_BROKER_ADDRESS,
-                          MQTT_PORT,
-                          invitation_code)?;
+        let game = T::new(params, invitation_code)?;
 
         self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
 
@@ -182,9 +183,11 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
     pub(crate) fn new() -> Self {
         //
 
-        let config = BrokerInfo::new(MQTT_BROKER_ADDRESS.to_string(), 10, MQTT_PORT, Duration::from_secs(60), MqttProtocolVersion::V5);
+        // let l = GameUpdatesPublisher::new("".to_string(), (), 0)
+
         let instance = Self {
-            event_publisher: Publisher::new(config),
+            event_plane_config: EventPlaneConfig::new(MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT),
+            observers: vec![],
             games: Default::default(),
         };
 
@@ -207,23 +210,7 @@ impl<T: GameTrait + Clone + Send + 'static> GamesManager<T> {
         // Update our Game instance.
         self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
 
-        // Inform the listening clients that a Player has taken a new turn.
-        let event_channel_id = game.get_event_channel_id();
-        let topic = EventPlaneTopicNames::TurnTaken.build(event_channel_id.as_str());
-        let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
-
-        // If the Game has ended, let the listening clients know how it ended.
-        match new_game_state.get_play_status() {
-            PlayStatus::EndedInStalemate => {
-                let topic = EventPlaneTopicNames::GameEndedInStalemate.build(event_channel_id.as_str());
-                let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
-            }
-            PlayStatus::EndedInWin => {
-                let topic = EventPlaneTopicNames::GameEndedInWin.build(event_channel_id.as_str());
-                let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
-            }
-            _ => {}
-        }
+        self.notify_observers(GameStateChange::TurnTaken, game.get_current_game_state().clone()).await;
 
         Ok(new_game_state)
     }

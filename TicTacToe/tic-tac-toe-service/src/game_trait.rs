@@ -30,10 +30,6 @@ pub(crate) trait GameTrait: Sized {
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;
 
-    /// Returns the Event Channel ID. This is used to form the topics for publishing Game state
-    /// change notifications.
-    fn get_event_channel_id(&self) -> String;
-
     /// Returns the Game ID.
     fn get_id(&self) -> String;
 
@@ -51,8 +47,6 @@ pub(crate) trait GameTrait: Sized {
 
     /// Creates a new Game instance.
     fn new(params: &NewGameParams,
-           mqtt_broker_address: impl Into<String>,
-           mqtt_port: u16,
            invitation_code: impl Into<String>) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.

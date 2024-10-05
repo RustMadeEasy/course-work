@@ -192,7 +192,6 @@ pub mod responses {
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
-    use crate::errors::GameError;
     use crate::game_state::GameState;
     use crate::game_trait::GameTrait;
     use crate::models::event_plane::EventPlaneConfig;
@@ -217,17 +216,15 @@ pub mod responses {
         pub(crate) players: Vec<PlayerInfo>,
     }
 
-    impl TryFrom<TicTacToeGame> for GameInfo {
-        type Error = GameError;
-
-        fn try_from(game: TicTacToeGame) -> Result<Self, Self::Error> {
+    impl From<TicTacToeGame> for GameInfo {
+        fn from(game: TicTacToeGame) -> GameInfo {
             let game_state = game.get_current_game_state();
-            Ok(GameInfo {
+            GameInfo {
                 current_player: game.current_player,
                 game_state,
                 id: game.id.clone(),
                 players: game.players,
-            })
+            }
         }
     }
 
@@ -246,16 +243,15 @@ pub mod responses {
         pub(crate) game_invitation_code: String,
     }
 
-    impl TryFrom<TicTacToeGame> for GameCreationResult {
-        type Error = GameError;
-
-        fn try_from(game: TicTacToeGame) -> Result<Self, Self::Error> {
-            let game_invitation_code = game.game_invitation_code.clone();
-            Ok(GameCreationResult {
-                game_info: GameInfo::try_from(game.clone()).unwrap(),
-                event_plane_config: game.event_plane_config,
-                game_invitation_code,
-            })
-        }
-    }
+    // impl From<TicTacToeGame> for GameCreationResult {
+    //
+    //     fn from(game: TicTacToeGame) -> GameCreationResult {
+    //         let game_invitation_code = game.game_invitation_code.clone();
+    //         GameCreationResult {
+    //             game_info: GameInfo::from(game.clone()),
+    //             event_plane_config: game.event_plane_config,
+    //             game_invitation_code,
+    //         }
+    //     }
+    // }
 }

@@ -36,6 +36,8 @@ mod play_outcome;
 mod play_status;
 mod tests;
 mod auto_player;
+mod game_observer_trait;
+mod game_updates_publisher;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;

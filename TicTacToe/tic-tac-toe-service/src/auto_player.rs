@@ -1,5 +1,8 @@
 use crate::game_board::{BoardPosition, GameBoard, GamePiece, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
+use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
+use crate::game_state::GameState;
 use crate::models::PlayerInfo;
+use async_trait::async_trait;
 use serde::Deserialize;
 use utoipa::ToSchema;
 
@@ -38,9 +41,9 @@ impl AutoPlayer {
 
         match Self::determine_empty_locations(&game_board) {
             None => None,
-            Some(empty_locations) => {
-                let index = (rand::random::<f32>() * empty_locations.len() as f32).floor() as usize;
-                Some(empty_locations[index].clone())
+            Some(open_locations) => {
+                let index = (rand::random::<f32>() * open_locations.len() as f32).floor() as usize;
+                Some(open_locations[index].clone())
             }
         }
     }
@@ -83,7 +86,17 @@ impl AutoPlayer {
             }
         }
 
-        Some(empty_locations)
+        match empty_locations.is_empty() {
+            false => Some(empty_locations),
+            true => None,
+        }
+    }
+}
+
+#[async_trait]
+impl GameObserverTrait for AutoPlayer {
+    async fn game_updated(&self, _game_state_change: &GameStateChange, _new_game_state: &GameState) {
+        // TODO: JD: finish
     }
 }
 

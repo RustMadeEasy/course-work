@@ -45,6 +45,42 @@ mod auto_player_tests {
         let empty_locations = AutoPlayer::determine_empty_locations(&board_state.game_board).unwrap();
         assert_eq!(empty_locations[0], BoardPosition::new(0, 1));
         assert_eq!(empty_locations[1], BoardPosition::new(1, 0));
+
+        /*
+        O  O  X
+        X  O  O
+        O  X  X     */
+        let mut board_state = GameState::new()
+            .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 1), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 1), &player_one, &player_two)
+            .unwrap();
+        board_state = board_state
+            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .unwrap();
+
+        // Make sure AutoPlayer can detect that a full board has no empty locations.
+        let empty_locations = AutoPlayer::determine_empty_locations(&board_state.game_board);
+        assert!(empty_locations.is_none());
     }
 }
 
@@ -496,9 +532,7 @@ mod game_play_tests {
             player_one_display_name: "Player One".to_string(),
             single_player_skill_level: None,
         };
-        let mqtt_broker_address = "test.mosquitto.org";
-        let mqtt_port = 1883;
-        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let mut game = TicTacToeGame::new(&params, Uuid::new_v4()).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -555,9 +589,7 @@ mod game_play_tests {
             player_one_display_name: "Player One".to_string(),
             single_player_skill_level: None,
         };
-        let mqtt_broker_address = "test.mosquitto.org";
-        let mqtt_port = 1883;
-        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let mut game = TicTacToeGame::new(&params, Uuid::new_v4()).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player
@@ -613,9 +645,7 @@ mod game_play_tests {
             player_one_display_name: "Player One".to_string(),
             single_player_skill_level: None,
         };
-        let mqtt_broker_address = "test.mosquitto.org";
-        let mqtt_port = 1883;
-        let mut game = TicTacToeGame::new(&params, mqtt_broker_address, mqtt_port, Uuid::new_v4()).unwrap();
+        let mut game = TicTacToeGame::new(&params, Uuid::new_v4()).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
 
         // Add the Second Player

@@ -14,7 +14,6 @@ use crate::errors::GameError::BoardLocationAlreadyOccupied;
 use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
-use crate::models::event_plane::EventPlaneConfig;
 use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
@@ -33,9 +32,6 @@ pub(crate) struct TicTacToeGame {
 
     /// The Player who can currently make a Game move
     pub(crate) current_player: Option<PlayerInfo>,
-
-    /// Provide the configuration required for clients to subscribe to Game updates via MQTT
-    pub(crate) event_plane_config: EventPlaneConfig,
 
     /// Code used to invite the second Player to the Game
     pub(crate) game_invitation_code: String,
@@ -126,9 +122,6 @@ impl GameTrait for TicTacToeGame {
         }
     }
 
-    /// Returns the Event Channel ID of this Game.
-    fn get_event_channel_id(&self) -> String { self.event_plane_config.topic_prefix.clone() }
-
     /// Returns the ID of this Game.
     fn get_id(&self) -> String {
         self.id.clone()
@@ -159,8 +152,6 @@ impl GameTrait for TicTacToeGame {
 
     /// Creates a new Game instance.
     fn new(params: &NewGameParams,
-           mqtt_broker_address: impl Into<String>,
-           mqtt_port: u16,
            invitation_code: impl Into<String>) -> Result<Self, GameError> {
         //
 
@@ -170,7 +161,6 @@ impl GameTrait for TicTacToeGame {
             players: vec![],
             play_history: vec![],
             game_invitation_code: invitation_code.into(),
-            event_plane_config: EventPlaneConfig::new(mqtt_broker_address.into(), mqtt_port),
         };
 
         // Add the human player

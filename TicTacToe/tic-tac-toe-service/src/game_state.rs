@@ -16,7 +16,6 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-
 use crate::errors::GameError;
 use crate::errors::GameError::{
     BoardLocationAlreadyOccupied, InvalidBoardPosition, WrongPlayerTakingTurn,

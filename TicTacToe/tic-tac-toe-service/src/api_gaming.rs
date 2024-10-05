@@ -45,15 +45,20 @@ pub(crate) async fn add_player(
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
-    match games_manager
-        .lock()
-        .unwrap()
-        .add_player(&second_player_params.into_inner()).await
+    let mut games_manager = games_manager.lock().unwrap();
+    let event_plane_config = games_manager.event_plane_config.clone();
+
+    match games_manager.add_player(&second_player_params.into_inner()).await
     {
-        Ok(game) => match GameCreationResult::try_from(game) {
-            Ok(new_game_info) => { Ok(web::Json(new_game_info)) }
-            Err(error) => { Err(actix_web::error::ErrorNotFound(error.to_string())) }
-        },
+        Ok(game) => {
+            let game_creation_result = GameCreationResult {
+                game_info: GameInfo::from(game.clone()),
+                event_plane_config,
+                game_invitation_code: game.game_invitation_code.clone(),
+            };
+
+            Ok(web::Json(game_creation_result))
+        }
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
 }
@@ -79,10 +84,17 @@ pub(crate) async fn create_game(
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
-    match games_manager.lock().unwrap().create_game(&new_game_params) {
-        Ok(game) => match GameCreationResult::try_from(game) {
-            Ok(new_game_info) => { Ok(web::Json(new_game_info)) }
-            Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+    let mut games_manager = games_manager.lock().unwrap();
+    let event_plane_config = games_manager.event_plane_config.clone();
+
+    match games_manager.create_game(&new_game_params) {
+        Ok(game) => {
+            let new_game_info = crate::models::responses::GameCreationResult {
+                game_info: GameInfo::from(game.clone()),
+                event_plane_config,
+                game_invitation_code: "".to_string(),
+            };
+            Ok(web::Json(new_game_info))
         },
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
