@@ -1,38 +1,34 @@
 use crate::game_board::{BoardPosition, GameBoard, GamePiece, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
 use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
 use crate::game_trait::GameTrait;
+use crate::models::requests::GameTurnInfo;
 use crate::models::PlayerInfo;
+use crate::play_status::PlayStatus;
 use async_trait::async_trait;
 use serde::Deserialize;
+use std::marker::PhantomData;
 use utoipa::ToSchema;
 
 /// AutoPlayer can play a game of Tic-Tac-Toe at various skill levels.
-pub(crate) struct AutoPlayer {
+pub(crate) struct AutoPlayer<T: GameTrait + Clone + Send + Sync> {
     player_info: PlayerInfo,
     skill_level: SkillLevel,
+    phantom_type: PhantomData<T>,
 }
 
-impl AutoPlayer {
+impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     //
 
     pub(crate) fn new(player_info: PlayerInfo, skill_level: SkillLevel) -> Self {
         Self {
             player_info,
             skill_level,
-        }
-    }
-
-    pub(crate) fn take_turn(&self, game_board: GameBoard) -> Option<BoardPosition> {
-        match self.skill_level {
-            SkillLevel::Beginner => self.take_turn_as_a_beginner(game_board),
-            SkillLevel::Intermediate => self.take_turn_as_an_intermediate(game_board),
-            SkillLevel::Expert => self.take_turn_as_an_expert(game_board),
-            SkillLevel::Master => self.take_turn_as_a_master(game_board),
+            phantom_type: Default::default(),
         }
     }
 }
 
-impl AutoPlayer {
+impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     //
 
     fn take_turn_as_a_beginner(&self, game_board: GameBoard) -> Option<BoardPosition> {
@@ -64,7 +60,30 @@ impl AutoPlayer {
     }
 }
 
-impl AutoPlayer {
+impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
+    //
+
+    pub(crate) fn take_turn(&self, game: &mut T) {
+        //
+
+        let game_board = game.get_current_game_state().game_board;
+
+        if let Some(new_board_position) = match self.skill_level {
+            SkillLevel::Beginner => self.take_turn_as_a_beginner(game_board),
+            SkillLevel::Intermediate => self.take_turn_as_an_intermediate(game_board),
+            SkillLevel::Expert => self.take_turn_as_an_expert(game_board),
+            SkillLevel::Master => self.take_turn_as_a_master(game_board),
+        } {
+            let game_turn_info = GameTurnInfo {
+                destination: new_board_position,
+                player_id: self.player_info.player_id.clone(),
+            };
+            let _ = game.take_turn(&game_turn_info);
+        }
+    }
+}
+
+impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     //
 
     /// Determines the empty locations on the specified Game Board.
@@ -94,30 +113,37 @@ impl AutoPlayer {
 }
 
 #[async_trait]
-impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for AutoPlayer {
+impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for AutoPlayer<T> {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
+    async fn game_updated(&self, game_state_change: &GameStateChange, game: &mut T) {
         //
 
         match game_state_change {
             GameStateChange::PlayerAdded => {}
             GameStateChange::TurnTaken => {
-                // match game.play_status {
-                //     PlayStatus::InProgress => {
-                //         // if new_game_state.
-                //     }
-                //     PlayStatus::NotStarted => {} // Early return. Nothing to do.
-                //     _ => {}
-                // }
+                let game_state = game.get_current_game_state();
+                match game_state.play_status {
+                    PlayStatus::InProgress => {
+                        // Is it my turn?
+                        if let Some(current_player) = game.get_current_player() {
+                            if current_player.player_id == self.player_info.player_id {
+                                self.take_turn(game);
+                            }
+                        }
+                    }
+                    PlayStatus::NotStarted => {} // Early return. Nothing to do.
+                    _ => {}
+                }
             }
         }
     }
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Clone, Default, Deserialize, ToSchema)]
 pub(crate) enum SkillLevel {
     /// Performs random moves.
+    #[default]
     Beginner,
     /// Takes best tactical move.
     Intermediate,

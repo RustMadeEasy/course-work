@@ -5,6 +5,7 @@ mod auto_player_tests {
     use crate::game_state::GameState;
     use crate::models::PlayerInfo;
     use uuid::Uuid;
+    use crate::tic_tac_toe_game::TicTacToeGame;
 
     #[test]
     fn test_get_empty_locations() {
@@ -42,7 +43,7 @@ mod auto_player_tests {
             .unwrap();
 
         // Make sure AutoPlayer can detect the empty locations.
-        let empty_locations = AutoPlayer::determine_empty_locations(&board_state.game_board).unwrap();
+        let empty_locations = AutoPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board).unwrap();
         assert_eq!(empty_locations[0], BoardPosition::new(0, 1));
         assert_eq!(empty_locations[1], BoardPosition::new(1, 0));
 
@@ -79,7 +80,7 @@ mod auto_player_tests {
             .unwrap();
 
         // Make sure AutoPlayer can detect that a full board has no empty locations.
-        let empty_locations = AutoPlayer::determine_empty_locations(&board_state.game_board);
+        let empty_locations = AutoPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board);
         assert!(empty_locations.is_none());
     }
 }

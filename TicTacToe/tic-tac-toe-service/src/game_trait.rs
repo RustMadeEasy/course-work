@@ -31,6 +31,12 @@ pub(crate) trait GameTrait: Sized {
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;
 
+    /// Returns the Player who can currently make a Game move.
+    fn get_current_player(&self) -> Option<PlayerInfo>;
+
+    /// Returns the Players.
+    fn get_players(&self) -> Vec<PlayerInfo>;
+
     /// Returns the Game ID.
     fn get_id(&self) -> String;
 

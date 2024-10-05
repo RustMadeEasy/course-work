@@ -102,7 +102,7 @@ pub mod event_plane {
 }
 
 /// Models a Tic-Tac-Toe Game Player.
-#[derive(Clone, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
 pub(crate) struct PlayerInfo {
     /// Name of the Player.
     pub(crate) display_name: String,

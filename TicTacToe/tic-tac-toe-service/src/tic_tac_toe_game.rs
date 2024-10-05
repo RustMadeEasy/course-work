@@ -15,7 +15,7 @@ use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneConfig;
-use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
+use crate::models::requests::{GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
 
@@ -125,6 +125,14 @@ impl GameTrait for TicTacToeGame {
         }
     }
 
+    fn get_current_player(&self) -> Option<PlayerInfo> {
+        self.current_player.clone()
+    }
+
+    fn get_players(&self) -> Vec<PlayerInfo> {
+        self.players.clone()
+    }
+
     /// Returns the ID of this Game.
     fn get_id(&self) -> String {
         self.id.clone()
@@ -170,13 +178,8 @@ impl GameTrait for TicTacToeGame {
             event_plane_config: EventPlaneConfig::new(broker_address, broker_port, Uuid::new_v4().to_string()),
         };
 
-        // Add the human player
+        // Add the player
         game.add_player(&params.player_one_display_name, false)?;
-
-        // Also, if this is human vs. computer, add the computer opponent now
-        if params.game_mode == GameMode::SinglePlayer {
-            game.add_player("Reema", true)?;
-        }
 
         Ok(game)
     }

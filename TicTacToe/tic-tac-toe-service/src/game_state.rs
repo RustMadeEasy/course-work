@@ -97,6 +97,7 @@ impl GameState {
     }
 
     /// Returns the Play Status.
+    #[cfg(test)]
     pub(crate) fn get_play_status(&self) -> PlayStatus {
         self.play_status.clone()
     }

@@ -32,7 +32,7 @@ impl GameUpdatesPublisher {
 impl<T: GameTrait + Clone + Send + Sync> GameObserverTrait<T> for GameUpdatesPublisher {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
+    async fn game_updated(&self, game_state_change: &GameStateChange, game: &mut T) {
         //
 
         let topic: String;
