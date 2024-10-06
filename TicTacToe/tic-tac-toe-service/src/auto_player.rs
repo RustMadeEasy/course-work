@@ -13,19 +13,25 @@ use utoipa::ToSchema;
 
 /// AutoPlayer can play a game of Tic-Tac-Toe at various skill levels.
 pub(crate) struct AutoPlayer<T: GameTrait + Clone + Send + Sync> {
+    game_id: String,
+    phantom_type: PhantomData<T>,
     player_info: PlayerInfo,
     skill_level: SkillLevel,
-    phantom_type: PhantomData<T>,
 }
 
 impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     //
 
-    pub(crate) fn new(player_info: PlayerInfo, skill_level: SkillLevel) -> Self {
+    pub(crate) fn get_name() -> String {
+        "Reema".to_string()
+    }
+
+    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: SkillLevel) -> Self {
         Self {
+            game_id: game_id.clone(),
+            phantom_type: Default::default(),
             player_info,
             skill_level,
-            phantom_type: Default::default(),
         }
     }
 }
@@ -138,6 +144,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     }
 }
 
+// GameObserverTrait implementation
 #[async_trait]
 impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutoPlayer<T> {
     //
@@ -163,6 +170,10 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
                 }
             }
         }
+    }
+
+    fn unique_id(&self) -> String {
+        self.game_id.clone()
     }
 }
 

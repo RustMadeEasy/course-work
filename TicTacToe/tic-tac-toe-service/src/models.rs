@@ -175,7 +175,7 @@ pub mod requests {
     }
 
     /// Specifies the type of Game - single player or two players.
-    #[derive(Deserialize, PartialEq, Serialize, ToSchema)]
+    #[derive(Deserialize, PartialEq, Serialize, ToSchema, Clone)]
     pub enum GameMode {
         SinglePlayer,
         TwoPlayers,

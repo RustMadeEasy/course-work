@@ -48,12 +48,6 @@ pub(crate) struct GamesManager<T: GameTrait + Clone + Send + Sync + 'static> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     //
 
-    async fn notify_observers(&mut self, game_state_change: GameStateChange, game: &T) {
-        for observer in self.observers.iter() {
-            let _ = observer.game_updated(&game_state_change, game).await;
-        }
-    }
-
     /// Adds a Player to the Game.
     pub(crate) async fn add_player(&mut self, second_player_params: &AddPlayerParams) -> Result<T, GameError> {
         //
@@ -79,8 +73,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     /// Background task that regularly cleans up abandoned and completed Games.
     fn auto_cleanup(games: Arc<Mutex<HashMap<String, T>>>, ttl: i64, interval: Duration) {
         //
-
-        // TODO: JD: test
 
         thread::spawn(move || {
             //
@@ -147,13 +139,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         // Also, if this is human vs. computer, add the computer opponent now
         if params.game_mode == GameMode::SinglePlayer {
-            game.add_player("Reema", true)?;
+            game.add_player(AutoPlayer::<T>::get_name().as_str(), true)?;
             let second_player = game.get_players().last().unwrap().clone();
             let skill_level = params.single_player_skill_level.clone().unwrap_or_default();
 
-            let auto_player = AutoPlayer::<T>::new(second_player, skill_level);
+            // Create an AutoPlayer to play against Play One.
+            let auto_player = AutoPlayer::<T>::new(&game.get_id(), second_player, skill_level);
 
-            // TODO: JD: we have to clean up the auto_player from the list of observers when this game is removed
+            // Make sure the AutoPlayer can follow the Game.
             self.observers.push(Box::new(auto_player));
         }
 
@@ -168,17 +161,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         let game = self.get_game_instance(game_id)?;
 
+        if game.get_game_mode() == GameMode::SinglePlayer {
+            self.remove_auto_player_observer(game_id);
+        }
+
         self.games.lock().unwrap().remove(&game.get_id());
 
         Ok(())
-    }
-
-    /// Retrieves the specified Game instance.
-    pub(crate) fn get_game_instance(&self, game_id: impl Into<String>) -> Result<T, GameError> {
-        match self.games.lock().unwrap().get(&game_id.into()) {
-            None => Err(GameError::GameNotFound),
-            Some(game) => Ok(game.clone()),
-        }
     }
 
     /// Retrieves the history of the Game States from the initial creation through to the current
@@ -187,6 +176,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     pub(crate) fn get_game_history(&self, game_id: &String) -> Result<Vec<GameState>, GameError> {
         let game = self.get_game_instance(game_id)?;
         Ok(game.get_play_history())
+    }
+
+    /// Retrieves the specified Game instance.
+    pub(crate) fn get_game_instance(&self, game_id: impl Into<String>) -> Result<T, GameError> {
+        match self.games.lock().unwrap().get(&game_id.into()) {
+            None => Err(GameError::GameNotFound),
+            Some(game) => Ok(game.clone()),
+        }
     }
 
     /// Creates a new GamesManager instance.
@@ -205,6 +202,18 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
         Self::auto_cleanup(instance.games.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
 
         instance
+    }
+
+    async fn notify_observers(&mut self, game_state_change: GameStateChange, game: &T) {
+        for observer in self.observers.iter() {
+            let _ = observer.game_updated(&game_state_change, game).await;
+        }
+    }
+
+    fn remove_auto_player_observer(&mut self, game_id: &String) {
+        if let Some(index) = self.observers.iter().position(|it| it.unique_id().as_str() != game_id) {
+            self.observers.remove(index);
+        }
     }
 
     /// Takes a turn for the specified Player.

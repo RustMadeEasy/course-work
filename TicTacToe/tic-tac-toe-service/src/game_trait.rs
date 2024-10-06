@@ -8,7 +8,7 @@
 use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::models::event_plane::EventPlaneConfig;
-use crate::models::requests::{GameTurnInfo, NewGameParams};
+use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
 use chrono::{DateTime, Utc};
 
@@ -33,6 +33,9 @@ pub(crate) trait GameTrait: Sized {
 
     /// Returns the Player who can currently make a Game move.
     fn get_current_player(&self) -> Option<PlayerInfo>;
+
+    /// Returns the Game Mode.
+    fn get_game_mode(&self) -> GameMode;
 
     /// Returns the Players.
     fn get_players(&self) -> Vec<PlayerInfo>;

@@ -7,12 +7,15 @@ use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
 use mqtt_publisher_lib::publisher::Publisher;
 use mqtt_publisher_lib::publisher_qos::PublisherQoS;
 use std::time::Duration;
+use uuid::Uuid;
 
 pub(crate) struct GameUpdatesPublisher {
     //
 
     /// Provides MQTT message publishing functionality.
     event_publisher: Publisher,
+
+    unique_id: String,
 }
 
 impl GameUpdatesPublisher {
@@ -24,7 +27,7 @@ impl GameUpdatesPublisher {
                                      broker_port,
                                      Duration::from_secs(60),
                                      MqttProtocolVersion::V5);
-        Self { event_publisher: Publisher::new(config) }
+        Self { event_publisher: Publisher::new(config), unique_id: Uuid::new_v4().to_string() }
     }
 }
 
@@ -54,5 +57,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
         }
 
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
+    }
+
+    fn unique_id(&self) -> String {
+        self.unique_id.clone()
     }
 }

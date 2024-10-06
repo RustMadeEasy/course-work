@@ -15,7 +15,7 @@ use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneConfig;
-use crate::models::requests::{GameTurnInfo, NewGameParams};
+use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
 
@@ -38,6 +38,9 @@ pub(crate) struct TicTacToeGame {
 
     /// Code used to invite the second Player to the Game
     pub(crate) game_invitation_code: String,
+
+    /// Indicates whether this is a Single-Player or Two-Player Game.
+    pub(crate) game_mode: GameMode,
 
     /// Unique ID of the Game
     pub(crate) id: String,
@@ -129,6 +132,10 @@ impl GameTrait for TicTacToeGame {
         self.current_player.clone()
     }
 
+    fn get_game_mode(&self) -> GameMode {
+        self.game_mode.clone()
+    }
+
     fn get_players(&self) -> Vec<PlayerInfo> {
         self.players.clone()
     }
@@ -176,6 +183,7 @@ impl GameTrait for TicTacToeGame {
             play_history: vec![],
             game_invitation_code: invitation_code.into(),
             event_plane_config: EventPlaneConfig::new(broker_address, broker_port, Uuid::new_v4().to_string()),
+            game_mode: params.game_mode.clone(),
         };
 
         // Add the player
