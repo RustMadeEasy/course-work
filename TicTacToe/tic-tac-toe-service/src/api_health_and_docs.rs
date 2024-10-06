@@ -10,7 +10,6 @@ use utoipa::openapi::ContactBuilder;
 use utoipa::OpenApi;
 
 use crate::api_gaming::*;
-use crate::auto_player::SkillLevel;
 use crate::game_board::BoardPosition;
 use crate::game_board::GamePiece;
 use crate::game_state::GameState;
@@ -24,6 +23,7 @@ use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
+use crate::models::AutoPlayerSkillLevel;
 
 /**
  * Defines and implements the public Health and Docs contracts for this service.
@@ -57,7 +57,7 @@ use crate::play_status::PlayStatus;
         NewGameParams,
         PlayerInfo,
         PlayStatus,
-        SkillLevel,
+        AutoPlayerSkillLevel,
     ))
 )]
 pub(crate) struct ApiDoc;

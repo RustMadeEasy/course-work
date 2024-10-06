@@ -2,14 +2,12 @@ use crate::game_board::{BoardPosition, GameBoard, GamePiece, MAX_BOARD_COLUMNS, 
 use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
 use crate::game_trait::GameTrait;
 use crate::models::requests::GameTurnInfo;
-use crate::models::PlayerInfo;
+use crate::models::{AutoPlayerSkillLevel, PlayerInfo};
 use crate::play_status::PlayStatus;
 use async_trait::async_trait;
 use log::error;
-use serde::Deserialize;
 use std::marker::PhantomData;
 use tokio::time::{sleep, Duration};
-use utoipa::ToSchema;
 
 // To help make the auto-player feel like more human, we deliberate on the move for anywhere
 // between MIN_DELIBERATION_TIME and MAX_DELIBERATION_TIME seconds.
@@ -21,7 +19,7 @@ pub(crate) struct AutoPlayer<T: GameTrait + Clone + Send + Sync> {
     game_id: String,
     phantom_type: PhantomData<T>,
     player_info: PlayerInfo,
-    skill_level: SkillLevel,
+    skill_level: AutoPlayerSkillLevel,
 }
 
 impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
@@ -31,7 +29,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
         "Reema".to_string()
     }
 
-    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: SkillLevel) -> Self {
+    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: AutoPlayerSkillLevel) -> Self {
         Self {
             game_id: game_id.clone(),
             phantom_type: Default::default(),
@@ -83,10 +81,10 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
         let game_board = game.get_current_game_state().game_board;
 
         if let Some(new_board_position) = match self.skill_level {
-            SkillLevel::Beginner => self.take_turn_as_a_beginner(game_board),
-            SkillLevel::Intermediate => self.take_turn_as_an_intermediate(game_board),
-            SkillLevel::Expert => self.take_turn_as_an_expert(game_board),
-            SkillLevel::Master => self.take_turn_as_a_master(game_board),
+            AutoPlayerSkillLevel::Beginner => self.take_turn_as_a_beginner(game_board),
+            AutoPlayerSkillLevel::Intermediate => self.take_turn_as_an_intermediate(game_board),
+            AutoPlayerSkillLevel::Expert => self.take_turn_as_an_expert(game_board),
+            AutoPlayerSkillLevel::Master => self.take_turn_as_a_master(game_board),
         } {
             let game_id = game.get_id();
             let player_id = self.player_info.player_id.clone();
@@ -180,18 +178,4 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
     fn unique_id(&self) -> String {
         self.game_id.clone()
     }
-}
-
-#[derive(Clone, Default, Deserialize, ToSchema)]
-pub(crate) enum SkillLevel {
-    /// Performs random moves.
-    #[default]
-    Beginner,
-    /// Takes best tactical move.
-    Intermediate,
-    /// Takes the best strategic moves, looking several moves into the future.
-    Expert,
-    /// Expands on the expert level by also making moves that can trick the other player into making
-    /// wrong moves.
-    Master,
 }

@@ -101,6 +101,20 @@ pub mod event_plane {
     }
 }
 
+#[derive(Clone, Default, Deserialize, ToSchema)]
+pub(crate) enum AutoPlayerSkillLevel {
+    /// Performs random moves.
+    #[default]
+    Beginner,
+    /// Takes best tactical move.
+    Intermediate,
+    /// Takes the best strategic moves, looking several moves into the future.
+    Expert,
+    /// Expands on the expert level by also making moves that can trick the other player into making
+    /// wrong moves.
+    Master,
+}
+
 /// Models a Tic-Tac-Toe Game Player.
 #[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
 pub(crate) struct PlayerInfo {
@@ -145,11 +159,11 @@ impl PlayerInfo {
 }
 
 pub mod requests {
-    use crate::auto_player::SkillLevel;
     use crate::game_board::BoardPosition;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
+    use crate::models::AutoPlayerSkillLevel;
 
     pub(crate) const ID_LENGTH_MAX: u64 = 36;
     const ID_LENGTH_MIN: u64 = 1;
@@ -187,7 +201,7 @@ pub mod requests {
         pub game_mode: GameMode,
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
         pub player_one_display_name: String,
-        pub single_player_skill_level: Option<SkillLevel>,
+        pub single_player_skill_level: Option<AutoPlayerSkillLevel>,
     }
 }
 
