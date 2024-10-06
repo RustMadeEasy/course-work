@@ -6,6 +6,7 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use actix_web::{get, web, HttpResponse};
+use log::debug;
 use utoipa::openapi::ContactBuilder;
 use utoipa::OpenApi;
 
@@ -21,9 +22,9 @@ use crate::models::requests::GameTurnInfo;
 use crate::models::requests::NewGameParams;
 use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
+use crate::models::AutomaticPlayerSkillLevel;
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
-use crate::models::AutoPlayerSkillLevel;
 
 /**
  * Defines and implements the public Health and Docs contracts for this service.
@@ -57,7 +58,7 @@ use crate::models::AutoPlayerSkillLevel;
         NewGameParams,
         PlayerInfo,
         PlayStatus,
-        AutoPlayerSkillLevel,
+        AutomaticPlayerSkillLevel,
     ))
 )]
 pub(crate) struct ApiDoc;
@@ -66,6 +67,10 @@ pub(crate) struct ApiDoc;
 /// instance, PostMan Collections, Client SDKs, etc.
 #[get("/api-docs")]
 pub(crate) async fn api_docs() -> actix_web::Result<String> {
+    //
+
+    debug!("HTTP GET to /api_docs");
+
     let mut doc = ApiDoc::openapi();
     doc.info.title = "Tic-Tac-Toe Service".to_string();
     doc.info.contact = Some(
@@ -82,5 +87,9 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
 /// Responds with the health of the Service.
 #[get("/health")]
 pub(crate) async fn health() -> HttpResponse {
+    //
+
+    debug!("HTTP GET to /health");
+
     HttpResponse::Ok().json(web::Json("Up"))
 }

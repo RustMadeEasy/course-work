@@ -6,6 +6,7 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use chrono::{DateTime, Utc};
+use log::debug;
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -70,6 +71,8 @@ impl GameTrait for TicTacToeGame {
     /// Adds a Player to the Game.
     fn add_player(&mut self, display_name: impl Into<String> + Copy, is_automated: bool) -> Result<(), GameError> {
         //
+
+        debug!("TicTacToeGame: Adding player {}", display_name.into());
 
         let game_piece: GamePiece;
 
@@ -176,6 +179,8 @@ impl GameTrait for TicTacToeGame {
     fn new(params: &NewGameParams, invitation_code: impl Into<String>, broker_address: String, broker_port: u16) -> Result<Self, GameError> {
         //
 
+        debug!("TicTacToeGame: Creating new game. Params: {:?}", params);
+
         let mut game = Self {
             current_player: None,
             id: Uuid::new_v4().to_string(),
@@ -195,6 +200,8 @@ impl GameTrait for TicTacToeGame {
     /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError> {
         //
+
+        debug!("TicTacToeGame: taking game turn. Params: {:?}", game_turn_info);
 
         let board_state = self.get_current_game_state();
 

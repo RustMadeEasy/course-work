@@ -6,6 +6,7 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use chrono::{DateTime, Utc};
+use log::debug;
 /**
  * Defines Game State related structs and enums.
  *
@@ -124,6 +125,8 @@ impl GameState {
     ) -> Result<GameState, GameError> {
         //
 
+        debug!("place_game_piece position: {:?}", position);
+
         // *** Verify that a valid board location is being specified ***
         if !Self::is_valid_board_position(position) {
             return Err(InvalidBoardPosition);
@@ -223,6 +226,8 @@ impl GameState {
         other_player_game_piece: &GamePiece,
     ) -> PlayOutcome {
         //
+
+        debug!("determine_outcome_of_play called for game board: {:?}", game_board);
 
         let as_binary = Self::binary_representation_for_piece_placement(
             game_board,

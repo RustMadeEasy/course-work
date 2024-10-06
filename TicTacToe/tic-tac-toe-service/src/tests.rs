@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod auto_player_tests {
-    use crate::auto_player::AutoPlayer;
+    use crate::auto_player::AutomaticPlayer;
     use crate::game_board::{BoardPosition, GamePiece};
     use crate::game_state::GameState;
     use crate::models::PlayerInfo;
-    use uuid::Uuid;
     use crate::tic_tac_toe_game::TicTacToeGame;
+    use uuid::Uuid;
 
     #[test]
     fn test_get_empty_locations() {
@@ -42,8 +42,8 @@ mod auto_player_tests {
             .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
 
-        // Make sure AutoPlayer can detect the empty locations.
-        let empty_locations = AutoPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board).unwrap();
+        // Make sure AutomaticPlayer can detect the empty locations.
+        let empty_locations = AutomaticPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board).unwrap();
         assert_eq!(empty_locations[0], BoardPosition::new(0, 1));
         assert_eq!(empty_locations[1], BoardPosition::new(1, 0));
 
@@ -79,8 +79,8 @@ mod auto_player_tests {
             .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
 
-        // Make sure AutoPlayer can detect that a full board has no empty locations.
-        let empty_locations = AutoPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board);
+        // Make sure AutomaticPlayer can detect that a full board has no empty locations.
+        let empty_locations = AutomaticPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board);
         assert!(empty_locations.is_none());
     }
 }
@@ -326,7 +326,7 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params) {
+        let game = match manager.create_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()
@@ -369,7 +369,7 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params) {
+        let game = match manager.create_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()
@@ -437,7 +437,7 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params) {
+        let game = match manager.create_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()
@@ -480,7 +480,7 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params) {
+        let game = match manager.create_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()

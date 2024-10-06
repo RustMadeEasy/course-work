@@ -5,7 +5,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::auto_player::AutoPlayer;
+use crate::auto_player::AutomaticPlayer;
 use crate::errors::GameError;
 use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
 use crate::game_state::GameState;
@@ -14,7 +14,7 @@ use crate::game_updates_publisher::GameUpdatesPublisher;
 use crate::models::requests::{AddPlayerParams, GameMode, GameTurnInfo, NewGameParams};
 use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
-use log::{debug, warn};
+use log::{debug, error};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -25,7 +25,7 @@ pub(crate) type TicTacToeGamesManager = GamesManager<TicTacToeGame>;
 
 const ABANDONED_GAME_TTL_MS: i64 = (SECOND_IN_AN_HOUR * 1000) as i64;
 const CLEANUP_INTERVAL: Duration = Duration::from_secs(SECOND_IN_AN_HOUR / 2);
-const SECOND_IN_AN_HOUR: u64 = 60;
+const SECOND_IN_AN_HOUR: u64 = 60 * 60;
 
 const MQTT_BROKER_ADDRESS: &str = "test.mosquitto.org";
 const MQTT_PORT: u16 = 1883;
@@ -52,6 +52,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     pub(crate) async fn add_player(&mut self, second_player_params: &AddPlayerParams) -> Result<T, GameError> {
         //
 
+        debug!("GamesManager: add_player() called. Params: {:?}", second_player_params);
+
         // Find the Game instance via the Game_invitation_code.
         let mut game = match self.get_game_by_invitation_code(&second_player_params.game_invitation_code) {
             None => {
@@ -65,7 +67,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
         // Update the Game instance in the list.
         self.games.lock().unwrap().insert(game.get_id(), game.clone());
 
-        self.notify_observers(GameStateChange::PlayerAdded, &mut game).await;
+        self.notify_observers(GameStateChange::PlayerAdded, &game).await;
 
         Ok(game)
     }
@@ -74,13 +76,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     fn auto_cleanup(games: Arc<Mutex<HashMap<String, T>>>, ttl: i64, interval: Duration) {
         //
 
+        debug!("GamesManager: auto_cleanup() started.");
+
         thread::spawn(move || {
             //
 
             loop {
                 //
 
-                debug!("Cleanup thread: Waking.");
+                debug!("GamesManager: Cleanup thread: Waking.");
 
                 let mut non_expired_games: HashMap<String, T> = HashMap::new();
                 let mut games = games.lock().unwrap();
@@ -110,9 +114,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
                 }
 
                 if games_expired > 0 {
-                    debug!("Cleanup thread: Complete. Removed {} expired games. Going back to sleep.", games_expired);
+                    debug!("GamesManager: Cleanup thread: Complete. Removed {} expired games. Going back to sleep.", games_expired);
                 } else {
-                    debug!("Cleanup thread: Complete. Going back to sleep.");
+                    debug!("GamesManager: Cleanup thread: Complete. Going back to sleep.");
                 }
 
                 drop(games);
@@ -129,6 +133,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     pub(crate) async fn create_game(&mut self, params: &NewGameParams) -> Result<T, GameError> {
         //
 
+        debug!("GamesManager: create_game() called. Params: {:?}", params);
+
         let invitation_code = if params.game_mode == GameMode::TwoPlayers {
             self.generate_invitation_code()
         } else {
@@ -139,14 +145,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         // Also, if this is human vs. computer, add the computer opponent now
         if params.game_mode == GameMode::SinglePlayer {
-            game.add_player(AutoPlayer::<T>::get_name().as_str(), true)?;
+            game.add_player(AutomaticPlayer::<T>::get_name().as_str(), true)?;
             let second_player = game.get_players().last().unwrap().clone();
             let skill_level = params.single_player_skill_level.clone().unwrap_or_default();
 
-            // Create an AutoPlayer to play against Play One.
-            let auto_player = AutoPlayer::<T>::new(&game.get_id(), second_player, skill_level);
+            // Create an AutomaticPlayer to play against Play One.
+            let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), second_player, skill_level);
 
-            // Make sure the AutoPlayer can follow the Game.
+            // Make sure the AutomaticPlayer can follow the Game.
             self.observers.push(Box::new(auto_player));
         }
 
@@ -158,6 +164,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     /// Closes down the specified Game instance.
     pub(crate) fn end_game(&mut self, game_id: &String) -> Result<(), GameError> {
         //
+
+        debug!("GamesManager: end_game() called for game: {:?}.", game_id);
 
         let game = self.get_game_instance(game_id)?;
 
@@ -190,6 +198,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     pub(crate) fn new() -> Self {
         //
 
+        debug!("GamesManager: new()");
+
         let mut instance = Self {
             observers: vec![],
             games: Default::default(),
@@ -205,12 +215,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     }
 
     async fn notify_observers(&mut self, game_state_change: GameStateChange, game: &T) {
+        debug!("GamesManager: notifying observers of game stage change: {:?}.", game_state_change);
         for observer in self.observers.iter() {
             let _ = observer.game_updated(&game_state_change, game).await;
         }
     }
 
     fn remove_auto_player_observer(&mut self, game_id: &String) {
+        debug!("GamesManager: remove_auto_player_observer() called for game: {:?}.", game_id);
         if let Some(index) = self.observers.iter().position(|it| it.unique_id().as_str() == game_id) {
             self.observers.remove(index);
         }
@@ -224,13 +236,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     ) -> Result<GameState, GameError> {
         //
 
+        debug!("GamesManager: take_turn() called for game: {:?}.", game_id);
+
         let mut game = self.get_game_instance(game_id)?;
         let new_game_state = game.take_turn(game_turn_info)?;
 
         // Update our Game instance.
         self.games.lock().unwrap().insert(game.get_id().clone(), game.clone());
 
-        self.notify_observers(GameStateChange::TurnTaken, &mut game).await;
+        self.notify_observers(GameStateChange::TurnTaken, &game).await;
 
         Ok(new_game_state)
     }
@@ -259,6 +273,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     fn generate_invitation_code(&self) -> String {
         //
 
+        debug!("GamesManager: generate_invitation_code() called.");
+
         // Place a limit to prevent an endless loop.
         for _ in 0..=1000 {
             let game_invitation_code: String = VerificationCodeGenerator::generate();
@@ -269,7 +285,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
         }
 
         // It will be next to impossible to get here. However, we have to cover all cases.
-        warn!("Could not create unique game invitation code!");
+        error!("Could not create unique game invitation code!");
         "".to_string()
     }
 }

@@ -7,6 +7,7 @@ pub(crate) trait GameObserverTrait<T: GameTrait + Clone + Send + Sync + 'static>
     fn unique_id(&self) -> String;
 }
 
+#[derive(Debug)]
 pub(crate) enum GameStateChange {
     PlayerAdded,
     TurnTaken,

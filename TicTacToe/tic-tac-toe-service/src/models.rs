@@ -101,8 +101,8 @@ pub mod event_plane {
     }
 }
 
-#[derive(Clone, Default, Deserialize, ToSchema)]
-pub(crate) enum AutoPlayerSkillLevel {
+#[derive(Clone, Debug, Default, Deserialize, ToSchema)]
+pub(crate) enum AutomaticPlayerSkillLevel {
     /// Performs random moves.
     #[default]
     Beginner,
@@ -160,10 +160,10 @@ impl PlayerInfo {
 
 pub mod requests {
     use crate::game_board::BoardPosition;
+    use crate::models::AutomaticPlayerSkillLevel;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
-    use crate::models::AutoPlayerSkillLevel;
 
     pub(crate) const ID_LENGTH_MAX: u64 = 36;
     const ID_LENGTH_MIN: u64 = 1;
@@ -172,7 +172,7 @@ pub mod requests {
     const NAME_LENGTH_MIN: u64 = 1;
 
     /// Models info needed to add a Player to a Game.
-    #[derive(Deserialize, ToSchema, Validate)]
+    #[derive(Debug, Deserialize, ToSchema, Validate)]
     pub struct AddPlayerParams {
         #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
         pub game_invitation_code: String,
@@ -181,7 +181,7 @@ pub mod requests {
     }
 
     /// Models info needed to perform a Game turn.
-    #[derive(Deserialize, Serialize, ToSchema, Validate)]
+    #[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
     pub struct GameTurnInfo {
         pub destination: BoardPosition,
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
@@ -189,19 +189,19 @@ pub mod requests {
     }
 
     /// Specifies the type of Game - single player or two players.
-    #[derive(Deserialize, PartialEq, Serialize, ToSchema, Clone)]
+    #[derive(Debug, Deserialize, PartialEq, Serialize, ToSchema, Clone)]
     pub enum GameMode {
         SinglePlayer,
         TwoPlayers,
     }
 
     /// Models info needed to start a new Game.
-    #[derive(Deserialize, ToSchema, Validate)]
+    #[derive(Debug, Deserialize, ToSchema, Validate)]
     pub struct NewGameParams {
         pub game_mode: GameMode,
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
         pub player_one_display_name: String,
-        pub single_player_skill_level: Option<AutoPlayerSkillLevel>,
+        pub single_player_skill_level: Option<AutomaticPlayerSkillLevel>,
     }
 }
 

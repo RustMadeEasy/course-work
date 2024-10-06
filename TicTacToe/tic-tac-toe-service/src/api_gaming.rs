@@ -13,6 +13,7 @@
  */
 
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use log::debug;
 use std::sync::Mutex;
 use validator::Validate;
 
@@ -40,6 +41,7 @@ pub(crate) async fn add_player(
     second_player_params: web::Json<AddPlayerParams>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
+    debug!("HTTP POST to /games/players. Params: {:?}", second_player_params);
 
     // *** Validate input params ***
     if let Err(e) = second_player_params.validate() {
@@ -78,6 +80,7 @@ pub(crate) async fn create_game(
     new_game_params: web::Json<NewGameParams>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
+    debug!("HTTP POST to /games. Params: {:?}", new_game_params);
 
     // *** Validate input params ***
     if let Err(e) = new_game_params.validate() {
@@ -115,6 +118,7 @@ pub(crate) async fn end_game(
     game_id: web::Path<String>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> HttpResponse {
+    debug!("HTTP DELETE to /games/game/{}", game_id);
 
     // *** Validate input params ***
     if game_id.is_empty() {
@@ -148,6 +152,7 @@ pub(crate) async fn get_game_history(
     game_id: web::Path<String>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<Vec<GameState>>> {
+    debug!("HTTP GET to /games/{}/turns", game_id);
 
     // *** Validate input params ***
     validate_game_id(&game_id)?;
@@ -175,6 +180,7 @@ pub(crate) async fn get_game_info(
     game_id: web::Path<String>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameInfo>> {
+    debug!("HTTP GET to /games/{}", game_id);
 
     // *** Validate input params ***
     validate_game_id(&game_id)?;
@@ -211,6 +217,7 @@ pub(crate) async fn take_turn(
     game_turn_info: web::Json<GameTurnInfo>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> impl Responder {
+    debug!("HTTP POST to /games/{}/turns", game_id);
 
     // *** Validate input params ***
     validate_game_id(&game_id)?;

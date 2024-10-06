@@ -1,11 +1,18 @@
+// Tic-Tac-Toe Service
+//
+// Provides 2-client Game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 use crate::game_board::{BoardPosition, GameBoard, GamePiece, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
 use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
 use crate::game_trait::GameTrait;
 use crate::models::requests::GameTurnInfo;
-use crate::models::{AutoPlayerSkillLevel, PlayerInfo};
+use crate::models::{AutomaticPlayerSkillLevel, PlayerInfo};
 use crate::play_status::PlayStatus;
 use async_trait::async_trait;
-use log::error;
+use log::{debug, error, info};
 use std::marker::PhantomData;
 use tokio::time::{sleep, Duration};
 
@@ -14,22 +21,24 @@ use tokio::time::{sleep, Duration};
 static MAX_DELIBERATION_TIME: f32 = 3_f32;
 static MIN_DELIBERATION_TIME: usize = 1;
 
-/// AutoPlayer can play a game of Tic-Tac-Toe at various skill levels.
-pub(crate) struct AutoPlayer<T: GameTrait + Clone + Send + Sync> {
+/// AutomaticPlayer can play a game of Tic-Tac-Toe at various skill levels.
+pub(crate) struct AutomaticPlayer<T: GameTrait + Clone + Send + Sync> {
     game_id: String,
     phantom_type: PhantomData<T>,
     player_info: PlayerInfo,
-    skill_level: AutoPlayerSkillLevel,
+    skill_level: AutomaticPlayerSkillLevel,
 }
 
-impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
+impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
+    /// Specifies the name of the AutomaticPlayer.
     pub(crate) fn get_name() -> String {
         "Reema".to_string()
     }
 
-    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: AutoPlayerSkillLevel) -> Self {
+    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: AutomaticPlayerSkillLevel) -> Self {
+        info!("Creating AutomaticPlayer {}", game_id);
         Self {
             game_id: game_id.clone(),
             phantom_type: Default::default(),
@@ -39,10 +48,11 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     }
 }
 
-impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
+impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
     fn take_turn_as_a_beginner(&self, game_board: GameBoard) -> Option<BoardPosition> {
+        debug!("Taking AutomaticPlayer turn as a beginner for game {}", self.game_id);
 
         // *** Select any random, open location on the board ***
 
@@ -56,47 +66,53 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     }
 
     fn take_turn_as_an_intermediate(&self, _game_board: GameBoard) -> Option<BoardPosition> {
+        debug!("Taking AutomaticPlayer turn as an intermediate for game {}", self.game_id);
         // TODO: JD: finish
         // TODO: JD: consider blocking the opponent from winning
         None
     }
 
     fn take_turn_as_an_expert(&self, _game_board: GameBoard) -> Option<BoardPosition> {
+        debug!("Taking AutomaticPlayer turn as an expert for game {}", self.game_id);
         // TODO: JD: finish
         None
     }
 
     fn take_turn_as_a_master(&self, _game_board: GameBoard) -> Option<BoardPosition> {
+        debug!("Taking AutomaticPlayer turn as a master for game {}", self.game_id);
         // TODO: JD: finish
         None
     }
 }
 
-impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
+impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
     pub(crate) async fn take_turn(&self, game: &T) {
         //
 
+        info!("Taking AutomaticPlayer turn for game {}", self.game_id);
+
         let game_board = game.get_current_game_state().game_board;
 
         if let Some(new_board_position) = match self.skill_level {
-            AutoPlayerSkillLevel::Beginner => self.take_turn_as_a_beginner(game_board),
-            AutoPlayerSkillLevel::Intermediate => self.take_turn_as_an_intermediate(game_board),
-            AutoPlayerSkillLevel::Expert => self.take_turn_as_an_expert(game_board),
-            AutoPlayerSkillLevel::Master => self.take_turn_as_a_master(game_board),
+            AutomaticPlayerSkillLevel::Beginner => self.take_turn_as_a_beginner(game_board),
+            AutomaticPlayerSkillLevel::Intermediate => self.take_turn_as_an_intermediate(game_board),
+            AutomaticPlayerSkillLevel::Expert => self.take_turn_as_an_expert(game_board),
+            AutomaticPlayerSkillLevel::Master => self.take_turn_as_a_master(game_board),
         } {
+            //
+
             let game_id = game.get_id();
             let player_id = self.player_info.player_id.clone();
 
             tokio::spawn(async move {
 
-                // Make the service feel like it is deliberating on the move for some time.
-                // We wait anywhere between 1 and 4 seconds.
-                let wait_time_secs = (rand::random::<f32>() * MAX_DELIBERATION_TIME).floor() as usize + MIN_DELIBERATION_TIME;
-                sleep(Duration::from_secs(wait_time_secs as u64)).await;
+                // Make the service feel more human by deliberating on the move for some time...
+                let deliberation_time_in_secs = (rand::random::<f32>() * MAX_DELIBERATION_TIME).floor() as usize + MIN_DELIBERATION_TIME;
+                sleep(Duration::from_secs(deliberation_time_in_secs as u64)).await;
 
-                // *** Control the service via the API in the same way clients do. ***
+                // *** Now, control the service via the API in the same way client apps do. ***
 
                 let url = format!("http://127.0.0.1:50020/v1/games/{}/turns", game_id);
                 let client = reqwest::Client::new();
@@ -118,7 +134,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
     }
 }
 
-impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
+impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
     /// Determines the empty locations on the specified Game Board.
@@ -149,11 +165,13 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
 
 // GameObserverTrait implementation
 #[async_trait]
-impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutoPlayer<T> {
+impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutomaticPlayer<T> {
     //
 
     async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
         //
+
+        debug!("AutomaticPlayer: received game_updated() for game {}", self.game_id);
 
         match game_state_change {
             GameStateChange::PlayerAdded => {}

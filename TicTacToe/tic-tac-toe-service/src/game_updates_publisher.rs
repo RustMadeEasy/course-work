@@ -3,6 +3,7 @@ use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::play_status::PlayStatus;
 use async_trait::async_trait;
+use log::debug;
 use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
 use mqtt_publisher_lib::publisher::Publisher;
 use mqtt_publisher_lib::publisher_qos::PublisherQoS;
@@ -37,6 +38,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
 
     async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
         //
+
+        debug!("GameUpdatesPublisher: received game_updated() for game {}", game.get_id());
 
         let topic: String;
         let topic_prefix = game.get_event_plane_config().topic_prefix;
