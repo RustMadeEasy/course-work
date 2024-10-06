@@ -14,12 +14,11 @@ use crate::game_updates_publisher::GameUpdatesPublisher;
 use crate::models::requests::{AddPlayerParams, GameMode, GameTurnInfo, NewGameParams};
 use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
-use log::{debug, error};
+use log::debug;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use verification_code_gen::verification_code_generator::VerificationCodeGenerator;
 
 pub(crate) type TicTacToeGamesManager = GamesManager<TicTacToeGame>;
 
@@ -135,13 +134,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         debug!("GamesManager: create_game() called. Params: {:?}", params);
 
-        let invitation_code = if params.game_mode == GameMode::TwoPlayers {
-            self.generate_invitation_code()
-        } else {
-            "".to_string()
-        };
-
-        let mut game = T::new(params, invitation_code, MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT)?;
+        let mut game = T::new(params, MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT)?;
 
         // Also, if this is human vs. computer, add the computer opponent now
         if params.game_mode == GameMode::SinglePlayer {
@@ -254,38 +247,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     //
 
-    /// Retrieves a Game by its invitation code.
+    /// Retrieves a Game by the invitation code of the Player who initiated the Game.
     fn get_game_by_invitation_code(&self, invitation_code: &String) -> Option<T> {
         self.games
             .lock()
             .unwrap()
             .iter()
-            .find(|it| it.1.get_invitation_code() == *invitation_code)
+            .find(|it| it.1.get_initiating_player().unwrap_or_default().player_invitation_code == *invitation_code)
             .map(|it| it.1.clone())
-    }
-
-    /// Creates a unique, 6-digit code for use as a Game Invitation.
-    ///
-    /// NOTE: We use a 6-digit Game Invitation instead of performing the Game setup handshaking
-    /// with the Game ID for two reasons:
-    ///     1) We don't want to expose the Game ID to clients that are not party to the Game.
-    ///     2) A 6-digit code is practical for end-users to utilize.
-    fn generate_invitation_code(&self) -> String {
-        //
-
-        debug!("GamesManager: generate_invitation_code() called.");
-
-        // Place a limit to prevent an endless loop.
-        for _ in 0..=1000 {
-            let game_invitation_code: String = VerificationCodeGenerator::generate();
-            // Ensure uniqueness across all open Games
-            if self.get_game_by_invitation_code(&game_invitation_code).is_none() {
-                return game_invitation_code;
-            }
-        }
-
-        // It will be next to impossible to get here. However, we have to cover all cases.
-        error!("Could not create unique game invitation code!");
-        "".to_string()
     }
 }

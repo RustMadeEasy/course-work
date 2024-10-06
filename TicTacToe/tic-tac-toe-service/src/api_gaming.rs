@@ -50,14 +50,15 @@ pub(crate) async fn add_player(
     }
 
     let mut games_manager = games_manager.lock().unwrap();
+    let second_player_params = second_player_params.into_inner();
 
-    match games_manager.add_player(&second_player_params.into_inner()).await
+    match games_manager.add_player(&second_player_params).await
     {
         Ok(game) => {
             let game_creation_result = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
                 event_plane_config: game.get_event_plane_config(),
-                game_invitation_code: game.game_invitation_code.clone(),
+                game_invitation_code: game.initiating_player.unwrap_or_default().player_invitation_code,
             };
 
             Ok(web::Json(game_creation_result))
@@ -96,8 +97,8 @@ pub(crate) async fn create_game(
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
-                event_plane_config: game.get_event_plane_config(),
-                game_invitation_code: game.game_invitation_code,
+                event_plane_config: game.clone().get_event_plane_config(),
+                game_invitation_code: game.initiating_player.unwrap_or_default().player_invitation_code,
             };
             Ok(web::Json(new_game_info))
         }

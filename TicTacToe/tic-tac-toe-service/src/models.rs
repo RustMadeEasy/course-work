@@ -12,13 +12,17 @@
  * @author JoelDavisEngineering@Gmail.com
  */
 
+use crate::errors::GameError;
+use crate::game_board::GamePiece;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
+use validator::Validate;
+use verification_code_gen::verification_code_generator::VerificationCodeGenerator;
 
 
-use crate::errors::GameError;
-use crate::game_board::GamePiece;
+const INVITATION_CODE_LENGTH: u64 = 6;
 
 pub mod event_plane {
     use serde::{Deserialize, Serialize};
@@ -116,7 +120,7 @@ pub(crate) enum AutomaticPlayerSkillLevel {
 }
 
 /// Models a Tic-Tac-Toe Game Player.
-#[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Default, Deserialize, Serialize, ToSchema, Validate)]
 pub(crate) struct PlayerInfo {
     /// Name of the Player.
     pub(crate) display_name: String,
@@ -126,6 +130,10 @@ pub(crate) struct PlayerInfo {
     pub(crate) is_automated: bool,
     /// Unique ID of the Player.
     pub(crate) player_id: String,
+    /// Unique Invitation Code for the Player. The Player can use this to invite others to play
+    /// Two-player Games with them.
+    #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
+    pub(crate) player_invitation_code: String,
 }
 
 impl PlayerInfo {
@@ -148,26 +156,40 @@ impl PlayerInfo {
     }
 
     /// Creates a new PlayerInfo instance.
-    pub(crate) fn new(display_name: impl Into<String>, game_piece: &GamePiece, is_automated: bool) -> Self {
+    pub(crate) fn new(display_name: impl Into<String>,
+                      game_piece: &GamePiece,
+                      is_automated: bool) -> Self {
         Self {
             display_name: display_name.into(),
             game_piece: game_piece.clone(),
             is_automated,
             player_id: Uuid::new_v4().to_string(),
+            player_invitation_code: Self::generate_invitation_code(),
         }
+    }
+
+    /// Creates a unique, 6-digit code for use as a Game Invitation.
+    ///
+    /// NOTE: We use a 6-digit Game Invitation instead of performing the Game setup handshaking
+    /// with the Game ID for two reasons:
+    ///     1) We don't want to expose the Game ID to clients that are not party to the Game.
+    ///     2) A 6-digit code is practical for end-users to utilize.
+    fn generate_invitation_code() -> String {
+        debug!("PlayerInfo: generate_invitation_code() called.");
+        VerificationCodeGenerator::generate()
     }
 }
 
 pub mod requests {
     use crate::game_board::BoardPosition;
     use crate::models::AutomaticPlayerSkillLevel;
+    use crate::models::INVITATION_CODE_LENGTH;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
 
     pub(crate) const ID_LENGTH_MAX: u64 = 36;
     const ID_LENGTH_MIN: u64 = 1;
-    const INVITATION_CODE_LENGTH: u64 = 6;
     const NAME_LENGTH_MAX: u64 = 40;
     const NAME_LENGTH_MIN: u64 = 1;
 

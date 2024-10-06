@@ -154,7 +154,6 @@ This service is accessible on the following port: `50020`
 
 ## Future Roadmap
 
-1. Central persistence, e.g., Our Mem Cache, Surreal DB, Redis, etc.
-2. Authentication.
-3. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
-   invitation is no longer required for rematches within a Gaming Session.
+1. Invitation-code chaining so that a new invitation is no longer required for rematches within a Gaming Session.
+2. Central persistence, e.g., Our Mem Cache, Surreal DB, Redis, etc.
+3. Authentication.

@@ -35,10 +35,10 @@ pub(crate) struct TicTacToeGame {
     /// The Player who can currently make a Game move
     pub(crate) current_player: Option<PlayerInfo>,
 
-    pub(crate) event_plane_config: EventPlaneConfig,
+    /// The Player who initiated the Game.
+    pub(crate) initiating_player: Option<PlayerInfo>,
 
-    /// Code used to invite the second Player to the Game
-    pub(crate) game_invitation_code: String,
+    pub(crate) event_plane_config: EventPlaneConfig,
 
     /// Indicates whether this is a Single-Player or Two-Player Game.
     pub(crate) game_mode: GameMode,
@@ -135,6 +135,11 @@ impl GameTrait for TicTacToeGame {
         self.current_player.clone()
     }
 
+    /// Returns the Player who initiated the Game.
+    fn get_initiating_player(&self) -> Option<PlayerInfo> {
+        self.initiating_player.clone()
+    }
+
     fn get_game_mode(&self) -> GameMode {
         self.game_mode.clone()
     }
@@ -150,11 +155,6 @@ impl GameTrait for TicTacToeGame {
 
     fn get_event_plane_config(&self) -> EventPlaneConfig {
         self.event_plane_config.clone()
-    }
-
-    /// Returns the invitation code that can be used to add the second Player to this Game.
-    fn get_invitation_code(&self) -> String {
-        self.game_invitation_code.clone()
     }
 
     /// Returns the Game Play History.
@@ -176,22 +176,22 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Creates a new Game instance.
-    fn new(params: &NewGameParams, invitation_code: impl Into<String>, broker_address: String, broker_port: u16) -> Result<Self, GameError> {
+    fn new(params: &NewGameParams, broker_address: String, broker_port: u16) -> Result<Self, GameError> {
         //
 
         debug!("TicTacToeGame: Creating new game. Params: {:?}", params);
 
         let mut game = Self {
             current_player: None,
-            id: Uuid::new_v4().to_string(),
-            players: vec![],
-            play_history: vec![],
-            game_invitation_code: invitation_code.into(),
             event_plane_config: EventPlaneConfig::new(broker_address, broker_port, Uuid::new_v4().to_string()),
             game_mode: params.game_mode.clone(),
+            id: Uuid::new_v4().to_string(),
+            initiating_player: None,
+            players: vec![],
+            play_history: vec![],
         };
 
-        // Add the player
+        // Add the initial player
         game.add_player(&params.player_one_display_name, false)?;
 
         Ok(game)

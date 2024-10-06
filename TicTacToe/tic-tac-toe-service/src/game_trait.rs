@@ -34,6 +34,9 @@ pub(crate) trait GameTrait: Sized {
     /// Returns the Player who can currently make a Game move.
     fn get_current_player(&self) -> Option<PlayerInfo>;
 
+    /// Returns the Player who initiated the Game.
+    fn get_initiating_player(&self) -> Option<PlayerInfo>;
+
     /// Returns the Game Mode.
     fn get_game_mode(&self) -> GameMode;
 
@@ -46,9 +49,6 @@ pub(crate) trait GameTrait: Sized {
     /// Returns the configuration clients can use to subscribe to game change events.
     fn get_event_plane_config(&self) -> EventPlaneConfig;
 
-    /// Returns the Game Invitation Code. This code is used to add a new client app to the Game.
-    fn get_invitation_code(&self) -> String;
-
     /// Returns the Game Play History.
     fn get_play_history(&self) -> Vec<GameState>;
 
@@ -59,7 +59,7 @@ pub(crate) trait GameTrait: Sized {
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
 
     /// Creates a new Game instance.
-    fn new(params: &NewGameParams, invitation_code: impl Into<String>, broker_address: String, broker_port: u16) -> Result<Self, GameError>;
+    fn new(params: &NewGameParams, broker_address: String, broker_port: u16) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError>;
