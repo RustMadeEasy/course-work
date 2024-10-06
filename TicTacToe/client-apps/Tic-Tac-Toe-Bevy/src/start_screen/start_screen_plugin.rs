@@ -12,7 +12,8 @@ use crate::shared::despawn;
 #[derive(Clone)]
 enum ButtonPurpose {
     AcceptInvitation,
-    StartNewGame,
+    StartTwoPlayerGame,
+    StartSinglePlayerGame,
 }
 
 /// Marker to indicate that an entity was spawned on the Startup Screen.
@@ -97,9 +98,16 @@ mod functionality {
                                 app_state.local_player_initiated_game = false;
                                 next_state.set(AppMode::EnterInvitation);
                             }
-                            ButtonPurpose::StartNewGame => {
+                            ButtonPurpose::StartTwoPlayerGame => {
                                 // Reflect the fact that this local Player is the one who initiated the Game.
                                 app_state.local_player_initiated_game = true;
+                                app_state.is_two_player_game = true;
+                                next_state.set(AppMode::GamePlay);
+                            }
+                            ButtonPurpose::StartSinglePlayerGame => {
+                                // Reflect the fact that this local Player is the one who initiated the Game.
+                                app_state.local_player_initiated_game = true;
+                                app_state.is_two_player_game = false;
                                 next_state.set(AppMode::GamePlay);
                             }
                         }
@@ -183,7 +191,7 @@ mod ui {
     use helpers_for_bevy::entity_info_component::EntityInfoComponent;
 
     use crate::shared::{BUTTON_COLOR_NORMAL, FONT_SIZE, TEXT_COLOR};
-    use crate::start_screen::start_screen_plugin::ButtonPurpose::{AcceptInvitation, StartNewGame};
+    use crate::start_screen::start_screen_plugin::ButtonPurpose::{AcceptInvitation, StartSinglePlayerGame, StartTwoPlayerGame};
     use crate::start_screen::start_screen_plugin::{OnStartScreen, PlayerNameLabelComponent};
 
     /// Sets up and then spawns the Start Screen UI widgets.
@@ -191,7 +199,8 @@ mod ui {
         //
 
         // TODO: JD: localize this text
-        let title_start = "Start New Game";
+        let title_start_two_player = "Two-Player Game";
+        let title_start_single_player = "Single-Player Game";
         let title_invitation = "Accept An Invitation";
         let title_instructions = "Please type your name:";
 
@@ -295,12 +304,24 @@ mod ui {
                         parent
                             .spawn((
                                 button_bundle.clone(),
-                                EntityInfoComponent::new(StartNewGame),
+                                EntityInfoComponent::new(StartTwoPlayerGame),
                                 OnStartScreen,
                             ))
                             .with_children(|parent| {
                                 parent.spawn((
-                                    TextBundle::from_section(title_start, text_style.clone()),
+                                    TextBundle::from_section(title_start_two_player, text_style.clone()),
+                                    OnStartScreen,
+                                ));
+                            });
+                        parent
+                            .spawn((
+                                button_bundle.clone(),
+                                EntityInfoComponent::new(StartSinglePlayerGame),
+                                OnStartScreen,
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn((
+                                    TextBundle::from_section(title_start_single_player, text_style.clone()),
                                     OnStartScreen,
                                 ));
                             });

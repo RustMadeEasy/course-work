@@ -21,6 +21,9 @@ pub(crate) struct AppStateResource {
     /// Indicates that this client app instance is the one that started the Game.
     pub(crate) local_player_initiated_game: bool,
 
+    /// Indicates that is a Two-Player Game as opposed to a Single-Player Game.
+    pub(crate) is_two_player_game: bool,
+
     /// The other Player, i.e. the local Player's opponent.
     pub(crate) other_player: Option<LocalPlayerInfo>,
 }

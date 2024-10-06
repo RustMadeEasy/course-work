@@ -31,11 +31,12 @@ impl LocalServiceClient {
     /// the game state, player info, and invitation code.
     pub(crate) fn create_game(
         local_player_display_name: &str,
+        is_two_player: bool,
     ) -> Result<(LocalGameStateResource, LocalPlayerInfo, String), Error<CreateGameError>> {
         //
 
         let params = NewGameParams {
-            game_mode: GameMode::SinglePlayer,
+            game_mode: if is_two_player { GameMode::TwoPlayers } else { GameMode::SinglePlayer },
             player_one_display_name: local_player_display_name.to_string(),
             single_player_skill_level: Some(Some(SkillLevel::Beginner)),
         };

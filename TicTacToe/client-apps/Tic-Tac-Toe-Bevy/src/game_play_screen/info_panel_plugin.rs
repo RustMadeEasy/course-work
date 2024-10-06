@@ -101,7 +101,7 @@ mod functionality {
         app_state: Res<AppStateResource>,
         _window_query: Query<&Window, With<PrimaryWindow>>,
     ) {
-        if app_state.local_player_initiated_game {
+        if app_state.local_player_initiated_game && app_state.is_two_player_game {
             let event = SetStatusTextEvent::new_with_duration(
                 "Please send the Invitation Code to another player so they can join the game...",
                 Duration::from_secs(30),

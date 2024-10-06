@@ -61,7 +61,7 @@ public struct StartGameView: View {
                                     self.navigateToGameView = true
                                 }
                             } label: {
-                                Text(String(localized: "New 2-Player Game"))
+                                Text(String(localized: "Two-Player Game"))
                                     .padding()
                             }
                             
@@ -76,7 +76,7 @@ public struct StartGameView: View {
                                     self.navigateToGameView = true
                                 }
                             } label: {
-                                Text(String(localized: "New Single-Player Game"))
+                                Text(String(localized: "Single-Player Game"))
                                     .padding()
                             }
                             

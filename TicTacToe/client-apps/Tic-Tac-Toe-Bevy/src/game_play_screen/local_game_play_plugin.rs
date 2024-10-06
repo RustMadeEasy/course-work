@@ -161,7 +161,7 @@ impl LocalGamePlayPlugin {
             //
 
             // Start a New Game on the server.
-            match LocalServiceClient::create_game(&app_state.local_player.display_name) {
+            match LocalServiceClient::create_game(&app_state.local_player.display_name, app_state.is_two_player_game) {
                 Ok(result) => {
                     app_state.invitation_code = result.2.clone();
                     (result.0, vec![result.1])
