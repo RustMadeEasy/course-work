@@ -22,10 +22,14 @@
 # *** Source Code Layer ***
 FROM scratch AS latest_source
 
-ADD RustLibs/mqtt-publisher/src                /source/RustLibs/mqtt-publisher/src/
-ADD RustLibs/mqtt-publisher/Cargo.toml         /source/RustLibs/mqtt-publisher/
-ADD TicTacToe/tic-tac-toe-service/src/         /source/TicTacToe/tic-tac-toe-service/src/
-ADD TicTacToe/tic-tac-toe-service/Cargo.toml   /source/TicTacToe/tic-tac-toe-service/
+ADD RustLibs/mqtt-publisher/src                 /source/RustLibs/mqtt-publisher/src/
+ADD RustLibs/mqtt-publisher/Cargo.toml          /source/RustLibs/mqtt-publisher/
+
+ADD RustLibs/verification-code-gen/src          /source/RustLibs/verification-code-gen/src/
+ADD RustLibs/verification-code-gen/Cargo.toml   /source/RustLibs/verification-code-gen/
+
+ADD TicTacToe/tic-tac-toe-service/src/          /source/TicTacToe/tic-tac-toe-service/src/
+ADD TicTacToe/tic-tac-toe-service/Cargo.toml    /source/TicTacToe/tic-tac-toe-service/
 
 ## *** Build Layer ***
 FROM rust:1.81.0 AS builder

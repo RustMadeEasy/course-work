@@ -96,6 +96,7 @@ or [Visual Code](https://code.visualstudio.com/download), etc.
 
 ## Building and Running the Service
 
+### Directly
 From the source root folder (tic-tac-toe-service) run the following command:
 
 `cargo run --release`
@@ -103,6 +104,14 @@ From the source root folder (tic-tac-toe-service) run the following command:
 If the service is already built and installed in your system's path, you can run it using the following:
 
 `tic-tac-toe-service`
+
+### Within Docker
+
+`cd [path to course-work]`
+
+`docker build -t tic-tac-toe-service:latest -f ./TicTacToe/tic-tac-toe-service/Dockerfile .`
+
+Note that the terminating "." is required.
 
 ## Open API 3
 
@@ -144,8 +153,7 @@ This service is accessible on the following port: `50020`
 
 ## Future Roadmap
 
-1. Automatic cleanup of older or abandoned Games.
-2. Central persistence, e.g., Our Mem Cache, Surreal DB, Redis, etc.
-3. Authentication.
-4. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
+1. Central persistence, e.g., Our Mem Cache, Surreal DB, Redis, etc.
+2. Authentication.
+3. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
    invitation is no longer required for rematches within a Gaming Session.
