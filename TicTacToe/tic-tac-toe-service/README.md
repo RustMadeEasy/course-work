@@ -97,6 +97,7 @@ or [Visual Code](https://code.visualstudio.com/download), etc.
 ## Building and Running the Service
 
 ### Directly
+
 From the source root folder (tic-tac-toe-service) run the following command:
 
 `cargo run --release`

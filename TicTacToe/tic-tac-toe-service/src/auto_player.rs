@@ -52,6 +52,8 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
     fn take_turn_as_a_beginner(&self, game_board: GameBoard) -> Option<BoardPosition> {
+        //
+
         debug!("Taking AutomaticPlayer turn as a beginner for game {}", self.game_id);
 
         // *** Select any random, open location on the board ***
