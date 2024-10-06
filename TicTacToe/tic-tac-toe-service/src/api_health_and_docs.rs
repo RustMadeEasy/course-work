@@ -5,11 +5,6 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use actix_web::{get, web, HttpResponse};
-use log::debug;
-use utoipa::openapi::ContactBuilder;
-use utoipa::OpenApi;
-
 use crate::api_gaming::*;
 use crate::game_board::BoardPosition;
 use crate::game_board::GamePiece;
@@ -25,6 +20,10 @@ use crate::models::responses::GameInfo;
 use crate::models::AutomaticPlayerSkillLevel;
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
+use actix_web::{get, web, HttpResponse};
+use log::debug;
+use utoipa::openapi::ContactBuilder;
+use utoipa::OpenApi;
 
 /**
  * Defines and implements the public Health and Docs contracts for this service.

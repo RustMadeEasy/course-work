@@ -5,6 +5,17 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
+use crate::game_state::GameState;
+use crate::game_trait::GameTrait;
+use crate::games_manager::GamesManager;
+use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams, ID_LENGTH_MAX};
+use crate::models::responses::{GameCreationResult, GameInfo};
+use crate::tic_tac_toe_game::TicTacToeGame;
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use log::debug;
+use std::sync::Mutex;
+use validator::Validate;
+
 /**
  * Defines and implements the public Gaming contract for this service.
  *
@@ -12,18 +23,6 @@
  * @author JoelDavisEngineering@Gmail.com
  */
 
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
-use log::debug;
-use std::sync::Mutex;
-use validator::Validate;
-
-
-use crate::game_state::GameState;
-use crate::game_trait::GameTrait;
-use crate::games_manager::GamesManager;
-use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams, ID_LENGTH_MAX};
-use crate::models::responses::{GameCreationResult, GameInfo};
-use crate::tic_tac_toe_game::TicTacToeGame;
 
 /// Adds a Player to the Game. Returns the result of the initial Game Creation.
 #[utoipa::path(
