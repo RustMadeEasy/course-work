@@ -15,6 +15,9 @@ public struct StartGameView: View {
     /// Holds the name of the local player
     @State private var localPlayerName = ""
 
+    /// Holds the desired Game Mode (Single-Player or Two-Player)
+    @State private var isTwoPlayer: Bool = true
+
     /// Navigates to the view that allows user to Join an existing Game using an Invitiation Code
     @State private var navigateToEnterInvitationCodeView = false
 
@@ -38,6 +41,7 @@ public struct StartGameView: View {
                         
                         // Name section
                         Text(String(localized: "Please enter your name:"))
+                            .foregroundStyle(.white)
                         TextField(String(localized: "name"), text: $localPlayerName)
                             .frame(width: 200)
                             .border(.secondary)
@@ -46,17 +50,33 @@ public struct StartGameView: View {
                         // Start Options
                         HStack {
                             
-                            // New Game
+                            // New Game - 2 Player
                             Button {
                                 if self.localPlayerName.isEmpty {
                                     self.showingNameNeededAlert = true
                                     self.navigateToGameView = false
                                 } else {
                                     self.showingNameNeededAlert = false
+                                    self.isTwoPlayer = true
                                     self.navigateToGameView = true
                                 }
                             } label: {
-                                Text(String(localized: "Start New Game"))
+                                Text(String(localized: "New 2-Player Game"))
+                                    .padding()
+                            }
+                            
+                            // New Game - Single Player
+                            Button {
+                                if self.localPlayerName.isEmpty {
+                                    self.showingNameNeededAlert = true
+                                    self.navigateToGameView = false
+                                } else {
+                                    self.showingNameNeededAlert = false
+                                    self.isTwoPlayer = false
+                                    self.navigateToGameView = true
+                                }
+                            } label: {
+                                Text(String(localized: "New Single-Player Game"))
                                     .padding()
                             }
                             
@@ -76,7 +96,7 @@ public struct StartGameView: View {
                         }
                     }
                     .navigationDestination(isPresented: $navigateToGameView, destination: {
-                        GameView(localPlayerName: self.localPlayerName)
+                        GameView(localPlayerName: self.localPlayerName, isTwoPlayer: self.isTwoPlayer)
                     })
                     .navigationDestination(isPresented: $navigateToEnterInvitationCodeView, destination: {
                         EnterInvitationCodeView(localPlayerName: localPlayerName)

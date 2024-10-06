@@ -24,12 +24,13 @@ enum GameInfoManagerError: Error {
 class GameInfoService {
 
     /// Creates a new Game. Returns the Game Info.
-    static func createGame(playerName: String) async -> GameInfoServiceResult {
+    static func createGame(playerName: String, isTwoPlayer: Bool) async -> GameInfoServiceResult {
 
         do {
 
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                let params = NewGameParams(gameMode: GameMode.singlePlayer, playerOneDisplayName: playerName)
+                let gameMode = isTwoPlayer ? GameMode.twoPlayers : GameMode.singlePlayer
+                let params = NewGameParams(gameMode: gameMode, playerOneDisplayName: playerName)
                 TicTacToeAPI.createGame(newGameParams: params) { data, error in
                     if error == nil {
                         if data != nil {

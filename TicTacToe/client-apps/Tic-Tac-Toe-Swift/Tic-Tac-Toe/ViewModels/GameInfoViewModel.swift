@@ -51,6 +51,9 @@ class GameInfoViewModel: ObservableObject {
     /// Name of the local Player, i.e. the Player using this app instance.
     @Published var localPlayerName: String = ""
     
+    /// Name of the local Player, i.e. the Player using this app instance.
+    @Published var isTwoPlayer: Bool = true
+    
     /// Name of the other Player, i.e. the local Player's opponent.
     @Published var otherPlayerName: String = ""
     
@@ -69,10 +72,11 @@ class GameInfoViewModel: ObservableObject {
     /// Informs this instance when our Tic Tac Toe service has updated the game state.
     private var gameInfoReceiver: GameInfoReceiver?
 
-    init(localPlayerName: String, invitationCode: String = "") {
+    init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {
         self.gameInfoReceiver = nil
         self._localPlayerName = Published(initialValue: localPlayerName)
         self._invitationCode = Published(initialValue: invitationCode)
+        self._isTwoPlayer = Published(initialValue: isTwoPlayer)
     }
 }
 
@@ -81,7 +85,7 @@ extension GameInfoViewModel {
     /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
     func createGame() async -> Error? {
         
-        let result = await GameInfoService.createGame(playerName: self.localPlayerName)
+        let result = await GameInfoService.createGame(playerName: self.localPlayerName, isTwoPlayer: self.isTwoPlayer)
         
         if let newGameInfo = result.newGameInfo {
             

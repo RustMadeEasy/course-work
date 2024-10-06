@@ -195,8 +195,8 @@ struct GameView: View {
     }
 
     /// Creates a new GameInfoViewModel instance. The invitation code must be provided when joining an existing Game.
-    public init(localPlayerName: String, invitationCode: String = "") {
-        self._gameInfoVM = StateObject(wrappedValue: GameInfoViewModel(localPlayerName: localPlayerName, invitationCode: invitationCode))
+    public init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {
+        self._gameInfoVM = StateObject(wrappedValue: GameInfoViewModel(localPlayerName: localPlayerName, isTwoPlayer: isTwoPlayer, invitationCode: invitationCode))
     }
 
     /// Section of the View that shows the Game invitation.
@@ -315,5 +315,5 @@ struct GameView: View {
 }
 
 #Preview {
-    GameView(localPlayerName: "")
+    GameView(localPlayerName: "", isTwoPlayer: false)
 }

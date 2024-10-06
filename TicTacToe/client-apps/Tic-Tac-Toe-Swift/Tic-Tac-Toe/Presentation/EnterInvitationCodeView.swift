@@ -38,6 +38,7 @@ public struct EnterInvitationCodeView: View {
                     VStack {
                         
                         Text(String(localized: "Please enter the Invitation Code:"))
+                            .foregroundStyle(.white)
 
                         TextField(String(localized: "invitation code"), text: $invitationCode)
                             .frame(width: 140)
@@ -58,7 +59,7 @@ public struct EnterInvitationCodeView: View {
                         Spacer()
                     }
                     .navigationDestination(isPresented: $navigateToGameView, destination: {
-                        GameView(localPlayerName: self.localPlayerName, invitationCode: self.invitationCode)
+                        GameView(localPlayerName: self.localPlayerName, isTwoPlayer: true, invitationCode: self.invitationCode)
                     })
                     .alert(String(localized: "Please enter a Game Invitation from another Player."), isPresented: $showEmptyInvitationAlert) {
                         Button() {

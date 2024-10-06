@@ -149,4 +149,3 @@ This service is accessible on the following port: `50020`
 3. Authentication.
 4. Notion of Game User-pair Session so that an invitation is still required to initially connect Users, but, a new
    invitation is no longer required for rematches within a Gaming Session.
-5. Implement an AI model so that users can play against the service.
