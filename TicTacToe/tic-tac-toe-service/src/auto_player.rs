@@ -11,6 +11,11 @@ use std::marker::PhantomData;
 use tokio::time::{sleep, Duration};
 use utoipa::ToSchema;
 
+// To help make the auto-player feel like more human, we deliberate on the move for anywhere
+// between MIN_DELIBERATION_TIME and MAX_DELIBERATION_TIME seconds.
+static MAX_DELIBERATION_TIME: f32 = 3_f32;
+static MIN_DELIBERATION_TIME: usize = 1;
+
 /// AutoPlayer can play a game of Tic-Tac-Toe at various skill levels.
 pub(crate) struct AutoPlayer<T: GameTrait + Clone + Send + Sync> {
     game_id: String,
@@ -90,7 +95,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutoPlayer<T> {
 
                 // Make the service feel like it is deliberating on the move for some time.
                 // We wait anywhere between 1 and 4 seconds.
-                let wait_time_secs = (rand::random::<f32>() * 4_f32).floor() as usize + 1;
+                let wait_time_secs = (rand::random::<f32>() * MAX_DELIBERATION_TIME).floor() as usize + MIN_DELIBERATION_TIME;
                 sleep(Duration::from_secs(wait_time_secs as u64)).await;
 
                 // *** Control the service via the API in the same way clients do. ***

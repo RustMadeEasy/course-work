@@ -211,7 +211,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     }
 
     fn remove_auto_player_observer(&mut self, game_id: &String) {
-        if let Some(index) = self.observers.iter().position(|it| it.unique_id().as_str() != game_id) {
+        if let Some(index) = self.observers.iter().position(|it| it.unique_id().as_str() == game_id) {
             self.observers.remove(index);
         }
     }
