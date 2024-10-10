@@ -39,7 +39,6 @@ mod auto_player;
 mod game_observer_trait;
 mod game_updates_publisher;
 mod game_session;
-mod game_session_manager;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;

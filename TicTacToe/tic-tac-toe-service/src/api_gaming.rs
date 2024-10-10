@@ -211,7 +211,7 @@ pub(crate) async fn get_game_info(
     match games_manager
         .lock()
         .unwrap()
-        .get_game_by_id(game_id.into_inner())
+        .get_game_by_id(game_id.as_str())
     {
         Ok(game) => match GameInfo::try_from(game) {
             Ok(game_info) => Ok(web::Json(game_info)),
