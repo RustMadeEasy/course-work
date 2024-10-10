@@ -14,21 +14,19 @@
 
 /*
 
-Client A
-    * Create Session
-    * Create Game
-    * Use Session ID to Setup MQTT
-    * Share Invitation ID
-
-Client B
-    Join session via invitation code
-    Use Session ID to Setup MQTT
-    Join Session's current game
-
-Both
-    Play Game
-
-
+    Client A
+        * Create Session
+        * Create Game
+        * Use Session ID to Setup MQTT
+        * Share Invitation ID
+    
+    Client B
+        Join session via invitation code
+        Use Session ID to Setup MQTT
+        Join Session's current game
+    
+    Both
+        Play Game
 
  */
 

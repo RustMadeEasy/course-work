@@ -43,7 +43,6 @@ pub(crate) struct GamesManager<T: GameTrait + Clone + Send + Sync + 'static> {
     //
 
     observers: Vec<Box<dyn GameObserverTrait<T> + Send>>,
-
     sessions: Arc<Mutex<HashMap<String, Box<GamingSession<T>>>>>,
 }
 
@@ -201,6 +200,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
     /// Retrieves the specified Session and Game pair.
     pub(crate) fn get_session_and_game_by_game_id(&self, game_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
+        //
+        
         let session = match self.get_session_containing_game(&game_id.into()) {
             None => None,
             Some(session) => {
