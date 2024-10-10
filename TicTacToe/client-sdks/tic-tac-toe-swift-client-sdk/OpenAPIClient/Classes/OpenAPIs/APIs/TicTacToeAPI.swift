@@ -13,7 +13,7 @@ import AnyCodable
 open class TicTacToeAPI {
 
     /**
-     Adds a Player to the Game. Returns the result of the initial Game Creation.
+     * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
      
      - parameter addPlayerParams: (body)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
@@ -32,9 +32,9 @@ open class TicTacToeAPI {
     }
 
     /**
-     Adds a Player to the Game. Returns the result of the initial Game Creation.
+     * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
      - POST /v1/games/players
-     - Adds a Player to the Game. Returns the result of the initial Game Creation.
+     - * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com Adds a Player to the Game. Returns the result of the initial Game Creation.
      - parameter addPlayerParams: (body)  
      - returns: RequestBuilder<GameCreationResult> 
      */

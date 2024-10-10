@@ -1,4 +1,4 @@
-# SkillLevel
+# AutomaticPlayerSkillLevel
 
 ## Enum Variants
 

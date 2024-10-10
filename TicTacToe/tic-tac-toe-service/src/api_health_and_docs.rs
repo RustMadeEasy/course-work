@@ -11,10 +11,10 @@ use crate::game_board::GamePiece;
 use crate::game_state::GameState;
 use crate::models::event_plane::EventPlaneConfig;
 use crate::models::event_plane::EventPlaneTopicNames;
-use crate::models::requests::AddPlayerParams;
 use crate::models::requests::GameMode;
 use crate::models::requests::GameTurnInfo;
 use crate::models::requests::NewGameParams;
+use crate::models::requests::NewGamingSessionParams;
 use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
 use crate::models::AutomaticPlayerSkillLevel;
@@ -36,15 +36,15 @@ use utoipa::OpenApi;
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(
-        add_player,
         create_game,
         end_game,
         get_game_history,
         get_game_info,
+        join_session,
         take_turn
     ),
     components(schemas(
-        AddPlayerParams,
+        AutomaticPlayerSkillLevel,
         BoardPosition,
         EventPlaneConfig,
         EventPlaneTopicNames,
@@ -55,9 +55,9 @@ use utoipa::OpenApi;
         GameState,
         GameTurnInfo,
         NewGameParams,
+        NewGamingSessionParams,
         PlayerInfo,
         PlayStatus,
-        AutomaticPlayerSkillLevel,
     ))
 )]
 pub(crate) struct ApiDoc;

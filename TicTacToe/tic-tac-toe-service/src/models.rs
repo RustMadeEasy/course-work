@@ -14,24 +14,23 @@
 
 use crate::errors::GameError;
 use crate::game_board::GamePiece;
-use log::debug;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
-use verification_code_gen::verification_code_generator::VerificationCodeGenerator;
 
 
 const INVITATION_CODE_LENGTH: u64 = 6;
 
 pub mod event_plane {
     use serde::{Deserialize, Serialize};
+    use strum::Display;
     use utoipa::ToSchema;
 
     const DOMAIN_NAME: &str = "RustMadeEasy.com";
 
     /// Models the configuration required for clients to subscribe to real-time Game state updates.
-    #[derive(Clone, Deserialize, Serialize, ToSchema)]
+    #[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
     pub struct EventPlaneConfig {
         //
 
@@ -69,19 +68,17 @@ pub mod event_plane {
     /// NOTE: The topic_prefix can be obtained from the event_plane_config field of the
     /// GameCreationResult model that is returned when creating a new Game or when adding a new
     /// Player to a Game.
-    #[derive(Deserialize, Serialize, ToSchema)]
+    #[derive(Deserialize, Display, Serialize, ToSchema)]
     pub enum EventPlaneTopicNames {
-        /// Called when the Game has ended in a stalemate. The client can call Get Game Info to
-        /// retrieve the details.
+        /// Called when the Game has ended in a stalemate.
         GameEndedInStalemate,
-        /// Called when the Game has ended in a win. The client can call Get Game Info to retrieve
-        /// the details.
+        /// Called when the Game has ended in a win.
         GameEndedInWin,
-        /// Published when a new Player has been added the Game. The client can call Get Game Info
-        /// to retrieve the details.
-        PlayerAdded,
-        /// Published when a Player has taken a new turn. The client can call Get Game Info to
-        /// retrieve the new board state.
+        /// Published when a new Player has been added to the Gaming Session.
+        PlayerAddedToSession,
+        /// Published when a new Player has been added the Game.
+        PlayerAddedToGame,
+        /// Published when a Player has taken a new turn.
         TurnTaken,
     }
 
@@ -91,10 +88,11 @@ pub mod event_plane {
         /// Constructs a topic specific to the Session ID.
         pub(crate) fn build(&self, topic_prefix: &str) -> String {
             match self {
-                EventPlaneTopicNames::GameEndedInStalemate => format!("{topic_prefix}/GameEndedInStalemate"),
-                EventPlaneTopicNames::GameEndedInWin => format!("{topic_prefix}/GameEndedInWin"),
-                EventPlaneTopicNames::PlayerAdded => format!("{topic_prefix}/PlayerAdded"),
-                EventPlaneTopicNames::TurnTaken => format!("{topic_prefix}/TurnTaken"),
+                EventPlaneTopicNames::GameEndedInStalemate => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInStalemate),
+                EventPlaneTopicNames::GameEndedInWin => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInWin),
+                EventPlaneTopicNames::PlayerAddedToGame => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerAddedToGame),
+                EventPlaneTopicNames::PlayerAddedToSession => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerAddedToSession),
+                EventPlaneTopicNames::TurnTaken => format!("{topic_prefix}/{}", EventPlaneTopicNames::TurnTaken),
             }
         }
 
@@ -130,10 +128,6 @@ pub(crate) struct PlayerInfo {
     pub(crate) is_automated: bool,
     /// Unique ID of the Player.
     pub(crate) player_id: String,
-    /// Unique Invitation Code for the Player. The Player can use this to invite others to play
-    /// Two-player Games with them.
-    #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
-    pub(crate) player_invitation_code: String,
 }
 
 impl PlayerInfo {
@@ -164,19 +158,7 @@ impl PlayerInfo {
             game_piece: game_piece.clone(),
             is_automated,
             player_id: Uuid::new_v4().to_string(),
-            player_invitation_code: Self::generate_invitation_code(),
         }
-    }
-
-    /// Creates a unique, 6-digit code for use as a Game Invitation.
-    ///
-    /// NOTE: We use a 6-digit Game Invitation instead of performing the Game setup handshaking
-    /// with the Game ID for two reasons:
-    ///     1) We don't want to expose the Game ID to clients that are not party to the Game.
-    ///     2) A 6-digit code is practical for end-users to utilize.
-    fn generate_invitation_code() -> String {
-        debug!("PlayerInfo: generate_invitation_code() called.");
-        VerificationCodeGenerator::generate()
     }
 }
 
@@ -193,9 +175,18 @@ pub mod requests {
     const NAME_LENGTH_MAX: u64 = 40;
     const NAME_LENGTH_MIN: u64 = 1;
 
-    /// Models info needed to add a Player to a Game.
+    /// Models info needed to join a Game.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
-    pub struct AddPlayerParams {
+    pub struct JoinGameParams {
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub game_id: String,
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub player_id: String,
+    }
+
+    /// Models info needed to join a Gaming Session.
+    #[derive(Debug, Deserialize, ToSchema, Validate)]
+    pub struct JoinSessionParams {
         #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
         pub game_invitation_code: String,
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
@@ -217,12 +208,19 @@ pub mod requests {
         TwoPlayers,
     }
 
+    /// Models info needed to start a new Gaming Session.
+    #[derive(Debug, Deserialize, ToSchema, Validate)]
+    pub struct NewGamingSessionParams {
+        #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
+        pub session_owner_display_name: String,
+    }
+
     /// Models info needed to start a new Game.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
     pub struct NewGameParams {
         pub game_mode: GameMode,
-        #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
-        pub player_one_display_name: String,
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub session_id: String,
         pub single_player_skill_level: Option<AutomaticPlayerSkillLevel>,
     }
 }
@@ -267,18 +265,35 @@ pub mod responses {
         }
     }
 
-    /// Models the results of a call to the Create Game and Add Player endpoints.
+    // /// Models the results of a call to add a Player to a Gaming Session.
+    // #[derive(Deserialize, Serialize, ToSchema)]
+    // pub struct GamingSessionAdditionResult {
+    //     //
+    //
+    //     /// The ID of the Session's current Game.
+    //     pub(crate) current_game_id: String,
+    //
+    //     /// Specifies the configuration required for clients to subscribe to real-time Game state updates.
+    //     pub(crate) event_plane_config: EventPlaneConfig,
+    //
+    //     /// The ID of the Gaming Session.
+    //     pub(crate) session_id: String,
+    // }
+
+    /// Models the results of a call to the Create Gaming Session endpoint.
+    #[derive(Deserialize, Serialize, ToSchema)]
+    pub struct GamingSessionCreationResult {
+        pub(crate) event_plane_config: EventPlaneConfig,
+        /// Unique Code that is used to invite others to the Gaming Session.
+        pub(crate) invitation_code: String,
+        /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
+        pub(crate) session_id: String,
+    }
+
+    /// Models the results of a call to the Create Game endpoint.
     #[derive(Deserialize, Serialize, ToSchema)]
     pub struct GameCreationResult {
-        //
-
         /// The initial Game state.
         pub(crate) game_info: GameInfo,
-
-        /// Configuration required for clients subscribe to real-time Game state updates.
-        pub(crate) event_plane_config: EventPlaneConfig,
-
-        /// Code used to invite the second Player to the Game
-        pub(crate) game_invitation_code: String,
     }
 }

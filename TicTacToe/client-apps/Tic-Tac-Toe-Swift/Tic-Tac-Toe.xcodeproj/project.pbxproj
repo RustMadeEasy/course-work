@@ -25,6 +25,7 @@
 		3DB398C52BAED415005A1F6F /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB398C02BAED415005A1F6F /* GameView.swift */; };
 		3DB398C92BAED468005A1F6F /* OpenAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB398C82BAED468005A1F6F /* OpenAPIClient */; };
 		3DFB83D32BB56FD60093B6D8 /* ClipboardHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DFB83D22BB56FD60093B6D8 /* ClipboardHelper.swift */; };
+		529DE2CA2CB62BFB0089A946 /* OpenAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 529DE2C92CB62BFB0089A946 /* OpenAPIClient */; };
 		7A413D452CA127AB00489F74 /* OpenAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 7A413D442CA127AB00489F74 /* OpenAPIClient */; };
 		7A6A7F8A2C8405F0004E0622 /* MQTTNIO in Frameworks */ = {isa = PBXBuildFile; productRef = 7A6A7F892C8405F0004E0622 /* MQTTNIO */; };
 		7A6A7F8C2C840996004E0622 /* GameInfoReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A6A7F8B2C840996004E0622 /* GameInfoReceiver.swift */; };
@@ -77,6 +78,7 @@
 				7A6C01062CB1C8890046BCD0 /* OpenAPIClient in Frameworks */,
 				3D7316322BAF7E0800B16F80 /* OpenAPIClient in Frameworks */,
 				7AF3F0C82CB0779200F41DCF /* OpenAPIClient in Frameworks */,
+				529DE2CA2CB62BFB0089A946 /* OpenAPIClient in Frameworks */,
 				7A6A7F8A2C8405F0004E0622 /* MQTTNIO in Frameworks */,
 				7AEA45BE2C847A53000F7FCE /* OpenAPIClient in Frameworks */,
 				7AEA45C42C847F08000F7FCE /* OpenAPIClient in Frameworks */,
@@ -193,6 +195,7 @@
 				7A7A38882CB0FB070051C113 /* OpenAPIClient */,
 				7A6C01052CB1C8890046BCD0 /* OpenAPIClient */,
 				7AE7A63E2CB1FF7A00474E1D /* OpenAPIClient */,
+				529DE2C92CB62BFB0089A946 /* OpenAPIClient */,
 			);
 			productName = "Tic-Tac-Toe";
 			productReference = 3DB398A92BAED38C005A1F6F /* Tic-Tac-Toe.app */;
@@ -224,7 +227,7 @@
 			mainGroup = 3DB398A02BAED38C005A1F6F;
 			packageReferences = (
 				7A6A7F882C8405F0004E0622 /* XCRemoteSwiftPackageReference "mqtt-nio" */,
-				7AE7A63D2CB1FF7A00474E1D /* XCLocalSwiftPackageReference "../../client-sdks/tic-tac-toe-swift-client-sdk" */,
+				529DE2C82CB62BFB0089A946 /* XCLocalSwiftPackageReference "../../client-sdks/tic-tac-toe-swift-client-sdk" */,
 			);
 			productRefGroup = 3DB398AA2BAED38C005A1F6F /* Products */;
 			projectDirPath = "";
@@ -488,7 +491,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		7AE7A63D2CB1FF7A00474E1D /* XCLocalSwiftPackageReference "../../client-sdks/tic-tac-toe-swift-client-sdk" */ = {
+		529DE2C82CB62BFB0089A946 /* XCLocalSwiftPackageReference "../../client-sdks/tic-tac-toe-swift-client-sdk" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = "../../client-sdks/tic-tac-toe-swift-client-sdk";
 		};
@@ -539,6 +542,10 @@
 			productName = OpenAPIClient;
 		};
 		3DB398C82BAED468005A1F6F /* OpenAPIClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OpenAPIClient;
+		};
+		529DE2C92CB62BFB0089A946 /* OpenAPIClient */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OpenAPIClient;
 		};

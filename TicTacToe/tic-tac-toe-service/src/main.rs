@@ -18,7 +18,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api_gaming::{
-    add_player, create_game, end_game, get_game_history, get_game_info, take_turn,
+    create_game, end_game, get_game_history, get_game_info, join_session, take_turn,
 };
 use crate::api_health_and_docs::{api_docs, health, ApiDoc};
 use crate::games_manager::TicTacToeGamesManager;
@@ -38,6 +38,8 @@ mod tests;
 mod auto_player;
 mod game_observer_trait;
 mod game_updates_publisher;
+mod game_session;
+mod game_session_manager;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;
@@ -62,11 +64,11 @@ async fn main() -> std::io::Result<()> {
         App::new().app_data(games_manager.clone()).service(
             web::scope("/v1")
                 // *** Gaming API ***
-                .service(add_player)
                 .service(create_game)
                 .service(end_game)
                 .service(get_game_history)
                 .service(get_game_info)
+                .service(join_session)
                 .service(take_turn)
                 // *** Health & Docs API ***
                 .service(api_docs)

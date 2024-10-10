@@ -6,7 +6,8 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::game_board::{BoardPosition, GameBoard, GamePiece, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
-use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
+use crate::game_observer_trait::{GameObserverTrait, StateChanges};
+use crate::game_session::GamingSession;
 use crate::game_trait::GameTrait;
 use crate::models::requests::GameTurnInfo;
 use crate::models::{AutomaticPlayerSkillLevel, PlayerInfo};
@@ -170,14 +171,13 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutomaticPlayer<T> {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
+    async fn game_updated(&self, state_change: &StateChanges, _session: &GamingSession<T>, game: &T) {
         //
 
-        debug!("AutomaticPlayer: received game_updated() for game {}", self.game_id);
+        debug!("AutomaticPlayer: received game_updated() for game {}", game.get_id());
 
-        match game_state_change {
-            GameStateChange::PlayerAdded => {}
-            GameStateChange::TurnTaken => {
+        match state_change {
+            StateChanges::GameTurnTaken => {
                 let game_state = game.get_current_game_state();
                 match game_state.play_status {
                     PlayStatus::InProgress => {
@@ -192,6 +192,20 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
                     _ => {}
                 }
             }
+            StateChanges::PlayerAddedToSession => {}
+            StateChanges::PlayerAddedToGame => {}
+        }
+    }
+
+    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>) {
+        //
+
+        debug!("AutomaticPlayer: received session_updated() for session {}", session.session_id);
+
+        match state_change {
+            StateChanges::GameTurnTaken => {}
+            StateChanges::PlayerAddedToSession => {}
+            StateChanges::PlayerAddedToGame => {}
         }
     }
 

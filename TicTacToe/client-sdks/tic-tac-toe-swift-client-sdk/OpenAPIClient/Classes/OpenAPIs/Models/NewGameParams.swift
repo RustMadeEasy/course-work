@@ -15,9 +15,9 @@ public struct NewGameParams: Codable, JSONEncodable, Hashable {
 
     public var gameMode: GameMode
     public var playerOneDisplayName: String
-    public var singlePlayerSkillLevel: SkillLevel?
+    public var singlePlayerSkillLevel: AutomaticPlayerSkillLevel?
 
-    public init(gameMode: GameMode, playerOneDisplayName: String, singlePlayerSkillLevel: SkillLevel? = nil) {
+    public init(gameMode: GameMode, playerOneDisplayName: String, singlePlayerSkillLevel: AutomaticPlayerSkillLevel? = nil) {
         self.gameMode = gameMode
         self.playerOneDisplayName = playerOneDisplayName
         self.singlePlayerSkillLevel = singlePlayerSkillLevel

@@ -1,4 +1,5 @@
 .gitignore
+.openapi-generator-ignore
 .swiftformat
 Cartfile
 OpenAPIClient.podspec
@@ -12,6 +13,7 @@ OpenAPIClient/Classes/OpenAPIs/JSONDataEncoding.swift
 OpenAPIClient/Classes/OpenAPIs/JSONEncodingHelper.swift
 OpenAPIClient/Classes/OpenAPIs/Models.swift
 OpenAPIClient/Classes/OpenAPIs/Models/AddPlayerParams.swift
+OpenAPIClient/Classes/OpenAPIs/Models/AutomaticPlayerSkillLevel.swift
 OpenAPIClient/Classes/OpenAPIs/Models/BoardPosition.swift
 OpenAPIClient/Classes/OpenAPIs/Models/EventPlaneConfig.swift
 OpenAPIClient/Classes/OpenAPIs/Models/EventPlaneTopicNames.swift
@@ -24,7 +26,6 @@ OpenAPIClient/Classes/OpenAPIs/Models/GameTurnInfo.swift
 OpenAPIClient/Classes/OpenAPIs/Models/NewGameParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayStatus.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayerInfo.swift
-OpenAPIClient/Classes/OpenAPIs/Models/SkillLevel.swift
 OpenAPIClient/Classes/OpenAPIs/OpenISO8601DateFormatter.swift
 OpenAPIClient/Classes/OpenAPIs/SynchronizedDictionary.swift
 OpenAPIClient/Classes/OpenAPIs/URLSessionImplementations.swift
@@ -32,6 +33,7 @@ OpenAPIClient/Classes/OpenAPIs/Validation.swift
 Package.swift
 README.md
 docs/AddPlayerParams.md
+docs/AutomaticPlayerSkillLevel.md
 docs/BoardPosition.md
 docs/EventPlaneConfig.md
 docs/EventPlaneTopicNames.md
@@ -44,7 +46,6 @@ docs/GameTurnInfo.md
 docs/NewGameParams.md
 docs/PlayStatus.md
 docs/PlayerInfo.md
-docs/SkillLevel.md
 docs/TicTacToeAPI.md
 git_push.sh
 project.yml

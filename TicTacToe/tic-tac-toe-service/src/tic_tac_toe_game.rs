@@ -15,7 +15,6 @@ use crate::errors::GameError::BoardLocationAlreadyOccupied;
 use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
-use crate::models::event_plane::EventPlaneConfig;
 use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
@@ -34,11 +33,6 @@ pub(crate) struct TicTacToeGame {
 
     /// The Player who can currently make a Game move
     pub(crate) current_player: Option<PlayerInfo>,
-
-    /// The Player who initiated the Game.
-    pub(crate) initiating_player: Option<PlayerInfo>,
-
-    pub(crate) event_plane_config: EventPlaneConfig,
 
     /// Indicates whether this is a Single-Player or Two-Player Game.
     pub(crate) game_mode: GameMode,
@@ -102,7 +96,7 @@ impl GameTrait for TicTacToeGame {
 
         self.players.push(player_info);
 
-        // set the Player One to be the first to take their turn
+        // Note Player One as the first to take their turn.
         self.current_player = Some(self.players.first().unwrap().clone());
 
         Ok(())
@@ -135,11 +129,6 @@ impl GameTrait for TicTacToeGame {
         self.current_player.clone()
     }
 
-    /// Returns the Player who initiated the Game.
-    fn get_initiating_player(&self) -> Option<PlayerInfo> {
-        self.initiating_player.clone()
-    }
-
     fn get_game_mode(&self) -> GameMode {
         self.game_mode.clone()
     }
@@ -151,10 +140,6 @@ impl GameTrait for TicTacToeGame {
     /// Returns the ID of this Game.
     fn get_id(&self) -> String {
         self.id.clone()
-    }
-
-    fn get_event_plane_config(&self) -> EventPlaneConfig {
-        self.event_plane_config.clone()
     }
 
     /// Returns the Game Play History.
@@ -176,23 +161,18 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Creates a new Game instance.
-    fn new(params: &NewGameParams, broker_address: String, broker_port: u16) -> Result<Self, GameError> {
+    fn new(params: &NewGameParams) -> Result<Self, GameError> {
         //
 
         debug!("TicTacToeGame: Creating new game. Params: {:?}", params);
 
-        let mut game = Self {
+        let game = Self {
             current_player: None,
-            event_plane_config: EventPlaneConfig::new(broker_address, broker_port, Uuid::new_v4().to_string()),
             game_mode: params.game_mode.clone(),
             id: Uuid::new_v4().to_string(),
-            initiating_player: None,
             players: vec![],
             play_history: vec![],
         };
-
-        // Add the initial player
-        game.add_player(&params.player_one_display_name, false)?;
 
         Ok(game)
     }

@@ -1,5 +1,7 @@
 pub mod add_player_params;
 pub use self::add_player_params::AddPlayerParams;
+pub mod automatic_player_skill_level;
+pub use self::automatic_player_skill_level::AutomaticPlayerSkillLevel;
 pub mod board_position;
 pub use self::board_position::BoardPosition;
 pub mod event_plane_config;
@@ -24,5 +26,3 @@ pub mod play_status;
 pub use self::play_status::PlayStatus;
 pub mod player_info;
 pub use self::player_info::PlayerInfo;
-pub mod skill_level;
-pub use self::skill_level::SkillLevel;

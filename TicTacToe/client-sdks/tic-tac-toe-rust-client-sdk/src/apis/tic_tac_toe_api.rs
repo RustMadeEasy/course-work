@@ -77,7 +77,7 @@ pub enum TakeTurnError {
 }
 
 
-/// Adds a Player to the Game. Returns the result of the initial Game Creation.
+/// * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com Adds a Player to the Game. Returns the result of the initial Game Creation.
 pub fn add_player(configuration: &configuration::Configuration, add_player_params: models::AddPlayerParams) -> Result<models::GameCreationResult, Error<AddPlayerError>> {
     let local_var_configuration = configuration;
 

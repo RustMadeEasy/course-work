@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 /// 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-pub enum SkillLevel {
+pub enum AutomaticPlayerSkillLevel {
     #[serde(rename = "Beginner")]
     Beginner,
     #[serde(rename = "Intermediate")]
@@ -25,7 +25,7 @@ pub enum SkillLevel {
 
 }
 
-impl std::fmt::Display for SkillLevel {
+impl std::fmt::Display for AutomaticPlayerSkillLevel {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::Beginner => write!(f, "Beginner"),
@@ -36,8 +36,8 @@ impl std::fmt::Display for SkillLevel {
     }
 }
 
-impl Default for SkillLevel {
-    fn default() -> SkillLevel {
+impl Default for AutomaticPlayerSkillLevel {
+    fn default() -> AutomaticPlayerSkillLevel {
         Self::Beginner
     }
 }

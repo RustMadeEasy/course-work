@@ -15,19 +15,15 @@ public struct GameCreationResult: Codable, JSONEncodable, Hashable {
 
     public var eventPlaneConfig: EventPlaneConfig
     public var gameInfo: GameInfo
-    /** Code used to invite the second Player to the Game */
-    public var gameInvitationCode: String
 
-    public init(eventPlaneConfig: EventPlaneConfig, gameInfo: GameInfo, gameInvitationCode: String) {
+    public init(eventPlaneConfig: EventPlaneConfig, gameInfo: GameInfo) {
         self.eventPlaneConfig = eventPlaneConfig
         self.gameInfo = gameInfo
-        self.gameInvitationCode = gameInvitationCode
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case eventPlaneConfig = "event_plane_config"
         case gameInfo = "game_info"
-        case gameInvitationCode = "game_invitation_code"
     }
 
     // Encodable protocol methods
@@ -36,7 +32,6 @@ public struct GameCreationResult: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(eventPlaneConfig, forKey: .eventPlaneConfig)
         try container.encode(gameInfo, forKey: .gameInfo)
-        try container.encode(gameInvitationCode, forKey: .gameInvitationCode)
     }
 }
 

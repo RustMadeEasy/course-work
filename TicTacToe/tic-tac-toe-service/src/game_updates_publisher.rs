@@ -1,4 +1,5 @@
-use crate::game_observer_trait::{GameObserverTrait, GameStateChange};
+use crate::game_observer_trait::{GameObserverTrait, StateChanges};
+use crate::game_session::GamingSession;
 use crate::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::play_status::PlayStatus;
@@ -36,20 +37,17 @@ impl GameUpdatesPublisher {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for GameUpdatesPublisher {
     //
 
-    async fn game_updated(&self, game_state_change: &GameStateChange, game: &T) {
+    async fn game_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: &T) {
         //
 
         debug!("GameUpdatesPublisher: received game_updated() for game {}", game.get_id());
 
         let topic: String;
-        let topic_prefix = game.get_event_plane_config().topic_prefix;
+        let topic_prefix = session.get_event_plane_config().topic_prefix;
         let topic_prefix = topic_prefix.as_str();
 
-        match game_state_change {
-            GameStateChange::PlayerAdded => {
-                topic = EventPlaneTopicNames::PlayerAdded.build(topic_prefix);
-            }
-            GameStateChange::TurnTaken => {
+        match state_change {
+            StateChanges::GameTurnTaken => {
                 match game.get_current_game_state().play_status {
                     PlayStatus::EndedInStalemate => topic = EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
                     PlayStatus::EndedInWin => topic = EventPlaneTopicNames::GameEndedInWin.build(topic_prefix),
@@ -57,9 +55,27 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
                     PlayStatus::NotStarted => return, // Early return. Nothing to publish.
                 }
             }
+            StateChanges::PlayerAddedToGame => {
+                topic = EventPlaneTopicNames::PlayerAddedToGame.build(topic_prefix);
+            }
+            StateChanges::PlayerAddedToSession => {
+                topic = EventPlaneTopicNames::PlayerAddedToSession.build(topic_prefix);
+            }
         }
 
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
+    }
+
+    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>) {
+        //
+
+        debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);
+
+        match state_change {
+            StateChanges::GameTurnTaken => {}
+            StateChanges::PlayerAddedToSession => {}
+            StateChanges::PlayerAddedToGame => {}
+        }
     }
 
     fn unique_id(&self) -> String {

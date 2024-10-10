@@ -154,6 +154,6 @@ This service is accessible on the following port: `50020`
 
 ## Future Roadmap
 
-1. Invitation-code chaining so that a new invitation is no longer required for rematches within a Gaming Session.
+1. Update the clients to support rematch now that the Invitation Code is at the Player level.
 2. Central persistence, e.g., Our Mem Cache, Surreal DB, Redis, etc.
 3. Authentication.

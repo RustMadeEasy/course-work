@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**addPlayer**](TicTacToeAPI.md#addplayer) | **POST** /v1/games/players | Adds a Player to the Game. Returns the result of the initial Game Creation.
+[**addPlayer**](TicTacToeAPI.md#addplayer) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
 [**createGame**](TicTacToeAPI.md#creategame) | **POST** /v1/games | Creates a new Game. Returns Game Creation Result.
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
@@ -17,9 +17,9 @@ Method | HTTP request | Description
     open class func addPlayer(addPlayerParams: AddPlayerParams, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
 ```
 
-Adds a Player to the Game. Returns the result of the initial Game Creation.
+* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
 
-Adds a Player to the Game. Returns the result of the initial Game Creation.
+* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com Adds a Player to the Game. Returns the result of the initial Game Creation.
 
 ### Example
 ```swift
@@ -28,7 +28,7 @@ import OpenAPIClient
 
 let addPlayerParams = AddPlayerParams(gameInvitationCode: "gameInvitationCode_example", playerDisplayName: "playerDisplayName_example") // AddPlayerParams | 
 
-// Adds a Player to the Game. Returns the result of the initial Game Creation.
+// * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
 TicTacToeAPI.addPlayer(addPlayerParams: addPlayerParams) { (response, error) in
     guard error == nil else {
         print(error)
@@ -76,7 +76,7 @@ Creates a new Game. Returns Game Creation Result.
 // The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
 import OpenAPIClient
 
-let newGameParams = NewGameParams(gameMode: GameMode(), playerOneDisplayName: "playerOneDisplayName_example", singlePlayerSkillLevel: SkillLevel()) // NewGameParams | 
+let newGameParams = NewGameParams(gameMode: GameMode(), playerOneDisplayName: "playerOneDisplayName_example", singlePlayerSkillLevel: AutomaticPlayerSkillLevel()) // NewGameParams | 
 
 // Creates a new Game. Returns Game Creation Result.
 TicTacToeAPI.createGame(newGameParams: newGameParams) { (response, error) in

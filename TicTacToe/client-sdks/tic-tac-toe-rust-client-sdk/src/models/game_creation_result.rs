@@ -18,18 +18,14 @@ pub struct GameCreationResult {
     pub event_plane_config: models::EventPlaneConfig,
     #[serde(rename = "game_info")]
     pub game_info: models::GameInfo,
-    /// Code used to invite the second Player to the Game
-    #[serde(rename = "game_invitation_code")]
-    pub game_invitation_code: String,
 }
 
 impl GameCreationResult {
     /// Models the results of a call to the Create Game and Add Player endpoints.
-    pub fn new(event_plane_config: models::EventPlaneConfig, game_info: models::GameInfo, game_invitation_code: String) -> GameCreationResult {
+    pub fn new(event_plane_config: models::EventPlaneConfig, game_info: models::GameInfo) -> GameCreationResult {
         GameCreationResult {
             event_plane_config,
             game_info,
-            game_invitation_code,
         }
     }
 }

@@ -313,7 +313,7 @@ mod game_manager_tests {
 
     use crate::errors::GameError;
     use crate::games_manager::TicTacToeGamesManager;
-    use crate::models::requests::{AddPlayerParams, GameMode, NewGameParams};
+    use crate::models::requests::{GameMode, JoinSessionParams, NewGameParams};
 
     #[tokio::test]
     async fn test_add_second_player() {
@@ -326,18 +326,18 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params).await {
+        let game = match manager.create_new_session_and_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()
             }
         };
 
-        let second_player_params = AddPlayerParams {
+        let second_player_params = JoinSessionParams {
             game_invitation_code: game.game_invitation_code,
             player_display_name: Uuid::new_v4().to_string(),
         };
-        match manager.add_player(&second_player_params).await {
+        match manager.add_player_to_session(&second_player_params).await {
             Ok(new_game_instance) => {
                 match new_game_instance.players.last() {
                     None => {
@@ -369,18 +369,18 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params).await {
+        let game = match manager.create_new_session_and_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()
             }
         };
 
-        let second_player_params = AddPlayerParams {
+        let second_player_params = JoinSessionParams {
             game_invitation_code: game.game_invitation_code.clone(),
             player_display_name: Uuid::new_v4().to_string(),
         };
-        match manager.add_player(&second_player_params).await {
+        match manager.add_player_to_session(&second_player_params).await {
             Ok(new_game_instance) => {
                 match new_game_instance.players.last() {
                     None => {
@@ -401,11 +401,11 @@ mod game_manager_tests {
         }
 
         // This attempt should fail
-        let second_player_params = AddPlayerParams {
+        let second_player_params = JoinSessionParams {
             game_invitation_code: game.game_invitation_code,
             player_display_name: Uuid::new_v4().to_string(),
         };
-        match manager.add_player(&second_player_params).await {
+        match manager.add_player_to_session(&second_player_params).await {
             Ok(new_game_instance) => {
                 match new_game_instance.players.last() {
                     None => {
@@ -437,18 +437,18 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params).await {
+        let game = match manager.create_new_session_and_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()
             }
         };
 
-        let second_player_params = AddPlayerParams {
+        let second_player_params = JoinSessionParams {
             game_invitation_code: game.game_invitation_code,
             player_display_name: player_one_display_name,
         };
-        match manager.add_player(&second_player_params).await {
+        match manager.add_player_to_session(&second_player_params).await {
             Ok(new_game_instance) => {
                 match new_game_instance.players.last() {
                     None => {
@@ -480,18 +480,18 @@ mod game_manager_tests {
             single_player_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_game(&params).await {
+        let game = match manager.create_new_session_and_game(&params).await {
             Ok(game) => game,
             Err(_) => {
                 panic!()
             }
         };
 
-        let second_player_params = AddPlayerParams {
+        let second_player_params = JoinSessionParams {
             game_invitation_code: Uuid::new_v4().to_string(),
             player_display_name: Uuid::new_v4().to_string(),
         };
-        match manager.add_player(&second_player_params).await {
+        match manager.add_player_to_session(&second_player_params).await {
             Ok(new_game_instance) => {
                 match new_game_instance.players.last() {
                     None => {

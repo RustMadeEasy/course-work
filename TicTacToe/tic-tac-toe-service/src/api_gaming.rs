@@ -5,17 +5,6 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::game_state::GameState;
-use crate::game_trait::GameTrait;
-use crate::games_manager::GamesManager;
-use crate::models::requests::{AddPlayerParams, GameTurnInfo, NewGameParams, ID_LENGTH_MAX};
-use crate::models::responses::{GameCreationResult, GameInfo};
-use crate::tic_tac_toe_game::TicTacToeGame;
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
-use log::debug;
-use std::sync::Mutex;
-use validator::Validate;
-
 /**
  * Defines and implements the public Gaming contract for this service.
  *
@@ -23,49 +12,36 @@ use validator::Validate;
  * @author JoelDavisEngineering@Gmail.com
  */
 
+/*
 
-/// Adds a Player to the Game. Returns the result of the initial Game Creation.
-#[utoipa::path(
-    post,
-    tag = "TicTacToe",
-    path = "/v1/games/players",
-    responses(
-    (status = 200, description = "Player added to the Game", body = GameCreationResult, content_type = "application/json"),
-    (status = 400, description = "Bad request - Malformed AddPlayerParams"),
-    (status = 404, description = "No Game found for the specified Invitation"),
-    (status = 500, description = "Internal server error")
-,), )]
-#[post("/games/players")]
-pub(crate) async fn add_player(
-    second_player_params: web::Json<AddPlayerParams>,
-    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GameCreationResult>> {
-    //
+Client A
+    * Create Session
+    * Create Game
+    * Use Session ID to Setup MQTT
+    * Share Invitation ID
 
-    debug!("HTTP POST to /games/players. Params: {:?}", second_player_params);
+Client B
+    Join session via invitation code
+    Use Session ID to Setup MQTT
+    Join Session's current game
 
-    // *** Validate input params ***
-    if let Err(e) = second_player_params.validate() {
-        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
-    }
+Both
+    Play Game
 
-    let mut games_manager = games_manager.lock().unwrap();
-    let second_player_params = second_player_params.into_inner();
 
-    match games_manager.add_player(&second_player_params).await
-    {
-        Ok(game) => {
-            let game_creation_result = GameCreationResult {
-                game_info: GameInfo::from(game.clone()),
-                event_plane_config: game.get_event_plane_config(),
-                game_invitation_code: game.initiating_player.unwrap_or_default().player_invitation_code,
-            };
 
-            Ok(web::Json(game_creation_result))
-        }
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
-    }
-}
+ */
+
+use crate::game_state::GameState;
+use crate::games_manager::GamesManager;
+use crate::models::requests::{GameTurnInfo, JoinGameParams, JoinSessionParams, NewGameParams, NewGamingSessionParams, ID_LENGTH_MAX};
+use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
+use crate::tic_tac_toe_game::TicTacToeGame;
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use log::debug;
+use std::sync::Mutex;
+use validator::Validate;
+
 
 /// Creates a new Game. Returns Game Creation Result.
 #[utoipa::path(
@@ -93,14 +69,51 @@ pub(crate) async fn create_game(
 
     let mut games_manager = games_manager.lock().unwrap();
 
-    match games_manager.create_game(&new_game_params).await {
+    match games_manager.create_new_game(&new_game_params).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
-                event_plane_config: game.clone().get_event_plane_config(),
-                game_invitation_code: game.initiating_player.unwrap_or_default().player_invitation_code,
             };
             Ok(web::Json(new_game_info))
+        }
+        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+    }
+}
+
+/// Creates a new Game. Returns Game Creation Result.
+#[utoipa::path(
+    post,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions",
+    responses(
+    (status = 200, description = "Gaming Session created successfully", body = NewGamingSessionParams, content_type = "application/json"),
+    (status = 400, description = "Bad request - Malformed NewGamingSessionParams"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[post("/gaming-sessions")]
+pub(crate) async fn create_session(
+    new_game_params: web::Json<NewGamingSessionParams>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
+) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
+    //
+
+    debug!("HTTP POST to /gaming-sessions. Params: {:?}", new_game_params);
+
+    // *** Validate input params ***
+    if let Err(e) = new_game_params.validate() {
+        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
+    }
+
+    let mut games_manager = games_manager.lock().unwrap();
+
+    match games_manager.create_new_session(&new_game_params).await {
+        Ok(session) => {
+            let creation_result = GamingSessionCreationResult {
+                event_plane_config: session.event_plane_config,
+                invitation_code: session.invitation_code,
+                session_id: session.session_id,
+            };
+            Ok(web::Json(creation_result))
         }
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
@@ -198,12 +211,87 @@ pub(crate) async fn get_game_info(
     match games_manager
         .lock()
         .unwrap()
-        .get_game_instance(game_id.into_inner())
+        .get_game_by_id(game_id.into_inner())
     {
         Ok(game) => match GameInfo::try_from(game) {
             Ok(game_info) => Ok(web::Json(game_info)),
             Err(error) => { Err(actix_web::error::ErrorNotFound(error.to_string())) }
         },
+        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+    }
+}
+
+/// Adds a Player to the Gaming Session.
+#[utoipa::path(
+    post,
+    tag = "TicTacToe",
+    path = "/v1/game/players",
+    responses(
+    (status = 200, description = "Player added to the Game"),
+    (status = 400, description = "Bad request - Malformed AddPlayerParams"),
+    (status = 404, description = "No Game found for the specified Invitation"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[post("/game/players")]
+pub(crate) async fn join_game(
+    params: web::Json<JoinGameParams>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
+) -> impl Responder {
+    //
+
+    debug!("HTTP POST to /game/players. Params: {:?}", params);
+
+    // *** Validate input params ***
+    if let Err(e) = params.validate() {
+        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
+    }
+
+    let mut games_manager = games_manager.lock().unwrap();
+    let params = params.into_inner();
+
+    match games_manager.add_player_to_game(&params).await {
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
+        Err(error) => { Err(error.into()) }
+    }
+}
+
+/// Adds a Player to the Gaming Session.
+#[utoipa::path(
+    post,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions/players",
+    responses(
+    (status = 200, description = "Player added to the Gaming Session", body = GamingSessionAdditionResult, content_type = "application/json"),
+    (status = 400, description = "Bad request - Malformed AddPlayerParams"),
+    (status = 404, description = "No Game found for the specified Invitation"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[post("/gaming-sessions/players")]
+pub(crate) async fn join_session(
+    params: web::Json<JoinSessionParams>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
+) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
+    //
+
+    debug!("HTTP POST to /gaming-sessions/players. Params: {:?}", params);
+
+    // *** Validate input params ***
+    if let Err(e) = params.validate() {
+        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
+    }
+
+    let mut games_manager = games_manager.lock().unwrap();
+    let second_player_params = params.into_inner();
+
+    match games_manager.add_player_to_session(&second_player_params).await {
+        Ok(session) => {
+            let game_session_addition_result = GamingSessionCreationResult {
+                event_plane_config: session.event_plane_config,
+                invitation_code: session.invitation_code,
+                session_id: session.session_id,
+            };
+            Ok(web::Json(game_session_addition_result))
+        }
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
 }

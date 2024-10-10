@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**add_player**](TicTacToeApi.md#add_player) | **POST** /v1/games/players | Adds a Player to the Game. Returns the result of the initial Game Creation.
+[**add_player**](TicTacToeApi.md#add_player) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
 [**create_game**](TicTacToeApi.md#create_game) | **POST** /v1/games | Creates a new Game. Returns Game Creation Result.
 [**end_game**](TicTacToeApi.md#end_game) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**get_game_history**](TicTacToeApi.md#get_game_history) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
@@ -16,9 +16,9 @@ Method | HTTP request | Description
 ## add_player
 
 > models::GameCreationResult add_player(add_player_params)
-Adds a Player to the Game. Returns the result of the initial Game Creation.
+* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
 
-Adds a Player to the Game. Returns the result of the initial Game Creation.
+* Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com Adds a Player to the Game. Returns the result of the initial Game Creation.
 
 ### Parameters
 

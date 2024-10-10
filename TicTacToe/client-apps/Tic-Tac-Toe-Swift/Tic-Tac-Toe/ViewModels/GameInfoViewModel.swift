@@ -90,7 +90,6 @@ extension GameInfoViewModel {
         if let newGameInfo = result.newGameInfo {
             
             DispatchQueue.main.async {
-                self.invitationCode = newGameInfo.gameInvitationCode
                 self._initiatedGame = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
                 self.update(gameInfo: newGameInfo.gameInfo)

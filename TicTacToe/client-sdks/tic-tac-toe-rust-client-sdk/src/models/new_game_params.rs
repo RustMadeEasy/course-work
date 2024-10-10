@@ -19,7 +19,7 @@ pub struct NewGameParams {
     #[serde(rename = "player_one_display_name")]
     pub player_one_display_name: String,
     #[serde(rename = "single_player_skill_level", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
-    pub single_player_skill_level: Option<Option<models::SkillLevel>>,
+    pub single_player_skill_level: Option<Option<models::AutomaticPlayerSkillLevel>>,
 }
 
 impl NewGameParams {

@@ -1,4 +1,4 @@
-# SkillLevel
+# AutomaticPlayerSkillLevel
 
 ## Properties
 Name | Type | Description | Notes
