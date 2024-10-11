@@ -313,17 +313,17 @@ mod game_manager_tests {
 
     use crate::errors::GameError;
     use crate::games_manager::TicTacToeGamesManager;
-    use crate::models::requests::{GameMode, JoinSessionParams, NewGameParams};
+    use crate::models::requests::{GameMode, JoinSessionParams, NewSinglePlayerGameParams};
 
     #[tokio::test]
     async fn test_add_second_player() {
         //
 
         let display_name = Uuid::new_v4().to_string();
-        let params = NewGameParams {
+        let params = NewSinglePlayerGameParams {
             game_mode: GameMode::TwoPlayers,
             player_one_display_name: display_name.clone(),
-            single_player_skill_level: None,
+            computer_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_new_session_and_game(&params).await {
@@ -363,10 +363,10 @@ mod game_manager_tests {
         //
 
         let display_name = Uuid::new_v4().to_string();
-        let params = NewGameParams {
+        let params = NewSinglePlayerGameParams {
             game_mode: GameMode::TwoPlayers,
             player_one_display_name: display_name.clone(),
-            single_player_skill_level: None,
+            computer_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_new_session_and_game(&params).await {
@@ -431,10 +431,10 @@ mod game_manager_tests {
         //
 
         let player_one_display_name = Uuid::new_v4().to_string();
-        let params = NewGameParams {
+        let params = NewSinglePlayerGameParams {
             game_mode: GameMode::TwoPlayers,
             player_one_display_name: player_one_display_name.clone(),
-            single_player_skill_level: None,
+            computer_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_new_session_and_game(&params).await {
@@ -474,10 +474,10 @@ mod game_manager_tests {
         //
 
         let display_name = Uuid::new_v4().to_string();
-        let params = NewGameParams {
+        let params = NewSinglePlayerGameParams {
             game_mode: GameMode::TwoPlayers,
             player_one_display_name: display_name.clone(),
-            single_player_skill_level: None,
+            computer_skill_level: None,
         };
         let mut manager = TicTacToeGamesManager::new();
         let game = match manager.create_new_session_and_game(&params).await {
@@ -519,7 +519,7 @@ mod game_play_tests {
 
     use crate::game_board::{BoardPosition, GamePiece};
     use crate::game_trait::GameTrait;
-    use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
+    use crate::models::requests::{GameMode, GameTurnInfo, NewSinglePlayerGameParams};
     use crate::play_status::PlayStatus;
     use crate::tic_tac_toe_game::TicTacToeGame;
 
@@ -528,10 +528,10 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let params = NewGameParams {
+        let params = NewSinglePlayerGameParams {
             game_mode: GameMode::TwoPlayers,
             player_one_display_name: "Player One".to_string(),
-            single_player_skill_level: None,
+            computer_skill_level: None,
         };
         let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
@@ -585,10 +585,10 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let params = NewGameParams {
+        let params = NewSinglePlayerGameParams {
             game_mode: GameMode::TwoPlayers,
             player_one_display_name: "Player One".to_string(),
-            single_player_skill_level: None,
+            computer_skill_level: None,
         };
         let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();
@@ -641,10 +641,10 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let params = NewGameParams {
+        let params = NewSinglePlayerGameParams {
             game_mode: GameMode::TwoPlayers,
             player_one_display_name: "Player One".to_string(),
-            single_player_skill_level: None,
+            computer_skill_level: None,
         };
         let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
         let player_one_id = game.players.first().unwrap().player_id.clone();

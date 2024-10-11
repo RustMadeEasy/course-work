@@ -12,27 +12,9 @@
  * @author JoelDavisEngineering@Gmail.com
  */
 
-/*
-
-    Client A
-        * Create Session
-        * Create Game
-        * Use Session ID to Setup MQTT
-        * Share Invitation ID
-    
-    Client B
-        Join session via invitation code
-        Use Session ID to Setup MQTT
-        Join Session's current game
-    
-    Both
-        Play Game
-
- */
-
 use crate::game_state::GameState;
 use crate::games_manager::GamesManager;
-use crate::models::requests::{GameTurnInfo, JoinGameParams, JoinSessionParams, NewGameParams, NewGamingSessionParams, ID_LENGTH_MAX};
+use crate::models::requests::{GameTurnInfo, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, NewTwoPlayerGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
 use crate::tic_tac_toe_game::TicTacToeGame;
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
@@ -45,20 +27,20 @@ use validator::Validate;
 #[utoipa::path(
     post,
     tag = "TicTacToe",
-    path = "/v1/games",
+    path = "/v1/single-player-games",
     responses(
-    (status = 200, description = "Game created successfully", body = GameCreationResult, content_type = "application/json"),
-    (status = 400, description = "Bad request - Malformed NewGameParams"),
+    (status = 200, description = "Single-Player Game created successfully", body = GameCreationResult, content_type = "application/json"),
+    (status = 400, description = "Bad request - Malformed NewSinglePlayerGameParams"),
     (status = 500, description = "Internal server error")
 ,), )]
-#[post("/games")]
-pub(crate) async fn create_game(
-    new_game_params: web::Json<NewGameParams>,
+#[post("/single-player-games")]
+pub(crate) async fn create_single_player_game(
+    new_game_params: web::Json<NewSinglePlayerGameParams>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
     //
 
-    debug!("HTTP POST to /games. Params: {:?}", new_game_params);
+    debug!("HTTP POST to /single-player-games. Params: {:?}", new_game_params);
 
     // *** Validate input params ***
     if let Err(e) = new_game_params.validate() {
@@ -67,7 +49,48 @@ pub(crate) async fn create_game(
 
     let mut games_manager = games_manager.lock().unwrap();
 
-    match games_manager.create_new_game(&new_game_params).await {
+    let new_game_params: NewSinglePlayerGameParams = new_game_params.0;
+
+    match games_manager.create_new_single_player_game(&new_game_params.clone().session_id, &new_game_params.computer_skill_level).await {
+        Ok(game) => {
+            let new_game_info = GameCreationResult {
+                game_info: GameInfo::from(game.clone()),
+            };
+            Ok(web::Json(new_game_info))
+        }
+        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+    }
+}
+
+/// Creates a new Two-Player Game. Returns Game Creation Result.
+#[utoipa::path(
+    post,
+    tag = "TicTacToe",
+    path = "/v1/two-player-games",
+    responses(
+    (status = 200, description = "Two-Player Game created successfully", body = GameCreationResult, content_type = "application/json"),
+    (status = 400, description = "Bad request - Malformed NewTwoPlayerGameParams"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[post("/two-player-games")]
+pub(crate) async fn create_two_player_game(
+    new_game_params: web::Json<NewTwoPlayerGameParams>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
+) -> actix_web::Result<web::Json<GameCreationResult>> {
+    //
+
+    debug!("HTTP POST to /two-player-games. Params: {:?}", new_game_params);
+
+    // *** Validate input params ***
+    if let Err(e) = new_game_params.validate() {
+        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
+    }
+
+    let mut games_manager = games_manager.lock().unwrap();
+
+    let new_game_params = new_game_params.0;
+
+    match games_manager.create_new_two_player_game(&new_game_params.session_id).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
@@ -89,7 +112,7 @@ pub(crate) async fn create_game(
     (status = 500, description = "Internal server error")
 ,), )]
 #[post("/gaming-sessions")]
-pub(crate) async fn create_session(
+pub(crate) async fn create_gaming_session(
     new_game_params: web::Json<NewGamingSessionParams>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
@@ -135,7 +158,7 @@ pub(crate) async fn end_game(
 ) -> HttpResponse {
     //
 
-    debug!("HTTP DELETE to /games/game/{}", game_id);
+    debug!("HTTP DELETE to /games/{}", game_id);
 
     // *** Validate input params ***
     if game_id.is_empty() {
@@ -146,7 +169,42 @@ pub(crate) async fn end_game(
 
     // TODO: JD: only allow Players who is part of the Game to end the Game.
 
-    match games_manager.lock().unwrap().end_game(&game_id) {
+    match games_manager.lock().unwrap().end_game(&game_id).await {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(error) => HttpResponse::from_error(error),
+    }
+}
+
+/// Closes down the specified Gaming Session.
+#[utoipa::path(
+    delete,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions/{session_id}",
+    responses(
+    (status = 200, description = "Gaming Session ended successfully"),
+    (status = 400, description = "Bad request - Malformed Gaming Session ID"),
+    (status = 403, description = "Unauthorized"),
+    (status = 404, description = "Gaming Session not found")
+,), )]
+#[delete("/gaming-sessions/{session_id}")]
+pub(crate) async fn end_gaming_session(
+    session_id: web::Path<String>,
+    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
+) -> HttpResponse {
+    //
+
+    debug!("HTTP DELETE to /gaming-sessions/{}", session_id);
+
+    // *** Validate input params ***
+    if session_id.is_empty() {
+        return HttpResponse::BadRequest().body("Gaming Session ID is empty");
+    } else if session_id.len() as u64 > ID_LENGTH_MAX {
+        return HttpResponse::BadRequest().body("Gaming Session ID exceeds maximum length");
+    }
+
+    // TODO: JD: only allow Players who owns the session to end the session.
+
+    match games_manager.lock().unwrap().end_gaming_session(&session_id).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(error) => HttpResponse::from_error(error),
     }
@@ -223,40 +281,6 @@ pub(crate) async fn get_game_info(
 #[utoipa::path(
     post,
     tag = "TicTacToe",
-    path = "/v1/game/players",
-    responses(
-    (status = 200, description = "Player added to the Game"),
-    (status = 400, description = "Bad request - Malformed AddPlayerParams"),
-    (status = 404, description = "No Game found for the specified Invitation"),
-    (status = 500, description = "Internal server error")
-,), )]
-#[post("/game/players")]
-pub(crate) async fn join_game(
-    params: web::Json<JoinGameParams>,
-    games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
-) -> impl Responder {
-    //
-
-    debug!("HTTP POST to /game/players. Params: {:?}", params);
-
-    // *** Validate input params ***
-    if let Err(e) = params.validate() {
-        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
-    }
-
-    let mut games_manager = games_manager.lock().unwrap();
-    let params = params.into_inner();
-
-    match games_manager.add_player_to_game(&params).await {
-        Ok(_) => Ok(HttpResponse::Ok().finish()),
-        Err(error) => { Err(error.into()) }
-    }
-}
-
-/// Adds a Player to the Gaming Session.
-#[utoipa::path(
-    post,
-    tag = "TicTacToe",
     path = "/v1/gaming-sessions/players",
     responses(
     (status = 200, description = "Player added to the Gaming Session", body = GamingSessionAdditionResult, content_type = "application/json"),
@@ -265,7 +289,7 @@ pub(crate) async fn join_game(
     (status = 500, description = "Internal server error")
 ,), )]
 #[post("/gaming-sessions/players")]
-pub(crate) async fn join_session(
+pub(crate) async fn join_gaming_session(
     params: web::Json<JoinSessionParams>,
     games_manager: web::Data<Mutex<GamesManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {

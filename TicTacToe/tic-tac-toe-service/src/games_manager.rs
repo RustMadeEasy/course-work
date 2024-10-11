@@ -7,15 +7,14 @@
 
 use crate::auto_player::AutomaticPlayer;
 use crate::errors::GameError;
-use crate::game_board::GamePiece;
 use crate::game_observer_trait::{GameObserverTrait, StateChanges};
 use crate::game_session::GamingSession;
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::game_updates_publisher::GameUpdatesPublisher;
-use crate::models::requests::{GameMode, GameTurnInfo, JoinGameParams, JoinSessionParams, NewGameParams, NewGamingSessionParams};
+use crate::models::requests::{GameMode, GameTurnInfo, JoinSessionParams, NewGamingSessionParams};
 use crate::models::responses::GamingSessionCreationResult;
-use crate::models::PlayerInfo;
+use crate::models::{AutomaticPlayerSkillLevel, PlayerInfo};
 use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
 use log::debug;
@@ -56,12 +55,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         debug!("GamesManager: add_player() called. Params: {:?}", params);
 
-        let mut session = match self.get_session(&params.game_invitation_code) {
+        let mut session = match self.get_session_by_invitation_code(&params.game_invitation_code) {
             None => return Err(GameError::InvitationCodeNotFound),
             Some(session) => session,
         };
 
-        let new_player = PlayerInfo::new(&params.player_display_name, &GamePiece::O, false);
+        let new_player = PlayerInfo::new(&params.player_display_name, false);
         session.add_participant(&new_player);
 
         self.notify_observers_of_session_change(StateChanges::PlayerAddedToSession, &session).await;
@@ -79,15 +78,24 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         debug!("GamesManager: create_new_session() called. Params: {:?}", params);
 
-        let player_one = PlayerInfo::new(&params.session_owner_display_name, &GamePiece::X, false);
+        let player_one = PlayerInfo::new(&params.session_owner_display_name, false);
         let session = GamingSession::new(player_one, MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT);
         self.upsert_session(&session);
 
         Ok(session.clone())
     }
 
-    fn get_session(&self, invitation_code: &String) -> Option<Box<GamingSession<T>>> {
+    /// Retrieves the Gaming Session by Invitation Code.
+    fn get_session_by_invitation_code(&self, invitation_code: &String) -> Option<Box<GamingSession<T>>> {
         self.sessions.lock().unwrap().get(invitation_code).cloned()
+    }
+
+    /// Retrieves the Gaming Session by ID.
+    fn get_session_by_session_id(&self, session_id: &String) -> Option<Box<GamingSession<T>>> {
+        match self.sessions.lock().unwrap().iter().find(|it| it.1.session_id.as_str() == session_id) {
+            None => None,
+            Some(it) => Some(it.1.clone()),
+        }
     }
 
     fn get_session_containing_game(&self, game_id: &String) -> Option<Box<GamingSession<T>>> {
@@ -117,56 +125,75 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
     //
 
-    /// Adds a Player to the Game.
-    pub(crate) async fn add_player_to_game(&mut self, params: &JoinGameParams) -> Result<(), GameError> {
+    /// Creates a new Single-Player Game.
+    pub(crate) async fn create_new_single_player_game(&mut self,
+                                                      session_id: &String,
+                                                      computer_skill_level: &AutomaticPlayerSkillLevel) -> Result<T, GameError> {
         //
 
-        debug!("GamesManager: add_player() called. Params: {:?}", params);
+        debug!("GamesManager: create_new_single_player_game() called. Session ID: {:?}, Skill Level: {:?}", session_id, computer_skill_level);
 
-        match self.get_session_and_game_by_game_id(&params.game_id) {
-            Ok(session_and_game) => {
-                self.notify_observers_of_game_change(StateChanges::PlayerAddedToGame, &session_and_game.0, &session_and_game.1).await;
-                Ok(())
-            }
-            Err(error) => {
-                Err(error)
-            }
-        }
-    }
+        let session = match self.get_session_by_invitation_code(session_id) {
+            None => return Err(GameError::SessionNotFound),
+            Some(session) => session,
+        };
 
-    /// Creates a new Gaming Session and new Game.
-    pub(crate) async fn create_new_game(&mut self, params: &NewGameParams) -> Result<T, GameError> {
-        //
+        let human_player = match session.participants.first() {
+            None => return Err(GameError::InvalidSession),
+            Some(player) => player,
+        };
 
-        debug!("GamesManager: create_new_game() called. Params: {:?}", params);
+        let computer_player = PlayerInfo::new(AutomaticPlayer::<T>::get_name().as_str(), true);
 
-        let mut game = T::new(params)?;
+        let game = T::new(GameMode::SinglePlayer, &human_player, &computer_player, &session.session_id)?;
 
-        // Also, if this is human vs. computer, add the computer opponent now
-        if params.game_mode == GameMode::SinglePlayer {
-            game.add_player(AutomaticPlayer::<T>::get_name().as_str(), true)?;
-            let second_player = game.get_players().last().unwrap().clone();
-            let skill_level = params.single_player_skill_level.clone().unwrap_or_default();
+        // Create an AutomaticPlayer to play against Player One.
+        let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), computer_player, &computer_skill_level);
 
-            // Create an AutomaticPlayer to play against Play One.
-            let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), second_player, skill_level);
-
-            // Make sure the AutomaticPlayer can follow the Game.
-            self.observers.push(Box::new(auto_player));
-        }
+        // Make sure the AutomaticPlayer can follow the Game.
+        self.observers.push(Box::new(auto_player));
 
         self.upsert_game(&game);
+
+        self.notify_observers_of_game_change(StateChanges::GameStarted, &session, &game).await;
+
+        Ok(game.clone())
+    }
+
+    /// Creates a new Two-Player Game.
+    pub(crate) async fn create_new_two_player_game(&mut self, session_id: &String) -> Result<T, GameError> {
+        //
+
+        debug!("GamesManager: create_new_two_player_game() called for Session ID: {:?}", session_id);
+
+        let session = match self.get_session_by_session_id(&session_id) {
+            Some(session) => session,
+            None => return Err(GameError::SessionNotFound),
+        };
+
+        if session.participants.iter().count() < 2 {
+            return Err(GameError::InvalidSession);
+        }
+
+        let game = T::new(GameMode::TwoPlayers,
+                          session.participants.first().unwrap(),
+                          session.participants.get(1).unwrap(),
+                          &session.session_id)?;
+
+        self.upsert_game(&game);
+
+        self.notify_observers_of_game_change(StateChanges::GameStarted, &session, &game).await;
 
         Ok(game.clone())
     }
 
     /// Closes down the specified Game instance.
-    pub(crate) fn end_game(&mut self, game_id: &String) -> Result<(), GameError> {
+    pub(crate) async fn end_game(&mut self, game_id: &String) -> Result<(), GameError> {
         //
 
         debug!("GamesManager: end_game() called for game: {:?}.", game_id);
 
-        let game = self.get_game_by_id(game_id)?;
+        let (session, game) = self.get_session_and_game_by_game_id(game_id)?;
 
         if game.get_game_mode() == GameMode::SinglePlayer {
             self.remove_auto_player_observer(game_id);
@@ -174,7 +201,34 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         self.remove_game(game_id);
 
+        self.notify_observers_of_game_change(StateChanges::GameDeleted, &session, &game).await;
+
         Ok(())
+    }
+
+    /// Closes down the specified Game instance.
+    pub(crate) async fn end_gaming_session(&mut self, session_id: &String) -> Result<(), GameError> {
+        //
+
+        debug!("GamesManager: end_gaming_session() called for session: {:?}.", session_id);
+
+        match self.get_session_by_invitation_code(session_id) {
+            None => Err(GameError::SessionNotFound),
+            Some(session) => {
+                //
+
+                // Close down the session's game, if any
+                if let Some(ref game) = session.current_game {
+                    let _ = self.end_game(&game.get_id());
+                }
+
+                // Remove the Session
+                self.notify_observers_of_session_change(StateChanges::SessionDeleted, &session).await;
+                self.sessions.lock().unwrap().remove(session_id);
+
+                Ok(())
+            }
+        }
     }
 
     /// Retrieves the specified Session and Game pair.
@@ -201,7 +255,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
     /// Retrieves the specified Session and Game pair.
     pub(crate) fn get_session_and_game_by_game_id(&self, game_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
         //
-        
+
         let session = match self.get_session_containing_game(&game_id.into()) {
             None => None,
             Some(session) => {
@@ -210,7 +264,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
         };
 
         match session {
-            Some(session_and_game) => Ok(session_and_game),
+            Some(session) => Ok(session),
             None => Err(GameError::GameNotFound),
         }
     }
@@ -261,7 +315,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
                 let now = Utc::now().timestamp_millis();
                 for session in gaming_sessions.values().clone() {
                     if let Some(game) = session.current_game.clone() {
-                    match game.get_time_of_latest_move() {
+                        match game.get_time_of_latest_move() {
                             None => {}
                             Some(time_last_move) => {
                                 let game_age = now - time_last_move.timestamp_millis();
@@ -278,7 +332,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
                         }
                     }
                 }
-                
+
                 for session in expired_sessions.iter_mut() {
                     session.current_game = None;
                     gaming_sessions.insert(session.invitation_code.clone(), Box::new(session.clone()));
@@ -331,13 +385,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamesManager<T> {
 
         debug!("GamesManager: take_turn() called for game: {:?}.", game_id);
 
-        let mut session_and_game = self.get_session_and_game_by_game_id(game_id)?;
-        let new_game_state = session_and_game.1.take_turn(game_turn_info)?;
+        let (session, mut game) = self.get_session_and_game_by_game_id(game_id)?;
+        let new_game_state = game.take_turn(game_turn_info)?;
 
         // Update our Game instance.
-        self.upsert_game(&session_and_game.1);
+        self.upsert_game(&game);
 
-        self.notify_observers_of_game_change(StateChanges::GameTurnTaken, &session_and_game.0, &session_and_game.1).await;
+        self.notify_observers_of_game_change(StateChanges::GameTurnTaken, &session, &game).await;
 
         Ok(new_game_state)
     }

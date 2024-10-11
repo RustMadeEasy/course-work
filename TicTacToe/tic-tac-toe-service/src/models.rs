@@ -70,14 +70,18 @@ pub mod event_plane {
     /// Player to a Game.
     #[derive(Deserialize, Display, Serialize, ToSchema)]
     pub enum EventPlaneTopicNames {
+        /// Called when the Game has been deleted from the platform.
+        GameDeleted,
         /// Called when the Game has ended in a stalemate.
         GameEndedInStalemate,
         /// Called when the Game has ended in a win.
         GameEndedInWin,
+        /// Published when the Game has started.
+        GameStarted,
         /// Published when a new Player has been added to the Gaming Session.
         PlayerAddedToSession,
-        /// Published when a new Player has been added the Game.
-        PlayerAddedToGame,
+        /// Called when the Gaming Session has been deleted from the platform.
+        SessionDeleted,
         /// Published when a Player has taken a new turn.
         TurnTaken,
     }
@@ -88,11 +92,13 @@ pub mod event_plane {
         /// Constructs a topic specific to the Session ID.
         pub(crate) fn build(&self, topic_prefix: &str) -> String {
             match self {
+                EventPlaneTopicNames::GameDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameDeleted),
                 EventPlaneTopicNames::GameEndedInStalemate => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInStalemate),
                 EventPlaneTopicNames::GameEndedInWin => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInWin),
-                EventPlaneTopicNames::PlayerAddedToGame => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerAddedToGame),
+                EventPlaneTopicNames::GameStarted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameStarted),
                 EventPlaneTopicNames::PlayerAddedToSession => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerAddedToSession),
                 EventPlaneTopicNames::TurnTaken => format!("{topic_prefix}/{}", EventPlaneTopicNames::TurnTaken),
+                EventPlaneTopicNames::SessionDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::SessionDeleted),
             }
         }
 
@@ -118,7 +124,7 @@ pub(crate) enum AutomaticPlayerSkillLevel {
 }
 
 /// Models a Tic-Tac-Toe Game Player.
-#[derive(Clone, Default, Deserialize, Serialize, ToSchema, Validate)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, ToSchema, Validate)]
 pub(crate) struct PlayerInfo {
     /// Name of the Player.
     pub(crate) display_name: String,
@@ -151,11 +157,10 @@ impl PlayerInfo {
 
     /// Creates a new PlayerInfo instance.
     pub(crate) fn new(display_name: impl Into<String>,
-                      game_piece: &GamePiece,
                       is_automated: bool) -> Self {
         Self {
             display_name: display_name.into(),
-            game_piece: game_piece.clone(),
+            game_piece: GamePiece::None,
             is_automated,
             player_id: Uuid::new_v4().to_string(),
         }
@@ -174,15 +179,6 @@ pub mod requests {
     const ID_LENGTH_MIN: u64 = 1;
     const NAME_LENGTH_MAX: u64 = 40;
     const NAME_LENGTH_MIN: u64 = 1;
-
-    /// Models info needed to join a Game.
-    #[derive(Debug, Deserialize, ToSchema, Validate)]
-    pub struct JoinGameParams {
-        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub game_id: String,
-        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub player_id: String,
-    }
 
     /// Models info needed to join a Gaming Session.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
@@ -211,17 +207,25 @@ pub mod requests {
     /// Models info needed to start a new Gaming Session.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
     pub struct NewGamingSessionParams {
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub session_id: String,
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
         pub session_owner_display_name: String,
     }
 
-    /// Models info needed to start a new Game.
-    #[derive(Debug, Deserialize, ToSchema, Validate)]
-    pub struct NewGameParams {
-        pub game_mode: GameMode,
+    /// Models info needed to start a new Single-Player Game.
+    #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
+    pub struct NewSinglePlayerGameParams {
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
         pub session_id: String,
-        pub single_player_skill_level: Option<AutomaticPlayerSkillLevel>,
+        pub computer_skill_level: AutomaticPlayerSkillLevel,
+    }
+
+    /// Models info needed to start a new Two-Player Game.
+    #[derive(Debug, Deserialize, ToSchema, Validate)]
+    pub struct NewTwoPlayerGameParams {
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub session_id: String,
     }
 }
 

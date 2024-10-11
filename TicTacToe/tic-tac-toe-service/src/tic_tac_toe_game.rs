@@ -5,19 +5,18 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use chrono::{DateTime, Utc};
-use log::debug;
-use serde::Serialize;
-use uuid::Uuid;
-
 use crate::errors::GameError;
 use crate::errors::GameError::BoardLocationAlreadyOccupied;
 use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
-use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
+use crate::models::requests::{GameMode, GameTurnInfo};
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
+use chrono::{DateTime, Utc};
+use log::debug;
+use serde::Serialize;
+use uuid::Uuid;
 
 /**
  * Provides Tic-Tac-Toe Game play functionality.
@@ -62,46 +61,6 @@ impl TicTacToeGame {
 impl GameTrait for TicTacToeGame {
     //
 
-    /// Adds a Player to the Game.
-    fn add_player(&mut self, display_name: impl Into<String> + Copy, is_automated: bool) -> Result<(), GameError> {
-        //
-
-        debug!("TicTacToeGame: Adding player {}", display_name.into());
-
-        let game_piece: GamePiece;
-
-        match self.players.len() {
-            0 => {
-                // Add Player One
-                game_piece = GamePiece::X;
-            }
-            1 => {
-                // Add Player Two
-                game_piece = GamePiece::O;
-
-                // Makes sure the display name of the Second Player is different from that of the First Player.
-                if display_name.into().to_lowercase()
-                    == self.players.first().unwrap().display_name.to_lowercase()
-                {
-                    return Err(GameError::DisplayNameAlreadyInUseInGame);
-                }
-            }
-            _ => {
-                // Tic-Tac-Toe is a 2-Player Game. No more Players can be added.
-                return Err(GameError::MaximumPlayersAlreadyAdded);
-            }
-        }
-
-        let player_info = PlayerInfo::new(display_name, &game_piece, is_automated);
-
-        self.players.push(player_info);
-
-        // Note Player One as the first to take their turn.
-        self.current_player = Some(self.players.first().unwrap().clone());
-
-        Ok(())
-    }
-
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState {
         //
@@ -133,10 +92,6 @@ impl GameTrait for TicTacToeGame {
         self.game_mode.clone()
     }
 
-    fn get_players(&self) -> Vec<PlayerInfo> {
-        self.players.clone()
-    }
-
     /// Returns the ID of this Game.
     fn get_id(&self) -> String {
         self.id.clone()
@@ -160,17 +115,26 @@ impl GameTrait for TicTacToeGame {
         self.play_history.last().map(|game_state| game_state.created_date)
     }
 
-    /// Creates a new Game instance.
-    fn new(params: &NewGameParams) -> Result<Self, GameError> {
+    fn new(game_mode: GameMode,
+           player: &PlayerInfo,
+           other_player: &PlayerInfo,
+           session_id: &String) -> Result<Self, GameError> {
         //
 
-        debug!("TicTacToeGame: Creating new game. Params: {:?}", params);
+        debug!("TicTacToeGame::new() Creating new game. Session ID: {:?} with Player: {:?} and player: {:?}", session_id, player, other_player);
+
+        let mut player = player.clone();
+        let mut other_player = other_player.clone();
+
+        // Randomly assign the game piece for each player
+        player.game_piece = GamePiece::random_choice();
+        other_player.game_piece = player.game_piece.opposite();
 
         let game = Self {
             current_player: None,
-            game_mode: params.game_mode.clone(),
+            game_mode,
             id: Uuid::new_v4().to_string(),
-            players: vec![],
+            players: vec![player, other_player],
             play_history: vec![],
         };
 

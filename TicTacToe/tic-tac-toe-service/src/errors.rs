@@ -21,13 +21,13 @@ use derive_more::{Display, Error};
 #[derive(Debug, Display, Error, PartialEq)]
 pub enum GameError {
     BoardLocationAlreadyOccupied,
-    DisplayNameAlreadyInUseInGame,
     GameHasAlreadyEnded,
     GameNotFound,
     InvalidBoardPosition,
     InvitationCodeNotFound,
-    MaximumPlayersAlreadyAdded,
+    InvalidSession,
     PlayerNotFound,
+    SessionNotFound,
     WrongPlayerTakingTurn,
 }
 
@@ -37,7 +37,7 @@ impl ResponseError for GameError {
     /// Converts each error variant to an HTTP status code.
     fn status_code(&self) -> StatusCode {
         match *self {
-            GameError::InvalidBoardPosition | GameError::MaximumPlayersAlreadyAdded => {
+            GameError::InvalidBoardPosition | GameError::InvalidSession => {
                 StatusCode::BAD_REQUEST
             }
 
@@ -45,13 +45,14 @@ impl ResponseError for GameError {
 
             GameError::WrongPlayerTakingTurn => StatusCode::METHOD_NOT_ALLOWED,
 
-            GameError::BoardLocationAlreadyOccupied | GameError::DisplayNameAlreadyInUseInGame => {
+            GameError::BoardLocationAlreadyOccupied => {
                 StatusCode::CONFLICT
             }
 
             GameError::GameNotFound
             | GameError::InvitationCodeNotFound
             | GameError::PlayerNotFound => StatusCode::NOT_FOUND,
+            GameError::SessionNotFound => StatusCode::NOT_FOUND,
         }
     }
 

@@ -13,8 +13,9 @@ use crate::models::event_plane::EventPlaneConfig;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::requests::GameMode;
 use crate::models::requests::GameTurnInfo;
-use crate::models::requests::NewGameParams;
 use crate::models::requests::NewGamingSessionParams;
+use crate::models::requests::NewSinglePlayerGameParams;
+use crate::models::requests::NewTwoPlayerGameParams;
 use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
 use crate::models::AutomaticPlayerSkillLevel;
@@ -36,12 +37,15 @@ use utoipa::OpenApi;
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(
-        create_game,
+        create_single_player_game,
+        create_two_player_game,
+        create_gaming_session,
         end_game,
+        end_gaming_session,
         get_game_history,
         get_game_info,
-        join_session,
-        take_turn
+        join_gaming_session,
+        take_turn,
     ),
     components(schemas(
         AutomaticPlayerSkillLevel,
@@ -54,7 +58,8 @@ use utoipa::OpenApi;
         GamePiece,
         GameState,
         GameTurnInfo,
-        NewGameParams,
+        NewSinglePlayerGameParams,
+        NewTwoPlayerGameParams,
         NewGamingSessionParams,
         PlayerInfo,
         PlayStatus,

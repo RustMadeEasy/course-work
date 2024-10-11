@@ -38,13 +38,13 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
         "Reema".to_string()
     }
 
-    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: AutomaticPlayerSkillLevel) -> Self {
+    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: &AutomaticPlayerSkillLevel) -> Self {
         info!("Creating AutomaticPlayer {}", game_id);
         Self {
             game_id: game_id.clone(),
             phantom_type: Default::default(),
             player_info,
-            skill_level,
+            skill_level: skill_level.clone(),
         }
     }
 }
@@ -177,6 +177,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
         debug!("AutomaticPlayer: received game_updated() for game {}", game.get_id());
 
         match state_change {
+            StateChanges::GameDeleted => {}
+            StateChanges::GameStarted => {}
             StateChanges::GameTurnTaken => {
                 let game_state = game.get_current_game_state();
                 match game_state.play_status {
@@ -193,7 +195,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
                 }
             }
             StateChanges::PlayerAddedToSession => {}
-            StateChanges::PlayerAddedToGame => {}
+            StateChanges::SessionDeleted => {}
         }
     }
 
@@ -203,9 +205,11 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
         debug!("AutomaticPlayer: received session_updated() for session {}", session.session_id);
 
         match state_change {
+            StateChanges::GameDeleted => {}
+            StateChanges::GameStarted => {}
             StateChanges::GameTurnTaken => {}
             StateChanges::PlayerAddedToSession => {}
-            StateChanges::PlayerAddedToGame => {}
+            StateChanges::SessionDeleted => {}
         }
     }
 

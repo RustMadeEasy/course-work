@@ -11,7 +11,9 @@ pub(crate) trait GameObserverTrait<T: GameTrait + Clone + Send + Sync + 'static>
 
 #[derive(Debug)]
 pub(crate) enum StateChanges {
+    GameDeleted,
+    GameStarted,
     GameTurnTaken,
-    PlayerAddedToGame,
     PlayerAddedToSession,
+    SessionDeleted,
 }

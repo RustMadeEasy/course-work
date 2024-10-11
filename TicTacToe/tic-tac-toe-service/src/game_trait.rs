@@ -7,7 +7,7 @@
 
 use crate::errors::GameError;
 use crate::game_state::GameState;
-use crate::models::requests::{GameMode, GameTurnInfo, NewGameParams};
+use crate::models::requests::{GameMode, GameTurnInfo};
 use crate::models::PlayerInfo;
 use chrono::{DateTime, Utc};
 
@@ -24,9 +24,6 @@ pub(crate) trait GameTrait: Sized {
 
     // TODO: HD: generalize GameState, GameTurnInfo, NewGameParams, and PlayerInfo.
 
-    /// Adds a Player to the Game.
-    fn add_player(&mut self, display_name: impl Into<String> + Copy, is_automated: bool) -> Result<(), GameError>;
-
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;
 
@@ -35,9 +32,6 @@ pub(crate) trait GameTrait: Sized {
 
     /// Returns the Game Mode.
     fn get_game_mode(&self) -> GameMode;
-
-    /// Returns the Players.
-    fn get_players(&self) -> Vec<PlayerInfo>;
 
     /// Returns the Game ID.
     fn get_id(&self) -> String;
@@ -52,7 +46,10 @@ pub(crate) trait GameTrait: Sized {
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
 
     /// Creates a new Game instance.
-    fn new(params: &NewGameParams) -> Result<Self, GameError>;
+    fn new(game_mode: GameMode,
+           player: &PlayerInfo,
+           other_player: &PlayerInfo,
+           session_id: &String) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError>;

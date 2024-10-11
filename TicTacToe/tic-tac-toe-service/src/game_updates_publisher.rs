@@ -47,6 +47,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
         let topic_prefix = topic_prefix.as_str();
 
         match state_change {
+            StateChanges::GameDeleted => {
+                topic = EventPlaneTopicNames::GameDeleted.build(topic_prefix);
+            }
+            StateChanges::GameStarted => {
+                topic = EventPlaneTopicNames::GameStarted.build(topic_prefix);
+            }
             StateChanges::GameTurnTaken => {
                 match game.get_current_game_state().play_status {
                     PlayStatus::EndedInStalemate => topic = EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
@@ -55,11 +61,11 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
                     PlayStatus::NotStarted => return, // Early return. Nothing to publish.
                 }
             }
-            StateChanges::PlayerAddedToGame => {
-                topic = EventPlaneTopicNames::PlayerAddedToGame.build(topic_prefix);
-            }
             StateChanges::PlayerAddedToSession => {
                 topic = EventPlaneTopicNames::PlayerAddedToSession.build(topic_prefix);
+            }
+            StateChanges::SessionDeleted => {
+                topic = EventPlaneTopicNames::SessionDeleted.build(topic_prefix);
             }
         }
 
@@ -72,9 +78,11 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
         debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);
 
         match state_change {
+            StateChanges::GameDeleted => {}
+            StateChanges::GameStarted => {}
             StateChanges::GameTurnTaken => {}
             StateChanges::PlayerAddedToSession => {}
-            StateChanges::PlayerAddedToGame => {}
+            StateChanges::SessionDeleted => {}
         }
     }
 

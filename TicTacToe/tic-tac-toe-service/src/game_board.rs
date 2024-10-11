@@ -55,3 +55,24 @@ pub(crate) enum GamePiece {
     X,
     O,
 }
+
+impl GamePiece {
+    //
+
+    /// Selects the opposite game piece. If self is X, then O is returned. If self is O, X is returned. If self is None, None is returned.
+    pub(crate) fn opposite(&self) -> Self {
+        match self {
+            GamePiece::None => GamePiece::None,
+            GamePiece::X => GamePiece::O,
+            GamePiece::O => GamePiece::X,
+        }
+    }
+
+    /// Makes a random selection between the X and O game pieces.
+    pub fn random_choice() -> Self {
+        match rand::random::<bool>() {
+            true => Self::O,
+            false => Self::O,
+        }
+    }
+}
