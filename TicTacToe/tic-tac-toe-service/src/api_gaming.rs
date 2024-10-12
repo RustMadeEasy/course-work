@@ -14,7 +14,7 @@
 
 use crate::game_state::GameState;
 use crate::gaming_sessions_manager::GamingSessionsManager;
-use crate::models::requests::{EndGameParams, GameTurnInfo, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, NewTwoPlayerGameParams, ID_LENGTH_MAX};
+use crate::models::requests::{EndGameParams, EndGamingSessionParams, GameTurnInfo, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, NewTwoPlayerGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
 use crate::tic_tac_toe_game::TicTacToeGame;
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
@@ -63,11 +63,8 @@ use validator::Validate;
             Play
             Play
 
-        Player B:        
+        Either Player:
             Exit Gaming Session
-
-        Player A:        
-            End Gaming Session
  */
 
 /// Creates a new Game. Returns Game Creation Result.
@@ -240,6 +237,7 @@ pub(crate) async fn end_game(
 ,), )]
 #[delete("/gaming-sessions/{session_id}")]
 pub(crate) async fn end_gaming_session(
+    params: web::Json<EndGamingSessionParams>,
     session_id: web::Path<String>,
     games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> HttpResponse {
@@ -254,9 +252,7 @@ pub(crate) async fn end_gaming_session(
         return HttpResponse::BadRequest().body("Gaming Session ID exceeds maximum length");
     }
 
-    // TODO: JD: only allow Players who owns the session to end the session.
-
-    match games_manager.lock().await.end_gaming_session(&session_id).await {
+    match games_manager.lock().await.end_gaming_session(params.player_id.as_str(), &session_id).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(error) => HttpResponse::from_error(error),
     }

@@ -210,10 +210,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Closes down the specified Game instance.
-    pub(crate) async fn end_gaming_session(&mut self, session_id: &str) -> Result<(), GameError> {
+    pub(crate) async fn end_gaming_session(&mut self, _player_id: &str, session_id: &str) -> Result<(), GameError> {
         //
 
         debug!("GamesManager: end_gaming_session() called for session: {:?}.", session_id);
+
+        // TODO: JD: only allow Players who are part of the session to end the session.
 
         match self.get_session_by_invitation_code(session_id).await {
             None => Err(GameError::SessionNotFound),
@@ -258,14 +260,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     // /// Retrieves the specified Session and Game pair.
     // pub(crate) async fn get_session_and_game_by_game_id(&self, game_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
     //     //
-    // 
+    //
     //     let session = match self.get_session_containing_game(&game_id.into()).await {
     //         None => None,
     //         Some(session) => {
     //             session.current_game.as_ref().map(|game| ((*session).clone(), game.clone()))
     //         }
     //     };
-    // 
+    //
     //     match session {
     //         Some(session) => Ok(session),
     //         None => Err(GameError::GameNotFound),

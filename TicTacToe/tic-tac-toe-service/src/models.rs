@@ -196,6 +196,13 @@ pub mod requests {
         pub session_id: String,
     }
 
+    /// Models info needed to end a Gaming Session.
+    #[derive(Debug, Deserialize, ToSchema, Validate)]
+    pub struct EndGamingSessionParams {
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub player_id: String,
+    }
+
     /// Models info needed to perform a Game turn.
     #[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
     pub struct GameTurnInfo {
