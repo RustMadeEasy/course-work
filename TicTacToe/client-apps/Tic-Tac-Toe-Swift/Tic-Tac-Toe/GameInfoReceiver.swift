@@ -11,9 +11,13 @@ import OpenAPIClient
 
 /// Defines handler for game info events.
 protocol GameInfoReceiverDelegate {
+    
+    func onGameDeleted()
     func onGameEndedInStalemate()
     func onGameEndedInWin()
-    func onPlayerAdded()
+    func onGameStarted()
+    func onPlayerAddedToSession()
+    func onSessionDeleted()
     func onTurnTaken()
 }
 
@@ -24,9 +28,12 @@ class GameInfoReceiver {
     private var delegate: GameInfoReceiverDelegate!
     private var eventPlaneConfig: EventPlaneConfig
     
+    private var topicGameDeleted: String!
     private var topicGameEndedInStalemate: String!
     private var topicGameEndedInWin: String!
-    private var topicPlayerAdded: String!
+    private var topicGameStarted: String!
+    private var topicPlayerAddedToSession: String!
+    private var topicSessionDeleted: String!
     private var topicTurnTaken: String!
     
     init(eventPlaneConfig: EventPlaneConfig, delegate: GameInfoReceiverDelegate) {
@@ -47,9 +54,13 @@ extension GameInfoReceiver {
     
     /// Pre-builds the topics so that we are not parsing each time a message is received.
     private func prebuildTopics() {
+
+        self.topicGameDeleted = buildTopic(topic: EventPlaneTopicNames.gameDeleted)
         self.topicGameEndedInStalemate = buildTopic(topic: EventPlaneTopicNames.gameEndedInStalemate)
         self.topicGameEndedInWin = buildTopic(topic: EventPlaneTopicNames.gameEndedInWin)
-        self.topicPlayerAdded = buildTopic(topic: EventPlaneTopicNames.playerAdded)
+        self.topicGameStarted = buildTopic(topic: EventPlaneTopicNames.gameStarted)
+        self.topicPlayerAddedToSession = buildTopic(topic: EventPlaneTopicNames.playerAddedToSession)
+        self.topicSessionDeleted = buildTopic(topic: EventPlaneTopicNames.sessionDeleted)
         self.topicTurnTaken = buildTopic(topic: EventPlaneTopicNames.turnTaken)
     }
 
@@ -83,8 +94,6 @@ extension GameInfoReceiver {
                 self.delegate.onGameEndedInStalemate()
             case self.topicGameEndedInWin:
                 self.delegate.onGameEndedInWin()
-            case self.topicPlayerAdded:
-                self.delegate.onPlayerAdded()
             case self.topicTurnTaken:
                 self.delegate.onTurnTaken()
             default:

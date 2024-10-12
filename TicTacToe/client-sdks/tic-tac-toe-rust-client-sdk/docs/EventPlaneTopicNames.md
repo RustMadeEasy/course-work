@@ -4,9 +4,12 @@
 
 | Name | Value |
 |---- | -----|
+| GameDeleted | GameDeleted |
 | GameEndedInStalemate | GameEndedInStalemate |
 | GameEndedInWin | GameEndedInWin |
-| PlayerAdded | PlayerAdded |
+| GameStarted | GameStarted |
+| PlayerAddedToSession | PlayerAddedToSession |
+| SessionDeleted | SessionDeleted |
 | TurnTaken | TurnTaken |
 
 

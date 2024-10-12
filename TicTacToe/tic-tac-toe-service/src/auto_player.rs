@@ -7,8 +7,8 @@
 
 use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_observer_trait::{GameObserverTrait, StateChanges};
-use crate::game_session::GamingSession;
 use crate::game_trait::GameTrait;
+use crate::gaming_session::GamingSession;
 use crate::models::requests::GameTurnInfo;
 use crate::models::{AutomaticPlayerSkillLevel, PlayerInfo};
 use crate::play_status::PlayStatus;
@@ -91,7 +91,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
-    pub(crate) async fn take_turn(&self, game: &T) {
+    pub(crate) async fn take_turn(&self, game: &T, session_id: String) {
         //
 
         info!("Taking AutomaticPlayer turn for game {}", self.game_id);
@@ -120,7 +120,11 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
                 let url = format!("http://127.0.0.1:50020/v1/games/{}/turns", game_id);
                 let client = reqwest::Client::new();
 
-                let game_turn_info = GameTurnInfo { destination: new_board_position, player_id };
+                let game_turn_info = GameTurnInfo {
+                    destination: new_board_position,
+                    player_id,
+                    session_id,
+                };
                 let result = client.post(url)
                     .json(&game_turn_info)
                     .send()
@@ -171,7 +175,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutomaticPlayer<T> {
     //
 
-    async fn game_updated(&self, state_change: &StateChanges, _session: &GamingSession<T>, game: &T) {
+    async fn game_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: &T) {
         //
 
         debug!("AutomaticPlayer: received game_updated() for game {}", game.get_id());
@@ -186,7 +190,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
                         // Is it my turn?
                         if let Some(current_player) = game.get_current_player() {
                             if current_player.player_id == self.player_info.player_id {
-                                self.take_turn(game).await;
+                                self.take_turn(game, session.session_id.clone()).await;
                             }
                         }
                     }

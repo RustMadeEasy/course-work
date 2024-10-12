@@ -22,6 +22,71 @@ use validator::Validate;
 
 const INVITATION_CODE_LENGTH: u64 = 6;
 
+#[derive(Clone, Debug, Default, Deserialize, ToSchema)]
+pub(crate) enum AutomaticPlayerSkillLevel {
+    /// Performs random moves.
+    #[default]
+    Beginner,
+    /// Takes best tactical move.
+    Intermediate,
+    /// Takes the best strategic moves, looking several moves into the future.
+    Expert,
+    /// Expands on the expert level by also making moves that can trick the other player into making
+    /// wrong moves.
+    Master,
+}
+
+/// Specifies the type of Game - single player or two players.
+#[derive(Debug, Deserialize, PartialEq, Serialize, ToSchema, Clone)]
+pub enum GameMode {
+    SinglePlayer,
+    TwoPlayers,
+}
+
+/// Models a Tic-Tac-Toe Game Player.
+#[derive(Clone, Debug, Default, Deserialize, Serialize, ToSchema, Validate)]
+pub(crate) struct PlayerInfo {
+    /// Name of the Player.
+    pub(crate) display_name: String,
+    /// The Game Piece with which the Tic-Tac-Toe Game is played.
+    pub(crate) game_piece: GamePiece,
+    /// Indicates that this Player's moves are automated, i.e., guided by this service.
+    pub(crate) is_automated: bool,
+    /// Unique ID of the Player.
+    pub(crate) player_id: String,
+}
+
+impl PlayerInfo {
+    //
+
+    /// Returns the Player other than the specified Player.
+    pub(crate) fn get_other_player_info_by_id(
+        player_id: impl Into<String>,
+        players: &[PlayerInfo],
+    ) -> Result<PlayerInfo, GameError> {
+        if players.len() < 2 {
+            return Err(GameError::PlayerNotFound);
+        }
+
+        let player_id = player_id.into();
+        match players.iter().find(|it| it.player_id != player_id) {
+            None => Err(GameError::PlayerNotFound),
+            Some(player) => Ok(player.clone()),
+        }
+    }
+
+    /// Creates a new PlayerInfo instance.
+    pub(crate) fn new(display_name: impl Into<String>,
+                      is_automated: bool) -> Self {
+        Self {
+            display_name: display_name.into(),
+            game_piece: GamePiece::None,
+            is_automated,
+            player_id: Uuid::new_v4().to_string(),
+        }
+    }
+}
+
 pub mod event_plane {
     use serde::{Deserialize, Serialize};
     use strum::Display;
@@ -109,64 +174,6 @@ pub mod event_plane {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, ToSchema)]
-pub(crate) enum AutomaticPlayerSkillLevel {
-    /// Performs random moves.
-    #[default]
-    Beginner,
-    /// Takes best tactical move.
-    Intermediate,
-    /// Takes the best strategic moves, looking several moves into the future.
-    Expert,
-    /// Expands on the expert level by also making moves that can trick the other player into making
-    /// wrong moves.
-    Master,
-}
-
-/// Models a Tic-Tac-Toe Game Player.
-#[derive(Clone, Debug, Default, Deserialize, Serialize, ToSchema, Validate)]
-pub(crate) struct PlayerInfo {
-    /// Name of the Player.
-    pub(crate) display_name: String,
-    /// The Game Piece with which the Tic-Tac-Toe Game is played.
-    pub(crate) game_piece: GamePiece,
-    /// Indicates that this Player's moves are automated, i.e., guided by this service.
-    pub(crate) is_automated: bool,
-    /// Unique ID of the Player.
-    pub(crate) player_id: String,
-}
-
-impl PlayerInfo {
-    //
-
-    /// Returns the Player other than the specified Player.
-    pub(crate) fn get_other_player_info_by_id(
-        player_id: impl Into<String>,
-        players: &[PlayerInfo],
-    ) -> Result<PlayerInfo, GameError> {
-        if players.len() < 2 {
-            return Err(GameError::PlayerNotFound);
-        }
-
-        let player_id = player_id.into();
-        match players.iter().find(|it| it.player_id != player_id) {
-            None => Err(GameError::PlayerNotFound),
-            Some(player) => Ok(player.clone()),
-        }
-    }
-
-    /// Creates a new PlayerInfo instance.
-    pub(crate) fn new(display_name: impl Into<String>,
-                      is_automated: bool) -> Self {
-        Self {
-            display_name: display_name.into(),
-            game_piece: GamePiece::None,
-            is_automated,
-            player_id: Uuid::new_v4().to_string(),
-        }
-    }
-}
-
 pub mod requests {
     use crate::game_board::BoardPosition;
     use crate::models::AutomaticPlayerSkillLevel;
@@ -180,13 +187,13 @@ pub mod requests {
     const NAME_LENGTH_MAX: u64 = 40;
     const NAME_LENGTH_MIN: u64 = 1;
 
-    /// Models info needed to join a Gaming Session.
+    /// Models info needed to end a Game.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
-    pub struct JoinSessionParams {
-        #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
-        pub game_invitation_code: String,
-        #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
-        pub player_display_name: String,
+    pub struct EndGameParams {
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub player_id: String,
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub session_id: String,
     }
 
     /// Models info needed to perform a Game turn.
@@ -195,13 +202,17 @@ pub mod requests {
         pub destination: BoardPosition,
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
         pub player_id: String,
+        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
+        pub session_id: String,
     }
 
-    /// Specifies the type of Game - single player or two players.
-    #[derive(Debug, Deserialize, PartialEq, Serialize, ToSchema, Clone)]
-    pub enum GameMode {
-        SinglePlayer,
-        TwoPlayers,
+    /// Models info needed to join a Gaming Session.
+    #[derive(Debug, Deserialize, ToSchema, Validate)]
+    pub struct JoinSessionParams {
+        #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
+        pub game_invitation_code: String,
+        #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
+        pub player_display_name: String,
     }
 
     /// Models info needed to start a new Gaming Session.

@@ -18,7 +18,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api_gaming::{create_gaming_session, create_single_player_game, create_two_player_game, end_game, end_gaming_session, get_game_history, get_game_info, join_gaming_session, take_turn};
 use crate::api_health_and_docs::{api_docs, health, ApiDoc};
-use crate::games_manager::TicTacToeGamesManager;
+use crate::gaming_sessions_manager::TicTacToeGamesManager;
 
 mod api_gaming;
 mod api_health_and_docs;
@@ -27,7 +27,7 @@ mod game_board;
 mod tic_tac_toe_game;
 mod game_state;
 mod game_trait;
-mod games_manager;
+mod gaming_sessions_manager;
 mod models;
 mod play_outcome;
 mod play_status;
@@ -35,7 +35,7 @@ mod tests;
 mod auto_player;
 mod game_observer_trait;
 mod game_updates_publisher;
-mod game_session;
+mod gaming_session;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;

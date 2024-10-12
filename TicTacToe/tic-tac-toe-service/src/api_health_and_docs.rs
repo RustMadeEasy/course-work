@@ -11,14 +11,16 @@ use crate::game_board::GamePiece;
 use crate::game_state::GameState;
 use crate::models::event_plane::EventPlaneConfig;
 use crate::models::event_plane::EventPlaneTopicNames;
-use crate::models::requests::GameMode;
 use crate::models::requests::GameTurnInfo;
+use crate::models::requests::JoinSessionParams;
 use crate::models::requests::NewGamingSessionParams;
 use crate::models::requests::NewSinglePlayerGameParams;
 use crate::models::requests::NewTwoPlayerGameParams;
 use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
+use crate::models::responses::GamingSessionCreationResult;
 use crate::models::AutomaticPlayerSkillLevel;
+use crate::models::GameMode;
 use crate::models::PlayerInfo;
 use crate::play_status::PlayStatus;
 use actix_web::{get, web, HttpResponse};
@@ -58,6 +60,8 @@ use utoipa::OpenApi;
         GamePiece,
         GameState,
         GameTurnInfo,
+        GamingSessionCreationResult,
+        JoinSessionParams,
         NewSinglePlayerGameParams,
         NewTwoPlayerGameParams,
         NewGamingSessionParams,

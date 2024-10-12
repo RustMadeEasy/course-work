@@ -12,8 +12,11 @@ import AnyCodable
 
 /** Defines the names of the subscription topics used in the real-time messaging event plane.  A full topic takes the form:  &#x60;[topic_prefix]/[event topic name]&#x60;  NOTE: The topic_prefix can be obtained from the event_plane_config field of the GameCreationResult model that is returned when creating a new Game or when adding a new Player to a Game. */
 public enum EventPlaneTopicNames: String, Codable, CaseIterable {
+    case gameDeleted = "GameDeleted"
     case gameEndedInStalemate = "GameEndedInStalemate"
     case gameEndedInWin = "GameEndedInWin"
-    case playerAdded = "PlayerAdded"
+    case gameStarted = "GameStarted"
+    case playerAddedToSession = "PlayerAddedToSession"
+    case sessionDeleted = "SessionDeleted"
     case turnTaken = "TurnTaken"
 }

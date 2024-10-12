@@ -1,5 +1,5 @@
-use crate::game_session::GamingSession;
 use crate::game_trait::GameTrait;
+use crate::gaming_session::GamingSession;
 use async_trait::async_trait;
 
 #[async_trait]

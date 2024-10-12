@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 .swiftformat
 Cartfile
 OpenAPIClient.podspec
@@ -12,7 +11,6 @@ OpenAPIClient/Classes/OpenAPIs/Extensions.swift
 OpenAPIClient/Classes/OpenAPIs/JSONDataEncoding.swift
 OpenAPIClient/Classes/OpenAPIs/JSONEncodingHelper.swift
 OpenAPIClient/Classes/OpenAPIs/Models.swift
-OpenAPIClient/Classes/OpenAPIs/Models/AddPlayerParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/AutomaticPlayerSkillLevel.swift
 OpenAPIClient/Classes/OpenAPIs/Models/BoardPosition.swift
 OpenAPIClient/Classes/OpenAPIs/Models/EventPlaneConfig.swift
@@ -23,7 +21,11 @@ OpenAPIClient/Classes/OpenAPIs/Models/GameMode.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GamePiece.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GameState.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GameTurnInfo.swift
-OpenAPIClient/Classes/OpenAPIs/Models/NewGameParams.swift
+OpenAPIClient/Classes/OpenAPIs/Models/GamingSessionCreationResult.swift
+OpenAPIClient/Classes/OpenAPIs/Models/JoinSessionParams.swift
+OpenAPIClient/Classes/OpenAPIs/Models/NewGamingSessionParams.swift
+OpenAPIClient/Classes/OpenAPIs/Models/NewSinglePlayerGameParams.swift
+OpenAPIClient/Classes/OpenAPIs/Models/NewTwoPlayerGameParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayStatus.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayerInfo.swift
 OpenAPIClient/Classes/OpenAPIs/OpenISO8601DateFormatter.swift
@@ -32,7 +34,6 @@ OpenAPIClient/Classes/OpenAPIs/URLSessionImplementations.swift
 OpenAPIClient/Classes/OpenAPIs/Validation.swift
 Package.swift
 README.md
-docs/AddPlayerParams.md
 docs/AutomaticPlayerSkillLevel.md
 docs/BoardPosition.md
 docs/EventPlaneConfig.md
@@ -43,7 +44,11 @@ docs/GameMode.md
 docs/GamePiece.md
 docs/GameState.md
 docs/GameTurnInfo.md
-docs/NewGameParams.md
+docs/GamingSessionCreationResult.md
+docs/JoinSessionParams.md
+docs/NewGamingSessionParams.md
+docs/NewSinglePlayerGameParams.md
+docs/NewTwoPlayerGameParams.md
 docs/PlayStatus.md
 docs/PlayerInfo.md
 docs/TicTacToeAPI.md

@@ -11,20 +11,17 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
-/// GameCreationResult : Models the results of a call to the Create Game and Add Player endpoints.
+/// GameCreationResult : Models the results of a call to the Create Game endpoint.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GameCreationResult {
-    #[serde(rename = "event_plane_config")]
-    pub event_plane_config: models::EventPlaneConfig,
     #[serde(rename = "game_info")]
     pub game_info: models::GameInfo,
 }
 
 impl GameCreationResult {
-    /// Models the results of a call to the Create Game and Add Player endpoints.
-    pub fn new(event_plane_config: models::EventPlaneConfig, game_info: models::GameInfo) -> GameCreationResult {
+    /// Models the results of a call to the Create Game endpoint.
+    pub fn new(game_info: models::GameInfo) -> GameCreationResult {
         GameCreationResult {
-            event_plane_config,
             game_info,
         }
     }

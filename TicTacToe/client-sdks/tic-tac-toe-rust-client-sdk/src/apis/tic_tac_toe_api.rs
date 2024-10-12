@@ -15,20 +15,28 @@ use crate::{apis::ResponseContent, models};
 use super::{Error, configuration};
 
 
-/// struct for typed errors of method [`add_player`]
+/// struct for typed errors of method [`create_gaming_session`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum AddPlayerError {
+pub enum CreateGamingSessionError {
     Status400(),
-    Status404(),
     Status500(),
     UnknownValue(serde_json::Value),
 }
 
-/// struct for typed errors of method [`create_game`]
+/// struct for typed errors of method [`create_single_player_game`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum CreateGameError {
+pub enum CreateSinglePlayerGameError {
+    Status400(),
+    Status500(),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`create_two_player_game`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CreateTwoPlayerGameError {
     Status400(),
     Status500(),
     UnknownValue(serde_json::Value),
@@ -38,6 +46,16 @@ pub enum CreateGameError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum EndGameError {
+    Status400(),
+    Status403(),
+    Status404(),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`end_gaming_session`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum EndGamingSessionError {
     Status400(),
     Status403(),
     Status404(),
@@ -64,6 +82,16 @@ pub enum GetGameInfoError {
     UnknownValue(serde_json::Value),
 }
 
+/// struct for typed errors of method [`join_gaming_session`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum JoinGamingSessionError {
+    Status400(),
+    Status404(),
+    Status500(),
+    UnknownValue(serde_json::Value),
+}
+
 /// struct for typed errors of method [`take_turn`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -77,19 +105,19 @@ pub enum TakeTurnError {
 }
 
 
-/// * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com Adds a Player to the Game. Returns the result of the initial Game Creation.
-pub fn add_player(configuration: &configuration::Configuration, add_player_params: models::AddPlayerParams) -> Result<models::GameCreationResult, Error<AddPlayerError>> {
+/// Creates a new Gaming Session. Returns GamingSessionCreationResult.
+pub fn create_gaming_session(configuration: &configuration::Configuration, new_gaming_session_params: models::NewGamingSessionParams) -> Result<models::GamingSessionCreationResult, Error<CreateGamingSessionError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/v1/games/players", local_var_configuration.base_path);
+    let local_var_uri_str = format!("{}/v1/gaming-sessions", local_var_configuration.base_path);
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::POST, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
     }
-    local_var_req_builder = local_var_req_builder.json(&add_player_params);
+    local_var_req_builder = local_var_req_builder.json(&new_gaming_session_params);
 
     let local_var_req = local_var_req_builder.build()?;
     let local_var_resp = local_var_client.execute(local_var_req)?;
@@ -100,25 +128,25 @@ pub fn add_player(configuration: &configuration::Configuration, add_player_param
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<AddPlayerError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<CreateGamingSessionError> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Creates a new Game. Returns Game Creation Result.
-pub fn create_game(configuration: &configuration::Configuration, new_game_params: models::NewGameParams) -> Result<models::GameCreationResult, Error<CreateGameError>> {
+pub fn create_single_player_game(configuration: &configuration::Configuration, new_single_player_game_params: models::NewSinglePlayerGameParams) -> Result<models::GameCreationResult, Error<CreateSinglePlayerGameError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
 
-    let local_var_uri_str = format!("{}/v1/games", local_var_configuration.base_path);
+    let local_var_uri_str = format!("{}/v1/single-player-games", local_var_configuration.base_path);
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::POST, local_var_uri_str.as_str());
 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
     }
-    local_var_req_builder = local_var_req_builder.json(&new_game_params);
+    local_var_req_builder = local_var_req_builder.json(&new_single_player_game_params);
 
     let local_var_req = local_var_req_builder.build()?;
     let local_var_resp = local_var_client.execute(local_var_req)?;
@@ -129,7 +157,36 @@ pub fn create_game(configuration: &configuration::Configuration, new_game_params
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<CreateGameError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<CreateSinglePlayerGameError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
+        Err(Error::ResponseError(local_var_error))
+    }
+}
+
+/// Creates a new Two-Player Game. Returns Game Creation Result.
+pub fn create_two_player_game(configuration: &configuration::Configuration, new_two_player_game_params: models::NewTwoPlayerGameParams) -> Result<models::GameCreationResult, Error<CreateTwoPlayerGameError>> {
+    let local_var_configuration = configuration;
+
+    let local_var_client = &local_var_configuration.client;
+
+    let local_var_uri_str = format!("{}/v1/two-player-games", local_var_configuration.base_path);
+    let mut local_var_req_builder = local_var_client.request(reqwest::Method::POST, local_var_uri_str.as_str());
+
+    if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+        local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+    }
+    local_var_req_builder = local_var_req_builder.json(&new_two_player_game_params);
+
+    let local_var_req = local_var_req_builder.build()?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
+
+    let local_var_status = local_var_resp.status();
+    let local_var_content = local_var_resp.text()?;
+
+    if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+        serde_json::from_str(&local_var_content).map_err(Error::from)
+    } else {
+        let local_var_entity: Option<CreateTwoPlayerGameError> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
@@ -158,6 +215,34 @@ pub fn end_game(configuration: &configuration::Configuration, game_id: &str) -> 
         Ok(())
     } else {
         let local_var_entity: Option<EndGameError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
+        Err(Error::ResponseError(local_var_error))
+    }
+}
+
+/// Closes down the specified Gaming Session.
+pub fn end_gaming_session(configuration: &configuration::Configuration, session_id: &str) -> Result<(), Error<EndGamingSessionError>> {
+    let local_var_configuration = configuration;
+
+    let local_var_client = &local_var_configuration.client;
+
+    let local_var_uri_str = format!("{}/v1/gaming-sessions/{session_id}", local_var_configuration.base_path, session_id=crate::apis::urlencode(session_id));
+    let mut local_var_req_builder = local_var_client.request(reqwest::Method::DELETE, local_var_uri_str.as_str());
+
+    if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+        local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+    }
+
+    let local_var_req = local_var_req_builder.build()?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
+
+    let local_var_status = local_var_resp.status();
+    let local_var_content = local_var_resp.text()?;
+
+    if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+        Ok(())
+    } else {
+        let local_var_entity: Option<EndGamingSessionError> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
@@ -214,6 +299,35 @@ pub fn get_game_info(configuration: &configuration::Configuration, game_id: &str
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
         let local_var_entity: Option<GetGameInfoError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
+        Err(Error::ResponseError(local_var_error))
+    }
+}
+
+/// Adds a Player to the Gaming Session.
+pub fn join_gaming_session(configuration: &configuration::Configuration, join_session_params: models::JoinSessionParams) -> Result<models::GamingSessionCreationResult, Error<JoinGamingSessionError>> {
+    let local_var_configuration = configuration;
+
+    let local_var_client = &local_var_configuration.client;
+
+    let local_var_uri_str = format!("{}/v1/gaming-sessions/players", local_var_configuration.base_path);
+    let mut local_var_req_builder = local_var_client.request(reqwest::Method::POST, local_var_uri_str.as_str());
+
+    if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
+        local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
+    }
+    local_var_req_builder = local_var_req_builder.json(&join_session_params);
+
+    let local_var_req = local_var_req_builder.build()?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
+
+    let local_var_status = local_var_resp.status();
+    let local_var_content = local_var_resp.text()?;
+
+    if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
+        serde_json::from_str(&local_var_content).map_err(Error::from)
+    } else {
+        let local_var_entity: Option<JoinGamingSessionError> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }

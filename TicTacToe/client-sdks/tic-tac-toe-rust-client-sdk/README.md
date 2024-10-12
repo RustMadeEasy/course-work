@@ -27,17 +27,19 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*TicTacToeApi* | [**add_player**](docs/TicTacToeApi.md#add_player) | **POST** /v1/games/players | * Defines and implements the public Gaming contract for this service.  *  * © 2024 Rust Made Easy. All rights reserved.  * @author JoelDavisEngineering@Gmail.com
-*TicTacToeApi* | [**create_game**](docs/TicTacToeApi.md#create_game) | **POST** /v1/games | Creates a new Game. Returns Game Creation Result.
+*TicTacToeApi* | [**create_gaming_session**](docs/TicTacToeApi.md#create_gaming_session) | **POST** /v1/gaming-sessions | Creates a new Gaming Session. Returns GamingSessionCreationResult.
+*TicTacToeApi* | [**create_single_player_game**](docs/TicTacToeApi.md#create_single_player_game) | **POST** /v1/single-player-games | Creates a new Game. Returns Game Creation Result.
+*TicTacToeApi* | [**create_two_player_game**](docs/TicTacToeApi.md#create_two_player_game) | **POST** /v1/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 *TicTacToeApi* | [**end_game**](docs/TicTacToeApi.md#end_game) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
+*TicTacToeApi* | [**end_gaming_session**](docs/TicTacToeApi.md#end_gaming_session) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 *TicTacToeApi* | [**get_game_history**](docs/TicTacToeApi.md#get_game_history) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
 *TicTacToeApi* | [**get_game_info**](docs/TicTacToeApi.md#get_game_info) | **GET** /v1/games/{game_id} | Retrieves details of the specified Game.
+*TicTacToeApi* | [**join_gaming_session**](docs/TicTacToeApi.md#join_gaming_session) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
 *TicTacToeApi* | [**take_turn**](docs/TicTacToeApi.md#take_turn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player.
 
 
 ## Documentation For Models
 
- - [AddPlayerParams](docs/AddPlayerParams.md)
  - [AutomaticPlayerSkillLevel](docs/AutomaticPlayerSkillLevel.md)
  - [BoardPosition](docs/BoardPosition.md)
  - [EventPlaneConfig](docs/EventPlaneConfig.md)
@@ -48,7 +50,11 @@ Class | Method | HTTP request | Description
  - [GamePiece](docs/GamePiece.md)
  - [GameState](docs/GameState.md)
  - [GameTurnInfo](docs/GameTurnInfo.md)
- - [NewGameParams](docs/NewGameParams.md)
+ - [GamingSessionCreationResult](docs/GamingSessionCreationResult.md)
+ - [JoinSessionParams](docs/JoinSessionParams.md)
+ - [NewGamingSessionParams](docs/NewGamingSessionParams.md)
+ - [NewSinglePlayerGameParams](docs/NewSinglePlayerGameParams.md)
+ - [NewTwoPlayerGameParams](docs/NewTwoPlayerGameParams.md)
  - [PlayStatus](docs/PlayStatus.md)
  - [PlayerInfo](docs/PlayerInfo.md)
 

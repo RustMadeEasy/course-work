@@ -15,12 +15,18 @@ use serde::{Deserialize, Serialize};
 /// Defines the names of the subscription topics used in the real-time messaging event plane.  A full topic takes the form:  `[topic_prefix]/[event topic name]`  NOTE: The topic_prefix can be obtained from the event_plane_config field of the GameCreationResult model that is returned when creating a new Game or when adding a new Player to a Game.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum EventPlaneTopicNames {
+    #[serde(rename = "GameDeleted")]
+    GameDeleted,
     #[serde(rename = "GameEndedInStalemate")]
     GameEndedInStalemate,
     #[serde(rename = "GameEndedInWin")]
     GameEndedInWin,
-    #[serde(rename = "PlayerAdded")]
-    PlayerAdded,
+    #[serde(rename = "GameStarted")]
+    GameStarted,
+    #[serde(rename = "PlayerAddedToSession")]
+    PlayerAddedToSession,
+    #[serde(rename = "SessionDeleted")]
+    SessionDeleted,
     #[serde(rename = "TurnTaken")]
     TurnTaken,
 
@@ -29,9 +35,12 @@ pub enum EventPlaneTopicNames {
 impl std::fmt::Display for EventPlaneTopicNames {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
+            Self::GameDeleted => write!(f, "GameDeleted"),
             Self::GameEndedInStalemate => write!(f, "GameEndedInStalemate"),
             Self::GameEndedInWin => write!(f, "GameEndedInWin"),
-            Self::PlayerAdded => write!(f, "PlayerAdded"),
+            Self::GameStarted => write!(f, "GameStarted"),
+            Self::PlayerAddedToSession => write!(f, "PlayerAddedToSession"),
+            Self::SessionDeleted => write!(f, "SessionDeleted"),
             Self::TurnTaken => write!(f, "TurnTaken"),
         }
     }
@@ -39,7 +48,7 @@ impl std::fmt::Display for EventPlaneTopicNames {
 
 impl Default for EventPlaneTopicNames {
     fn default() -> EventPlaneTopicNames {
-        Self::GameEndedInStalemate
+        Self::GameDeleted
     }
 }
 

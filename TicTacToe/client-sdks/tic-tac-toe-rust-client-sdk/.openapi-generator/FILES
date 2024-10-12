@@ -1,9 +1,7 @@
 .gitignore
-.openapi-generator-ignore
 .travis.yml
 Cargo.toml
 README.md
-docs/AddPlayerParams.md
 docs/AutomaticPlayerSkillLevel.md
 docs/BoardPosition.md
 docs/EventPlaneConfig.md
@@ -14,7 +12,11 @@ docs/GameMode.md
 docs/GamePiece.md
 docs/GameState.md
 docs/GameTurnInfo.md
-docs/NewGameParams.md
+docs/GamingSessionCreationResult.md
+docs/JoinSessionParams.md
+docs/NewGamingSessionParams.md
+docs/NewSinglePlayerGameParams.md
+docs/NewTwoPlayerGameParams.md
 docs/PlayStatus.md
 docs/PlayerInfo.md
 docs/TicTacToeApi.md
@@ -23,7 +25,6 @@ src/apis/configuration.rs
 src/apis/mod.rs
 src/apis/tic_tac_toe_api.rs
 src/lib.rs
-src/models/add_player_params.rs
 src/models/automatic_player_skill_level.rs
 src/models/board_position.rs
 src/models/event_plane_config.rs
@@ -34,7 +35,11 @@ src/models/game_mode.rs
 src/models/game_piece.rs
 src/models/game_state.rs
 src/models/game_turn_info.rs
+src/models/gaming_session_creation_result.rs
+src/models/join_session_params.rs
 src/models/mod.rs
-src/models/new_game_params.rs
+src/models/new_gaming_session_params.rs
+src/models/new_single_player_game_params.rs
+src/models/new_two_player_game_params.rs
 src/models/play_status.rs
 src/models/player_info.rs

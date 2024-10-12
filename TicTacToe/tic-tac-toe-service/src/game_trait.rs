@@ -7,8 +7,8 @@
 
 use crate::errors::GameError;
 use crate::game_state::GameState;
-use crate::models::requests::{GameMode, GameTurnInfo};
-use crate::models::PlayerInfo;
+use crate::models::requests::GameTurnInfo;
+use crate::models::{GameMode, PlayerInfo};
 use chrono::{DateTime, Utc};
 
 /**
