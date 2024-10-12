@@ -103,7 +103,7 @@ pub mod event_plane {
         }
 
         /// Constructs a topic prefix specific to the Channel ID.
-        pub(crate) fn build_topic_prefix(event_channel_id: &String) -> String {
+        pub(crate) fn build_topic_prefix(event_channel_id: &str) -> String {
             format!("{DOMAIN_NAME}/Channels/{event_channel_id}")
         }
     }

@@ -22,6 +22,7 @@ use derive_more::{Display, Error};
 pub enum GameError {
     BoardLocationAlreadyOccupied,
     GameHasAlreadyEnded,
+    GameNotStarted,
     GameNotFound,
     InvalidBoardPosition,
     InvitationCodeNotFound,
@@ -37,7 +38,7 @@ impl ResponseError for GameError {
     /// Converts each error variant to an HTTP status code.
     fn status_code(&self) -> StatusCode {
         match *self {
-            GameError::InvalidBoardPosition | GameError::InvalidSession => {
+            GameError::GameNotStarted | GameError::InvalidBoardPosition | GameError::InvalidSession => {
                 StatusCode::BAD_REQUEST
             }
 

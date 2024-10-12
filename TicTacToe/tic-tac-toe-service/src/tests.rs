@@ -11,10 +11,10 @@ mod auto_player_tests {
     fn test_get_empty_locations() {
         //
 
-        //
-
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
 
         /*
         X  -  X
@@ -99,8 +99,10 @@ mod game_board_tests {
     fn test_in_progress_status() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
 
         /*
         O  O  X
@@ -127,8 +129,8 @@ mod game_board_tests {
         //
 
         // Invalid column
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), false);
         if GameState::new()
             .place_game_piece(&BoardPosition::new(10, 0), &player_one, &player_two)
             .is_ok()
@@ -157,8 +159,10 @@ mod game_board_tests {
     fn test_occupied_piece_placement() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
 
         // Place an X at 0:0
         let board_state = GameState::new();
@@ -183,8 +187,10 @@ mod game_board_tests {
     fn test_stalemate() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
 
         /*
         O  O  X
@@ -225,8 +231,11 @@ mod game_board_tests {
     fn test_valid_piece_placement() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
+
         match GameState::new().place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
         {
             Ok(board_state) => {
@@ -243,8 +252,8 @@ mod game_board_tests {
     fn test_winning_moves() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        let player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), false);
 
         /*
         X  -  X
@@ -308,218 +317,13 @@ mod game_board_tests {
 }
 
 #[cfg(test)]
-mod game_manager_tests {
-    use uuid::Uuid;
-
-    use crate::errors::GameError;
-    use crate::games_manager::TicTacToeGamesManager;
-    use crate::models::requests::{GameMode, JoinSessionParams, NewSinglePlayerGameParams};
-
-    #[tokio::test]
-    async fn test_add_second_player() {
-        //
-
-        let display_name = Uuid::new_v4().to_string();
-        let params = NewSinglePlayerGameParams {
-            game_mode: GameMode::TwoPlayers,
-            player_one_display_name: display_name.clone(),
-            computer_skill_level: None,
-        };
-        let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_new_session_and_game(&params).await {
-            Ok(game) => game,
-            Err(_) => {
-                panic!()
-            }
-        };
-
-        let second_player_params = JoinSessionParams {
-            game_invitation_code: game.game_invitation_code,
-            player_display_name: Uuid::new_v4().to_string(),
-        };
-        match manager.add_player_to_session(&second_player_params).await {
-            Ok(new_game_instance) => {
-                match new_game_instance.players.last() {
-                    None => {
-                        panic!()
-                    }
-                    Some(player_info) => {
-                        // Make sure the Game piece is different from that of Player One
-                        assert_ne!(
-                            game.players.first().unwrap().game_piece,
-                            player_info.game_piece
-                        );
-                    }
-                }
-            }
-            Err(_) => {
-                panic!()
-            }
-        }
-    }
-
-    #[tokio::test]
-    async fn test_add_second_player_twice() {
-        //
-
-        let display_name = Uuid::new_v4().to_string();
-        let params = NewSinglePlayerGameParams {
-            game_mode: GameMode::TwoPlayers,
-            player_one_display_name: display_name.clone(),
-            computer_skill_level: None,
-        };
-        let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_new_session_and_game(&params).await {
-            Ok(game) => game,
-            Err(_) => {
-                panic!()
-            }
-        };
-
-        let second_player_params = JoinSessionParams {
-            game_invitation_code: game.game_invitation_code.clone(),
-            player_display_name: Uuid::new_v4().to_string(),
-        };
-        match manager.add_player_to_session(&second_player_params).await {
-            Ok(new_game_instance) => {
-                match new_game_instance.players.last() {
-                    None => {
-                        panic!()
-                    }
-                    Some(player_info) => {
-                        // Make sure the Game piece is different from that of Player One
-                        assert_ne!(
-                            game.players.first().unwrap().game_piece,
-                            player_info.game_piece
-                        );
-                    }
-                }
-            }
-            Err(_) => {
-                panic!()
-            }
-        }
-
-        // This attempt should fail
-        let second_player_params = JoinSessionParams {
-            game_invitation_code: game.game_invitation_code,
-            player_display_name: Uuid::new_v4().to_string(),
-        };
-        match manager.add_player_to_session(&second_player_params).await {
-            Ok(new_game_instance) => {
-                match new_game_instance.players.last() {
-                    None => {
-                        panic!()
-                    }
-                    Some(player_info) => {
-                        // Make sure the Game piece is different from that of Player One
-                        assert_ne!(
-                            game.players.first().unwrap().game_piece,
-                            player_info.game_piece
-                        );
-                    }
-                }
-            }
-            Err(error) => {
-                assert_eq!(error, GameError::MaximumPlayersAlreadyAdded)
-            }
-        }
-    }
-
-    #[tokio::test]
-    async fn test_add_second_player_using_player_one_name() {
-        //
-
-        let player_one_display_name = Uuid::new_v4().to_string();
-        let params = NewSinglePlayerGameParams {
-            game_mode: GameMode::TwoPlayers,
-            player_one_display_name: player_one_display_name.clone(),
-            computer_skill_level: None,
-        };
-        let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_new_session_and_game(&params).await {
-            Ok(game) => game,
-            Err(_) => {
-                panic!()
-            }
-        };
-
-        let second_player_params = JoinSessionParams {
-            game_invitation_code: game.game_invitation_code,
-            player_display_name: player_one_display_name,
-        };
-        match manager.add_player_to_session(&second_player_params).await {
-            Ok(new_game_instance) => {
-                match new_game_instance.players.last() {
-                    None => {
-                        panic!()
-                    }
-                    Some(player_info) => {
-                        // Make sure the Game piece is different from that of Player One
-                        assert_ne!(
-                            game.players.first().unwrap().game_piece,
-                            player_info.game_piece
-                        );
-                    }
-                }
-            }
-            Err(error) => {
-                assert_eq!(error, GameError::DisplayNameAlreadyInUseInGame)
-            }
-        }
-    }
-
-    #[tokio::test]
-    async fn test_add_second_player_with_invalid_invitation_code() {
-        //
-
-        let display_name = Uuid::new_v4().to_string();
-        let params = NewSinglePlayerGameParams {
-            game_mode: GameMode::TwoPlayers,
-            player_one_display_name: display_name.clone(),
-            computer_skill_level: None,
-        };
-        let mut manager = TicTacToeGamesManager::new();
-        let game = match manager.create_new_session_and_game(&params).await {
-            Ok(game) => game,
-            Err(_) => {
-                panic!()
-            }
-        };
-
-        let second_player_params = JoinSessionParams {
-            game_invitation_code: Uuid::new_v4().to_string(),
-            player_display_name: Uuid::new_v4().to_string(),
-        };
-        match manager.add_player_to_session(&second_player_params).await {
-            Ok(new_game_instance) => {
-                match new_game_instance.players.last() {
-                    None => {
-                        panic!()
-                    }
-                    Some(player_info) => {
-                        // Make sure the Game piece is different from that of Player One
-                        assert_ne!(
-                            game.players.first().unwrap().game_piece,
-                            player_info.game_piece
-                        );
-                    }
-                }
-            }
-            Err(error) => {
-                assert_eq!(error, GameError::InvitationCodeNotFound)
-            }
-        }
-    }
-}
-
-#[cfg(test)]
 mod game_play_tests {
     use uuid::Uuid;
 
     use crate::game_board::{BoardPosition, GamePiece};
     use crate::game_trait::GameTrait;
-    use crate::models::requests::{GameMode, GameTurnInfo, NewSinglePlayerGameParams};
+    use crate::models::requests::{GameMode, GameTurnInfo};
+    use crate::models::PlayerInfo;
     use crate::play_status::PlayStatus;
     use crate::tic_tac_toe_game::TicTacToeGame;
 
@@ -528,44 +332,31 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let params = NewSinglePlayerGameParams {
-            game_mode: GameMode::TwoPlayers,
-            player_one_display_name: "Player One".to_string(),
-            computer_skill_level: None,
-        };
-        let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
-        let player_one_id = game.players.first().unwrap().player_id.clone();
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
 
-        // Add the Second Player
-        match game.add_player("Player Two", false) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        };
-        let player_two_id = game.players.last().unwrap().player_id.clone();
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, &player_two, Uuid::new_v4().to_string().as_str()).unwrap();
+
+        game.current_player = Some(player_one.clone());
 
         // Let Player One take their turn
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 0),
-            player_id: player_one_id.clone(),
+            player_id: player_one.player_id.clone(),
         };
-        match game.take_turn(&turn_info) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        }
+        let _ = game.take_turn(&turn_info);
 
         // Check the board state
         let game_state = game.get_current_game_state();
         assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
-        assert_eq!(game_state.get_id_of_player_who_made_move(), player_one_id);
+        assert_eq!(game_state.get_id_of_player_who_made_move(), player_one.player_id);
 
         // Let Player Two take their turn
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 1),
-            player_id: player_two_id.clone(),
+            player_id: player_two.player_id.clone(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -577,7 +368,7 @@ mod game_play_tests {
         // Check the board state
         let game_state = game.get_current_game_state();
         assert_eq!(game_state.get_play_status(), PlayStatus::InProgress);
-        assert_eq!(game_state.get_id_of_player_who_made_move(), player_two_id);
+        assert_eq!(game_state.get_id_of_player_who_made_move(), player_two.player_id);
     }
 
     #[test]
@@ -585,22 +376,14 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let params = NewSinglePlayerGameParams {
-            game_mode: GameMode::TwoPlayers,
-            player_one_display_name: "Player One".to_string(),
-            computer_skill_level: None,
-        };
-        let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
-        let player_one_id = game.players.first().unwrap().player_id.clone();
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
 
-        // Add the Second Player
-        match game.add_player("Player Two", false) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        };
-        let player_two_id = game.players.last().unwrap().player_id.clone();
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, &player_two, Uuid::new_v4().to_string().as_str()).unwrap();
+
+        game.current_player = Some(player_one.clone());
 
         // There should be no moves in the history at this point
         assert_eq!(game.play_history.len(), 0);
@@ -608,7 +391,7 @@ mod game_play_tests {
         // Let Player One take their turn
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 0),
-            player_id: player_one_id.clone(),
+            player_id: player_one.player_id.clone(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -623,7 +406,7 @@ mod game_play_tests {
         // Let Player Two take their turn
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 1),
-            player_id: player_two_id.clone(),
+            player_id: player_two.player_id.clone(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -641,30 +424,20 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let params = NewSinglePlayerGameParams {
-            game_mode: GameMode::TwoPlayers,
-            player_one_display_name: "Player One".to_string(),
-            computer_skill_level: None,
-        };
-        let mut game = TicTacToeGame::new(&params, Uuid::new_v4(), "".to_string(), 0).unwrap();
-        let player_one_id = game.players.first().unwrap().player_id.clone();
+        let player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), false);
 
-        // Add the Second Player
-        match game.add_player("Player Two", false) {
-            Ok(_) => {}
-            Err(_) => {
-                panic!();
-            }
-        };
-        let player_two_id = game.players.last().unwrap().player_id.clone();
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, &player_two, Uuid::new_v4().to_string().as_str()).unwrap();
+
+        game.current_player = Some(player_one.clone());
 
         let player_one_destination = BoardPosition::new(0, 0);
         let player_two_destination = BoardPosition::new(1, 1);
 
-        // Let Player One take their turn, placing an X at 0:0
+        // Let Player One take their turn
         let turn_info = GameTurnInfo {
             destination: player_one_destination.clone(),
-            player_id: player_one_id.clone(),
+            player_id: player_one.player_id.clone(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -673,17 +446,17 @@ mod game_play_tests {
             }
         }
 
-        // There should be an X at 0:0
+        // Verify that position 0:0 contains Player One's game piece.
         assert_eq!(
             game.get_current_game_state().get_game_board()[player_one_destination.row]
                 [player_one_destination.column],
-            GamePiece::X
+            game.players.first().unwrap().game_piece
         );
 
-        // Let Player Two take their turn, placing an O at 1:1
+        // Let Player Two take their turn.
         let turn_info = GameTurnInfo {
             destination: player_two_destination.clone(),
-            player_id: player_two_id.clone(),
+            player_id: player_two.player_id.clone(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -692,11 +465,11 @@ mod game_play_tests {
             }
         }
 
-        // There should be an O at 1:1
+        // Verify that position 1:1 contains Player One's game piece.
         assert_eq!(
             game.get_current_game_state().get_game_board()[player_two_destination.row]
                 [player_two_destination.column],
-            GamePiece::O
+            game.players.get(1).unwrap().game_piece
         );
     }
 }
@@ -710,8 +483,12 @@ mod game_state_tests {
 
     #[test]
     fn test_binary_representation_for_piece_placement() {
-        let player_one = PlayerInfo::new(Uuid::new_v4(), &GamePiece::X, false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), &GamePiece::O, false);
+        //
+
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        player_one.game_piece = GamePiece::O;
+        player_two.game_piece = GamePiece::X;
 
         /*
         X  -  -

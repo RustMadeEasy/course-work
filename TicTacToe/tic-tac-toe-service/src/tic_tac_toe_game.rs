@@ -118,7 +118,7 @@ impl GameTrait for TicTacToeGame {
     fn new(game_mode: GameMode,
            player: &PlayerInfo,
            other_player: &PlayerInfo,
-           session_id: &String) -> Result<Self, GameError> {
+           session_id: &str) -> Result<Self, GameError> {
         //
 
         debug!("TicTacToeGame::new() Creating new game. Session ID: {:?} with Player: {:?} and player: {:?}", session_id, player, other_player);
@@ -152,6 +152,10 @@ impl GameTrait for TicTacToeGame {
         // Do not allow Game moves when the Game has already been completed.
         if board_state.has_ended() {
             return Err(GameError::GameHasAlreadyEnded);
+        }
+
+        if self.current_player.is_none() {
+            return Err(GameError::GameNotStarted);
         }
 
         // Get the Player - also validating that the correct IDs have been sent in.

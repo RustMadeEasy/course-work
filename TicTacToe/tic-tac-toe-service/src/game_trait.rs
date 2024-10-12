@@ -49,7 +49,7 @@ pub(crate) trait GameTrait: Sized {
     fn new(game_mode: GameMode,
            player: &PlayerInfo,
            other_player: &PlayerInfo,
-           session_id: &String) -> Result<Self, GameError>;
+           session_id: &str) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError>;

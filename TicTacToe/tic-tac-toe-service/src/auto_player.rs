@@ -5,7 +5,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::game_board::{BoardPosition, GameBoard, GamePiece, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
+use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_observer_trait::{GameObserverTrait, StateChanges};
 use crate::game_session::GamingSession;
 use crate::game_trait::GameTrait;
@@ -38,10 +38,10 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
         "Reema".to_string()
     }
 
-    pub(crate) fn new(game_id: &String, player_info: PlayerInfo, skill_level: &AutomaticPlayerSkillLevel) -> Self {
+    pub(crate) fn new(game_id: &str, player_info: PlayerInfo, skill_level: &AutomaticPlayerSkillLevel) -> Self {
         info!("Creating AutomaticPlayer {}", game_id);
         Self {
-            game_id: game_id.clone(),
+            game_id: game_id.to_string(),
             phantom_type: Default::default(),
             player_info,
             skill_level: skill_level.clone(),
@@ -150,11 +150,11 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 
         let mut empty_locations: Vec<BoardPosition> = Vec::new();
 
-        for row in 0..MAX_BOARD_ROWS {
-            for column in 0..MAX_BOARD_COLUMNS {
-                let game_piece = grid[row][column].clone();
-                if game_piece == GamePiece::None {
-                    empty_locations.push(BoardPosition::new(row, column));
+        for row in grid.iter().enumerate() {
+            for column in row.1.iter().enumerate() {
+                let game_piece = column.1;
+                if *game_piece == GamePiece::None {
+                    empty_locations.push(BoardPosition::new(row.0, column.0));
                 }
             }
         }

@@ -8,7 +8,6 @@
 extern crate core;
 
 use std::net::Ipv4Addr;
-use std::sync::Mutex;
 
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer};
@@ -55,7 +54,7 @@ async fn main() -> std::io::Result<()> {
 
     // This is our global Games Manager instance. Below, we add the Game Manager to the Actix app
     // data storage so that it is accessible to service methods.
-    let games_manager = Data::new(Mutex::new(TicTacToeGamesManager::new()));
+    let games_manager = Data::new(tokio::sync::Mutex::new(TicTacToeGamesManager::new()));
 
     HttpServer::new(move || {
         App::new().app_data(games_manager.clone()).service(
