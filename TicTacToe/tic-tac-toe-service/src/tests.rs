@@ -322,8 +322,8 @@ mod game_play_tests {
 
     use crate::game_board::{BoardPosition, GamePiece};
     use crate::game_trait::GameTrait;
-    use crate::models::requests::{GameMode, GameTurnInfo};
-    use crate::models::PlayerInfo;
+    use crate::models::requests::GameTurnInfo;
+    use crate::models::{GameMode, PlayerInfo};
     use crate::play_status::PlayStatus;
     use crate::tic_tac_toe_game::TicTacToeGame;
 
@@ -345,6 +345,7 @@ mod game_play_tests {
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 0),
             player_id: player_one.player_id.clone(),
+            session_id: "".to_string(),
         };
         let _ = game.take_turn(&turn_info);
 
@@ -357,6 +358,7 @@ mod game_play_tests {
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 1),
             player_id: player_two.player_id.clone(),
+            session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -392,6 +394,7 @@ mod game_play_tests {
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 0),
             player_id: player_one.player_id.clone(),
+            session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -407,6 +410,7 @@ mod game_play_tests {
         let turn_info = GameTurnInfo {
             destination: BoardPosition::new(0, 1),
             player_id: player_two.player_id.clone(),
+            session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -438,6 +442,7 @@ mod game_play_tests {
         let turn_info = GameTurnInfo {
             destination: player_one_destination.clone(),
             player_id: player_one.player_id.clone(),
+            session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
@@ -457,6 +462,7 @@ mod game_play_tests {
         let turn_info = GameTurnInfo {
             destination: player_two_destination.clone(),
             player_id: player_two.player_id.clone(),
+            session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}

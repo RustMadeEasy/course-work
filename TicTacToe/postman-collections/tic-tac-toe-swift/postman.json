@@ -1,0 +1,468 @@
+{
+	"info": {
+		"name": "Tic-Tac-Toe Service",
+		"description": {
+		    "content": "Tic-Tac-Toe Game Service",
+		    "type": "text/markdown"
+		},
+		"version": "0.4.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+	        {
+	            "name": "TicTacToe",
+	            "item": [
+	                        {
+    "name": "/v1/games/:game_id",
+                "description": "Closes down the specified Game.",
+                 "item": [
+                            {
+                                "name": "Closes down the specified Game.",
+                                "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/games/:game_id",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "games",
+                                            ":game_id"
+                                        ],
+                                        "variable": [
+                                            {
+                                                "key": "gameId",
+                                                "value": "",
+                                                "description": ""
+                                            }
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Closes down the specified Game."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/games/:game_id",
+                "description": "Retrieves details of the specified Game.",
+                 "item": [
+                            {
+                                "name": "Retrieves details of the specified Game.",
+                                "request": {
+                                    "method": "GET",
+                                    "header": [
+                                        {
+                                            "key": "Accept",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/games/:game_id",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "games",
+                                            ":game_id"
+                                        ],
+                                        "variable": [
+                                            {
+                                                "key": "gameId",
+                                                "value": "",
+                                                "description": "Game ID"
+                                            }
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Retrieves details of the specified Game."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/games/:game_id/turns",
+                "description": "Retrieves the history of the Game States from the initial move (turn) to the latest Game State. This can be used, for instance, to create an animated time-lapse of the Game play.",
+                 "item": [
+                            {
+                                "name": "Retrieves the history of the Game States from the initial move (turn) to the latest",
+                                "request": {
+                                    "method": "GET",
+                                    "header": [
+                                        {
+                                            "key": "Accept",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/games/:game_id/turns",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "games",
+                                            ":game_id",
+                                            "turns"
+                                        ],
+                                        "variable": [
+                                            {
+                                                "key": "gameId",
+                                                "value": "",
+                                                "description": ""
+                                            }
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Retrieves the history of the Game States from the initial move (turn) to the latest Game State. This can be used, for instance, to create an animated time-lapse of the Game play."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/games/:game_id/turns",
+                "description": "Make a Game move (turn) for the specified Player.",
+                 "item": [
+                            {
+                                "name": "Make a Game move (turn) for the specified Player.",
+                                "request": {
+                                    "method": "POST",
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "{\n \"destination\": \"<string>\",\n \"player_id\": \"<string>\"\n}",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/games/:game_id/turns",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "games",
+                                            ":game_id",
+                                            "turns"
+                                        ],
+                                        "variable": [
+                                            {
+                                                "key": "gameId",
+                                                "value": "",
+                                                "description": ""
+                                            }
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Make a Game move (turn) for the specified Player."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/gaming-sessions",
+                "description": "Creates a new Game. Returns Game Creation Result.",
+                 "item": [
+                            {
+                                "name": "Creates a new Game. Returns Game Creation Result.",
+                                "request": {
+                                    "method": "POST",
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "Accept",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "{\n \"session_id\": \"<string>\",\n \"session_owner_display_name\": \"<string>\"\n}",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/gaming-sessions",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "gaming-sessions"
+                                        ],
+                                        "variable": [
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Creates a new Game. Returns Game Creation Result."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/gaming-sessions/:session_id",
+                "description": "Closes down the specified Gaming Session.",
+                 "item": [
+                            {
+                                "name": "Closes down the specified Gaming Session.",
+                                "request": {
+                                    "method": "DELETE",
+                                    "header": [
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/gaming-sessions/:session_id",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "gaming-sessions",
+                                            ":session_id"
+                                        ],
+                                        "variable": [
+                                            {
+                                                "key": "sessionId",
+                                                "value": "",
+                                                "description": ""
+                                            }
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Closes down the specified Gaming Session."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/gaming-sessions/players",
+                "description": "Adds a Player to the Gaming Session.",
+                 "item": [
+                            {
+                                "name": "Adds a Player to the Gaming Session.",
+                                "request": {
+                                    "method": "POST",
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "Accept",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "{\n \"game_invitation_code\": \"<string>\",\n \"player_display_name\": \"<string>\"\n}",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/gaming-sessions/players",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "gaming-sessions",
+                                            "players"
+                                        ],
+                                        "variable": [
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Adds a Player to the Gaming Session."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/single-player-games",
+                "description": "Creates a new Game. Returns Game Creation Result.",
+                 "item": [
+                            {
+                                "name": "Creates a new Game. Returns Game Creation Result.",
+                                "request": {
+                                    "method": "POST",
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "Accept",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "{\n \"computer_skill_level\": \"<string>\",\n \"session_id\": \"<string>\"\n}",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/single-player-games",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "single-player-games"
+                                        ],
+                                        "variable": [
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Creates a new Game. Returns Game Creation Result."
+                                }
+                            }
+                            ]
+                        },
+	                        {
+    "name": "/v1/two-player-games",
+                "description": "Creates a new Two-Player Game. Returns Game Creation Result.",
+                 "item": [
+                            {
+                                "name": "Creates a new Two-Player Game. Returns Game Creation Result.",
+                                "request": {
+                                    "method": "POST",
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "Accept",
+                                            "value": "application/json",
+                                            "description": "",
+                                            "disabled": false
+                                        }
+                                    ],
+                                    "body": {
+                                        "mode": "raw",
+                                        "raw": "{\n \"session_id\": \"<string>\"\n}",
+                                        "options": {
+                                            "raw": {
+                                                "language": "json"
+                                            }
+                                        }
+                                    },
+                                    "url": {
+                                        "raw": "{{baseUrl}}/v1/two-player-games",
+                                        "host": [
+                                            "{{baseUrl}}"
+                                        ],
+                                        "path": [
+                                            "v1",
+                                            "two-player-games"
+                                        ],
+                                        "variable": [
+                                        ],
+                                        "query": [
+                                        ]
+                                    },
+                                    "description": "Creates a new Two-Player Game. Returns Game Creation Result."
+                                }
+                            }
+                            ]
+                        }
+	                    ]
+	        }
+    ],
+    
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "",
+			"type": "string"
+        }
+	]
+}
+
