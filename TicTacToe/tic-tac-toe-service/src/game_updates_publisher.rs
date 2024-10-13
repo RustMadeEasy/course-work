@@ -11,6 +11,7 @@ use mqtt_publisher_lib::publisher_qos::PublisherQoS;
 use std::time::Duration;
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub(crate) struct GameUpdatesPublisher {
     //
 

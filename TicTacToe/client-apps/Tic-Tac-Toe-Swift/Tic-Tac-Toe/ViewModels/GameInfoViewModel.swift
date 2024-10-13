@@ -18,6 +18,9 @@ struct Position {
 /// Provides control over a Tic-Tac-Toe Game.
 class GameInfoViewModel: ObservableObject {
     
+//    /// ID of the Gaming Session.
+//    @Published var eventPlaneConfig: EventPlaneConfig? = nil
+    
     /// Specifies the locations of the Game pieces
     @Published private var gameBoard: [[GamePiece]] = []
     
@@ -26,6 +29,12 @@ class GameInfoViewModel: ObservableObject {
     
     /// Remembers the ID of the Game. This is used for subsequent cals to the GameInfoService.
     @Published private var gameId: String = ""
+    
+    /// Informs this instance when our Tic Tac Toe service has updated the game state.
+    private var gameInfoReceiver: GameInfoReceiver?
+
+    /// ID of the Gaming Session.
+    @Published private var gamingSessionId: String = ""
     
     /// When the game has ended, gameResults contains localized messaging that details the result of the Game.
     @Published var gameResults: String = ""
@@ -45,14 +54,14 @@ class GameInfoViewModel: ObservableObject {
     /// Indicates whether Player Two is the current player.
     @Published var isPlayerTwoCurrentPlayer: Bool = false
     
+    /// Name of the local Player, i.e. the Player using this app instance.
+    @Published var isTwoPlayer: Bool = true
+    
     /// ID of the local Player, i.e. the Player using this app instance.
     @Published private var localPlayerId: String = ""
     
     /// Name of the local Player, i.e. the Player using this app instance.
     @Published var localPlayerName: String = ""
-    
-    /// Name of the local Player, i.e. the Player using this app instance.
-    @Published var isTwoPlayer: Bool = true
     
     /// Name of the other Player, i.e. the local Player's opponent.
     @Published var otherPlayerName: String = ""
@@ -69,9 +78,6 @@ class GameInfoViewModel: ObservableObject {
     /// If/when the Game has been won, winningLocations lists the locations of the winning Game pieces.
     @Published private var winningLocations: [Position]?
     
-    /// Informs this instance when our Tic Tac Toe service has updated the game state.
-    private var gameInfoReceiver: GameInfoReceiver?
-
     init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {
         self.gameInfoReceiver = nil
         self._localPlayerName = Published(initialValue: localPlayerName)
@@ -81,86 +87,6 @@ class GameInfoViewModel: ObservableObject {
 }
 
 extension GameInfoViewModel {
-    
-    /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
-    func createGame() async -> Error? {
-        
-        let result = await GameInfoService.createGame(playerName: self.localPlayerName, isTwoPlayer: self.isTwoPlayer)
-        
-        if let newGameInfo = result.newGameInfo {
-            
-            DispatchQueue.main.async {
-                self._initiatedGame = Published(wrappedValue: true)
-                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
-                self.update(gameInfo: newGameInfo.gameInfo)
-                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
-                self._localPlayerName = Published(wrappedValue: newGameInfo.gameInfo.players.first!.displayName)
-                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGameInfo.eventPlaneConfig, delegate: self)
-            }
-        }
-
-        return result.error
-    }
-
-    /// Ends the current game and stops the auto updating of the game info.
-    func endGame() async -> Error? {
-
-        var result: Error? = nil
-        
-        // If this is the client that started the game, close it down on the server.
-        if self.initiatedGame {
-            result = await GameInfoService.endGame(gameId: self.gameId).error
-        }
-
-        prepareForNewGame()
-
-        return result
-    }
-
-    /// Generates the appropriate Game completion text.
-    private func getGameResults(gameInfo: GameInfo, winningPlayerName: String) -> String {
-        switch gameInfo.gameState.playStatus {
-        case .endedInStalemate:
-            return String(localized: "This game has ended in a stalemate.")
-        case .endedInWin:
-            if self.localPlayerName == winningPlayerName {
-                return String(localized: "You won!")
-            } else {
-                return String(localized: "\(winningPlayerName) won. Better luck next time.")
-            }
-        default:
-            return ""
-        }
-    }
-
-    /// When a Game has been won, this function determines whether the specified position (block) represents a position that won the Game.
-    func isWinningPosition(pos: Position) -> Bool {
-        if let winningLocations = self.winningLocations {
-            return winningLocations.contains(where: { position in
-                position.column == pos.column && position.row == pos.row
-            })
-        } else {
-            return false
-        }
-    }
-    
-    /// Joins an existing Game.
-    func joinGame(invitationCode: String) async -> Error? {
-        
-        let result = await GameInfoService.joinGame(invitationCode: invitationCode, playerName: self.localPlayerName)
-        
-        if let newGameInfo = result.newGameInfo {
-            DispatchQueue.main.async {
-                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
-                self.update(gameInfo: newGameInfo.gameInfo)
-                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.last!.playerId)
-                self._localPlayerName = Published(wrappedValue: newGameInfo.gameInfo.players.last!.displayName)
-                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGameInfo.eventPlaneConfig, delegate: self)
-            }
-        }
-
-        return result.error
-    }
     
     /// Clears all of the variables that must be cleared in order to start a new Game.
     private func prepareForNewGame() {
@@ -180,22 +106,6 @@ extension GameInfoViewModel {
         winningLocations = nil
     }
     
-    /// Performs a Game move for the specified Player.
-    func takeTurn(pos: Position) async -> Error? {
-        
-        let result = await GameInfoService.takeTurn(gameId: self.gameId,
-                                              boardPosition: BoardPosition(column: pos.column, row: pos.row),
-                                              localPlayerId: self.localPlayerId)
-        
-        if result.error == nil && result.gameInfo != nil {
-            // Even though we update the Game Info periodically, let's take this
-            //  opportunity to update it immediately.
-            self.update(gameInfo: result.gameInfo!)
-        }
-
-        return result.error
-    }
-
     /// Gets the textual represenation for the board position.
     func textForGamePiece(pos: Position) -> String {
         
@@ -213,15 +123,154 @@ extension GameInfoViewModel {
             "O"
         }
     }
+}
+
+extension GameInfoViewModel {
+    
+    func createSinglePlayerGame() async -> Error? {
+        
+        // TODO: JD: allow the UI to set the AutomaticPlayerSkillLevel
+        let result = await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId)
+                
+        if let newGameInfo = result.newGameInfo {
+            
+            DispatchQueue.main.async {
+                self._initiatedGame = Published(wrappedValue: true)
+                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
+                self.update(gameInfo: newGameInfo.gameInfo)
+                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+            }
+        }
+        
+        return result.error
+    }
+    
+//    /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
+//    func createGame(eventPlaneConfig: EventPlaneConfig) async -> Error? {
+//        
+//        let result = if self.isTwoPlayer {
+//            await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId)
+//            
+//        } else {
+//            // TODO: JD: allow the UI to set the AutomaticPlayerSkillLevel
+//            await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId)
+//        }
+//        
+//        
+//        if let newGameInfo = result.newGameInfo {
+//            
+//            DispatchQueue.main.async {
+//                self._initiatedGame = Published(wrappedValue: true)
+//                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
+//                self.update(gameInfo: newGameInfo.gameInfo)
+//                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+//                self._localPlayerName = Published(wrappedValue: newGameInfo.gameInfo.players.first!.displayName)
+//                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: eventPlaneConfig, delegate: self)
+//            }
+//        }
+//        
+//        return result.error
+//    }
+    
+    /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
+    func createGamingSession(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
+        
+        let result = await GameInfoService.createGamingSession(sessionOwnerDisplayName: self.localPlayerName)
+        
+        if let newGamingSessionInfo = result.newGamingSessionInfo {
+            DispatchQueue.main.async {
+                self.invitationCode = result.newGamingSessionInfo?.invitationCode ?? ""
+                self.gamingSessionId = result.newGamingSessionInfo?.sessionId ?? ""
+                // Setup MQTT listener
+                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
+                completion(true, nil)
+            }
+        } else {
+            completion(false, result.error)
+        }
+    }
+    
+    /// Ends the current game and stops the auto updating of the game info.
+    func endGame() async -> Error? {
+        
+        var result: Error? = nil
+        
+        // If this is the client that started the game, close it down on the server.
+        if self.initiatedGame {
+            result = await GameInfoService.endGame(gameId: self.gameId, playerId: self.localPlayerId, sessionId: self.gamingSessionId).error
+        }
+        
+        prepareForNewGame()
+        
+        return result
+    }
+    
+    /// Generates the appropriate Game completion text.
+    private func getGameResults(gameInfo: GameInfo, winningPlayerName: String) -> String {
+        switch gameInfo.gameState.playStatus {
+        case .endedInStalemate:
+            return String(localized: "This game has ended in a stalemate.")
+        case .endedInWin:
+            if self.localPlayerName == winningPlayerName {
+                return String(localized: "You won!")
+            } else {
+                return String(localized: "\(winningPlayerName) won. Better luck next time.")
+            }
+        default:
+            return ""
+        }
+    }
+    
+    /// Joins a Gaming Session.
+    func joinGamingSession(invitationCode: String) async -> Error? {
+        
+        let result = await GameInfoService.joinGamingSession(invitationCode: invitationCode, playerName: self.localPlayerName)
+        
+        if let newGameInfo = result.newGamingSessionInfo {
+            DispatchQueue.main.async {
+                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGameInfo.eventPlaneConfig, delegate: self)
+            }
+        }
+        
+        return result.error
+    }
+    
+    
+    /// When a Game has been won, this function determines whether the specified position (block) represents a position that won the Game.
+    func isWinningPosition(pos: Position) -> Bool {
+        if let winningLocations = self.winningLocations {
+            return winningLocations.contains(where: { position in
+                position.column == pos.column && position.row == pos.row
+            })
+        } else {
+            return false
+        }
+    }
     
     /// Retrieves new game state info from our Tic Tac Toe service.
     private func refreshGameInfo() {
         Task {
-            let result = await GameInfoService.retrieveGameInfo(gameId: self.gameId)
+            let result = await GameInfoService.getGameInfo(gameId: self.gameId)
             if result.error == nil && result.gameInfo != nil {
                 self.update(gameInfo: result.gameInfo!)
             }
         }
+    }
+    
+    /// Performs a Game move for the specified Player.
+    func takeTurn(pos: Position) async -> Error? {
+        
+        let result = await GameInfoService.takeTurn(gameId: self.gameId,
+                                                    boardPosition: BoardPosition(column: pos.column, row: pos.row),
+                                                    localPlayerId: self.localPlayerId, sessionId: self.gamingSessionId)
+        
+        if result.error == nil && result.gameInfo != nil {
+            // Even though we update the Game Info periodically, let's take this
+            //  opportunity to update it immediately.
+            self.update(gameInfo: result.gameInfo!)
+        }
+        
+        return result.error
     }
     
     /// Updates this instance with the values of the passed in GameInfo.
@@ -234,7 +283,7 @@ extension GameInfoViewModel {
             self.gameEnded = gameInfo.gameState.playStatus == .endedInStalemate || gameInfo.gameState.playStatus == .endedInWin
             
             self.hasGameStarted = gameInfo.gameState.playStatus != .notStarted
-
+            
             // isPlayerOneCurrentPlayer
             if gameInfo.gameState.playStatus == .inProgress {
                 self.isPlayerOneCurrentPlayer = gameInfo.players.first?.playerId == gameInfo.currentPlayer?.playerId ?? ""
@@ -268,7 +317,7 @@ extension GameInfoViewModel {
             
             // winningPlayerName and winningLocations
             if gameInfo.gameState.playStatus == .endedInWin {
-
+                
                 let winnerName = gameInfo.players.first(where: { it in
                     it.playerId == gameInfo.gameState.winningPlayerId
                 })?.displayName ?? ""
@@ -291,13 +340,35 @@ extension GameInfoViewModel {
 
 /// GameInfoReceiverDelegate implementation
 extension GameInfoViewModel: GameInfoReceiverDelegate {
-    
-    func onGameEndedInStalemate() {
+
+    func onGameDeleted() {
         refreshGameInfo()
     }
     
-    func onGameEndedInWin() {
+    func onGameStarted() {
         refreshGameInfo()
+    }
+    
+    func onPlayerAddedToSession() {
+        refreshGameInfo()
+    }
+    
+    func onSessionDeleted() {
+        refreshGameInfo()
+    }
+        
+    func onGameEndedInStalemate() {
+
+        refreshGameInfo()
+        
+        // TODO: JD: ask for a rematch
+    }
+    
+    func onGameEndedInWin() {
+
+        refreshGameInfo()
+
+        // TODO: JD: ask for a rematch
     }
     
     func onPlayerAdded() {

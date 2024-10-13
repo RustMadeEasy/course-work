@@ -1,10 +1,9 @@
-# GameTurnInfo
+# EndGameParams
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**destination** | [**models::BoardPosition**](BoardPosition.md) |  | 
 **player_id** | **String** |  | 
 **session_id** | **String** |  | 
 

@@ -225,8 +225,6 @@ pub mod requests {
     /// Models info needed to start a new Gaming Session.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
     pub struct NewGamingSessionParams {
-        #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub session_id: String,
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
         pub session_owner_display_name: String,
     }

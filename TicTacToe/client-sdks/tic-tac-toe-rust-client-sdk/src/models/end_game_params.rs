@@ -11,22 +11,19 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
-/// GameTurnInfo : Models info needed to perform a Game turn.
+/// EndGameParams : Models info needed to end a Game.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct GameTurnInfo {
-    #[serde(rename = "destination")]
-    pub destination: models::BoardPosition,
+pub struct EndGameParams {
     #[serde(rename = "player_id")]
     pub player_id: String,
     #[serde(rename = "session_id")]
     pub session_id: String,
 }
 
-impl GameTurnInfo {
-    /// Models info needed to perform a Game turn.
-    pub fn new(destination: models::BoardPosition, player_id: String, session_id: String) -> GameTurnInfo {
-        GameTurnInfo {
-            destination,
+impl EndGameParams {
+    /// Models info needed to end a Game.
+    pub fn new(player_id: String, session_id: String) -> EndGameParams {
+        EndGameParams {
             player_id,
             session_id,
         }

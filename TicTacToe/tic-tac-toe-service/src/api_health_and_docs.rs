@@ -11,6 +11,8 @@ use crate::game_board::GamePiece;
 use crate::game_state::GameState;
 use crate::models::event_plane::EventPlaneConfig;
 use crate::models::event_plane::EventPlaneTopicNames;
+use crate::models::requests::EndGameParams;
+use crate::models::requests::EndGamingSessionParams;
 use crate::models::requests::GameTurnInfo;
 use crate::models::requests::JoinSessionParams;
 use crate::models::requests::NewGamingSessionParams;
@@ -52,6 +54,8 @@ use utoipa::OpenApi;
     components(schemas(
         AutomaticPlayerSkillLevel,
         BoardPosition,
+        EndGameParams,
+        EndGamingSessionParams,
         EventPlaneConfig,
         EventPlaneTopicNames,
         GameCreationResult,

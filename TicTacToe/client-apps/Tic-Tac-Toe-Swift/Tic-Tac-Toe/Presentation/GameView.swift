@@ -11,7 +11,7 @@ import OpenAPIClient
 
 /// Presents the user with the Game state as well as Game manipulation controls.
 struct GameView: View {
-
+    
     @Environment(\.presentationMode) private var presentation
 
     static let buttonSide = 100.0
@@ -170,28 +170,41 @@ struct GameView: View {
     /// Creates a new Game or joins an existing Game. If an inviation code is present, an existing Game is joined. Otherwise, a new Game is created.
     private func createOrJoinGame() async {
         
-        if self.gameInfoVM.invitationCode.isEmpty {
-            if await gameInfoVM.createGame() != nil {
-                showGameCreationError = true
-            }
-        } else {
-            let error = await gameInfoVM.joinGame(invitationCode: self.gameInfoVM.invitationCode)
-            if let error = error {
-                switch error {
-                case ErrorResponse.error(let code, _, _, _):
-                    switch code {
-                    case 404:
-                        showWrongCodeGameJoiningError = true
-                    case 409:
-                        showNameConflictGameJoiningError = true
-                    default:
-                        showGenericGameError = true
+        if !self.gameInfoVM.isTwoPlayer {
+            await self.gameInfoVM.createGamingSession { succeeded, error in
+                if succeeded {
+                    Task {
+                        if await self.gameInfoVM.createSinglePlayerGame() != nil {
+                            showGameCreationError = true
+                        }
                     }
-                default:
-                    showGenericGameError = true
                 }
             }
         }
+        
+//        if self.gameInfoVM.invitationCode.isEmpty {
+//            if await gameInfoVM.createGame(eventPlaneConfig: self.gameInfoVM.eventPlaneConfig!) != nil {
+//                showGameCreationError = true
+//            }
+//        } else {
+//             TODO: JD: finish
+//            let error = await gameInfoVM.joinGame(invitationCode: self.gameInfoVM.invitationCode)
+//            if let error = error {
+//                switch error {
+//                case ErrorResponse.error(let code, _, _, _):
+//                    switch code {
+//                    case 404:
+//                        showWrongCodeGameJoiningError = true
+//                    case 409:
+//                        showNameConflictGameJoiningError = true
+//                    default:
+//                        showGenericGameError = true
+//                    }
+//                default:
+//                    showGenericGameError = true
+//                }
+//            }
+//        }
     }
 
     /// Creates a new GameInfoViewModel instance. The invitation code must be provided when joining an existing Game.

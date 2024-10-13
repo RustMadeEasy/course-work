@@ -148,12 +148,13 @@ open class TicTacToeAPI {
      Closes down the specified Game.
      
      - parameter gameId: (path)  
+     - parameter endGameParams: (body)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func endGame(gameId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: Void?, _ error: Error?) -> Void)) -> RequestTask {
-        return endGameWithRequestBuilder(gameId: gameId).execute(apiResponseQueue) { result in
+    open class func endGame(gameId: String, endGameParams: EndGameParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: Void?, _ error: Error?) -> Void)) -> RequestTask {
+        return endGameWithRequestBuilder(gameId: gameId, endGameParams: endGameParams).execute(apiResponseQueue) { result in
             switch result {
             case .success:
                 completion((), nil)
@@ -168,20 +169,21 @@ open class TicTacToeAPI {
      - DELETE /v1/games/{game_id}
      - Closes down the specified Game.
      - parameter gameId: (path)  
+     - parameter endGameParams: (body)  
      - returns: RequestBuilder<Void> 
      */
-    open class func endGameWithRequestBuilder(gameId: String) -> RequestBuilder<Void> {
+    open class func endGameWithRequestBuilder(gameId: String, endGameParams: EndGameParams) -> RequestBuilder<Void> {
         var localVariablePath = "/v1/games/{game_id}"
         let gameIdPreEscape = "\(APIHelper.mapValueToPathItem(gameId))"
         let gameIdPostEscape = gameIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{game_id}", with: gameIdPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters: [String: Any]? = nil
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: endGameParams)
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
         let localVariableNillableHeaders: [String: Any?] = [
-            :
+            "Content-Type": "application/json",
         ]
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
@@ -195,12 +197,13 @@ open class TicTacToeAPI {
      Closes down the specified Gaming Session.
      
      - parameter sessionId: (path)  
+     - parameter endGamingSessionParams: (body)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func endGamingSession(sessionId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: Void?, _ error: Error?) -> Void)) -> RequestTask {
-        return endGamingSessionWithRequestBuilder(sessionId: sessionId).execute(apiResponseQueue) { result in
+    open class func endGamingSession(sessionId: String, endGamingSessionParams: EndGamingSessionParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: Void?, _ error: Error?) -> Void)) -> RequestTask {
+        return endGamingSessionWithRequestBuilder(sessionId: sessionId, endGamingSessionParams: endGamingSessionParams).execute(apiResponseQueue) { result in
             switch result {
             case .success:
                 completion((), nil)
@@ -215,20 +218,21 @@ open class TicTacToeAPI {
      - DELETE /v1/gaming-sessions/{session_id}
      - Closes down the specified Gaming Session.
      - parameter sessionId: (path)  
+     - parameter endGamingSessionParams: (body)  
      - returns: RequestBuilder<Void> 
      */
-    open class func endGamingSessionWithRequestBuilder(sessionId: String) -> RequestBuilder<Void> {
+    open class func endGamingSessionWithRequestBuilder(sessionId: String, endGamingSessionParams: EndGamingSessionParams) -> RequestBuilder<Void> {
         var localVariablePath = "/v1/gaming-sessions/{session_id}"
         let sessionIdPreEscape = "\(APIHelper.mapValueToPathItem(sessionId))"
         let sessionIdPostEscape = sessionIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{session_id}", with: sessionIdPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters: [String: Any]? = nil
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: endGamingSessionParams)
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
         let localVariableNillableHeaders: [String: Any?] = [
-            :
+            "Content-Type": "application/json",
         ]
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)

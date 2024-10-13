@@ -42,6 +42,8 @@ Class | Method | HTTP request | Description
 
  - [AutomaticPlayerSkillLevel](docs/AutomaticPlayerSkillLevel.md)
  - [BoardPosition](docs/BoardPosition.md)
+ - [EndGameParams](docs/EndGameParams.md)
+ - [EndGamingSessionParams](docs/EndGamingSessionParams.md)
  - [EventPlaneConfig](docs/EventPlaneConfig.md)
  - [EventPlaneTopicNames](docs/EventPlaneTopicNames.md)
  - [GameCreationResult](docs/GameCreationResult.md)

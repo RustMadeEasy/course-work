@@ -54,7 +54,6 @@ extension GameInfoReceiver {
     
     /// Pre-builds the topics so that we are not parsing each time a message is received.
     private func prebuildTopics() {
-
         self.topicGameDeleted = buildTopic(topic: EventPlaneTopicNames.gameDeleted)
         self.topicGameEndedInStalemate = buildTopic(topic: EventPlaneTopicNames.gameEndedInStalemate)
         self.topicGameEndedInWin = buildTopic(topic: EventPlaneTopicNames.gameEndedInWin)

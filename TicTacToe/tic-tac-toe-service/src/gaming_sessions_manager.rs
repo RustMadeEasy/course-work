@@ -41,6 +41,7 @@ pub(crate) struct GamingSessionsManager<T: GameTrait + Clone + Send + Sync + 'st
     //
 
     observers: Vec<Box<dyn GameObserverTrait<T> + Send>>,
+    // publisher: Box<GameUpdatesPublisher>,
     sessions: Arc<tokio::sync::Mutex<HashMap<String, Box<GamingSession<T>>>>>,
 }
 
@@ -129,7 +130,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         debug!("GamesManager: create_new_single_player_game() called. Session ID: {:?}, Skill Level: {:?}", session_id, computer_skill_level);
 
-        let session = match self.get_session_by_invitation_code(session_id).await {
+        let session = match self.get_session_by_session_id(session_id).await {
             None => return Err(GameError::SessionNotFound),
             Some(session) => session,
         };
@@ -370,15 +371,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             observers: vec![],
         };
 
-        let publisher = GameUpdatesPublisher::new(MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT);
-
-        instance.observers.push(Box::new(publisher));
+        let publisher = Box::new(GameUpdatesPublisher::new(MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT));
+        instance.observers.push(publisher.clone());
 
         Self::auto_cleanup(instance.sessions.clone(), ABANDONED_SESSION_TTL_MS, CLEANUP_INTERVAL);
 
         instance
     }
-
 
     /// Takes a turn for the specified Player.
     pub(crate) async fn take_turn(

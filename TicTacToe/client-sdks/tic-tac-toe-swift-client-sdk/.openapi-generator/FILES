@@ -1,4 +1,5 @@
 .gitignore
+.openapi-generator-ignore
 .swiftformat
 Cartfile
 OpenAPIClient.podspec
@@ -13,6 +14,8 @@ OpenAPIClient/Classes/OpenAPIs/JSONEncodingHelper.swift
 OpenAPIClient/Classes/OpenAPIs/Models.swift
 OpenAPIClient/Classes/OpenAPIs/Models/AutomaticPlayerSkillLevel.swift
 OpenAPIClient/Classes/OpenAPIs/Models/BoardPosition.swift
+OpenAPIClient/Classes/OpenAPIs/Models/EndGameParams.swift
+OpenAPIClient/Classes/OpenAPIs/Models/EndGamingSessionParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/EventPlaneConfig.swift
 OpenAPIClient/Classes/OpenAPIs/Models/EventPlaneTopicNames.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GameCreationResult.swift
@@ -36,6 +39,8 @@ Package.swift
 README.md
 docs/AutomaticPlayerSkillLevel.md
 docs/BoardPosition.md
+docs/EndGameParams.md
+docs/EndGamingSessionParams.md
 docs/EventPlaneConfig.md
 docs/EventPlaneTopicNames.md
 docs/GameCreationResult.md

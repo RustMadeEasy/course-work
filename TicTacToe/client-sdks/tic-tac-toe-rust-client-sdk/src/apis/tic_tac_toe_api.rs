@@ -193,7 +193,7 @@ pub fn create_two_player_game(configuration: &configuration::Configuration, new_
 }
 
 /// Closes down the specified Game.
-pub fn end_game(configuration: &configuration::Configuration, game_id: &str) -> Result<(), Error<EndGameError>> {
+pub fn end_game(configuration: &configuration::Configuration, game_id: &str, end_game_params: models::EndGameParams) -> Result<(), Error<EndGameError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -204,6 +204,7 @@ pub fn end_game(configuration: &configuration::Configuration, game_id: &str) -> 
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
     }
+    local_var_req_builder = local_var_req_builder.json(&end_game_params);
 
     let local_var_req = local_var_req_builder.build()?;
     let local_var_resp = local_var_client.execute(local_var_req)?;
@@ -221,7 +222,7 @@ pub fn end_game(configuration: &configuration::Configuration, game_id: &str) -> 
 }
 
 /// Closes down the specified Gaming Session.
-pub fn end_gaming_session(configuration: &configuration::Configuration, session_id: &str) -> Result<(), Error<EndGamingSessionError>> {
+pub fn end_gaming_session(configuration: &configuration::Configuration, session_id: &str, end_gaming_session_params: models::EndGamingSessionParams) -> Result<(), Error<EndGamingSessionError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -232,6 +233,7 @@ pub fn end_gaming_session(configuration: &configuration::Configuration, session_
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
     }
+    local_var_req_builder = local_var_req_builder.json(&end_gaming_session_params);
 
     let local_var_req = local_var_req_builder.build()?;
     let local_var_resp = local_var_client.execute(local_var_req)?;

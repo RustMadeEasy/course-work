@@ -29,7 +29,7 @@ Creates a new Gaming Session. Returns GamingSessionCreationResult.
 // The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
 import OpenAPIClient
 
-let newGamingSessionParams = NewGamingSessionParams(sessionId: "sessionId_example", sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewGamingSessionParams | 
+let newGamingSessionParams = NewGamingSessionParams(sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewGamingSessionParams | 
 
 // Creates a new Gaming Session. Returns GamingSessionCreationResult.
 TicTacToeAPI.createGamingSession(newGamingSessionParams: newGamingSessionParams) { (response, error) in
@@ -167,7 +167,7 @@ No authorization required
 
 # **endGame**
 ```swift
-    open class func endGame(gameId: String, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
+    open class func endGame(gameId: String, endGameParams: EndGameParams, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
 ```
 
 Closes down the specified Game.
@@ -180,9 +180,10 @@ Closes down the specified Game.
 import OpenAPIClient
 
 let gameId = "gameId_example" // String | 
+let endGameParams = EndGameParams(playerId: "playerId_example", sessionId: "sessionId_example") // EndGameParams | 
 
 // Closes down the specified Game.
-TicTacToeAPI.endGame(gameId: gameId) { (response, error) in
+TicTacToeAPI.endGame(gameId: gameId, endGameParams: endGameParams) { (response, error) in
     guard error == nil else {
         print(error)
         return
@@ -199,6 +200,7 @@ TicTacToeAPI.endGame(gameId: gameId) { (response, error) in
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **gameId** | **String** |  | 
+ **endGameParams** | [**EndGameParams**](EndGameParams.md) |  | 
 
 ### Return type
 
@@ -210,14 +212,14 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **endGamingSession**
 ```swift
-    open class func endGamingSession(sessionId: String, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
+    open class func endGamingSession(sessionId: String, endGamingSessionParams: EndGamingSessionParams, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
 ```
 
 Closes down the specified Gaming Session.
@@ -230,9 +232,10 @@ Closes down the specified Gaming Session.
 import OpenAPIClient
 
 let sessionId = "sessionId_example" // String | 
+let endGamingSessionParams = EndGamingSessionParams(playerId: "playerId_example") // EndGamingSessionParams | 
 
 // Closes down the specified Gaming Session.
-TicTacToeAPI.endGamingSession(sessionId: sessionId) { (response, error) in
+TicTacToeAPI.endGamingSession(sessionId: sessionId, endGamingSessionParams: endGamingSessionParams) { (response, error) in
     guard error == nil else {
         print(error)
         return
@@ -249,6 +252,7 @@ TicTacToeAPI.endGamingSession(sessionId: sessionId) { (response, error) in
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **sessionId** | **String** |  | 
+ **endGamingSessionParams** | [**EndGamingSessionParams**](EndGamingSessionParams.md) |  | 
 
 ### Return type
 
@@ -260,7 +264,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -430,7 +434,7 @@ Make a Game move (turn) for the specified Player.
 import OpenAPIClient
 
 let gameId = "gameId_example" // String | 
-let gameTurnInfo = GameTurnInfo(destination: BoardPosition(column: 123, row: 123), playerId: "playerId_example") // GameTurnInfo | 
+let gameTurnInfo = GameTurnInfo(destination: BoardPosition(column: 123, row: 123), playerId: "playerId_example", sessionId: "sessionId_example") // GameTurnInfo | 
 
 // Make a Game move (turn) for the specified Player.
 TicTacToeAPI.takeTurn(gameId: gameId, gameTurnInfo: gameTurnInfo) { (response, error) in

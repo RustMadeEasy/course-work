@@ -30,6 +30,7 @@ use validator::Validate;
             Create a new Gaming Session
             Subscribe to MQTT
             Create a new Single-Player Game
+            Join Game
             Play
             End Game
             End Gaming Session
@@ -67,6 +68,45 @@ use validator::Validate;
             Exit Gaming Session
  */
 
+/// Creates a new Gaming Session. Returns GamingSessionCreationResult.
+#[utoipa::path(
+    post,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions",
+    responses(
+    (status = 200, description = "Gaming Session created successfully", body = GamingSessionCreationResult, content_type = "application/json"),
+    (status = 400, description = "Bad request - Malformed NewGamingSessionParams"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[post("/gaming-sessions")]
+pub(crate) async fn create_gaming_session(
+    params: web::Json<NewGamingSessionParams>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
+    //
+
+    debug!("HTTP POST to /gaming-sessions. Params: {:?}", params);
+
+    // *** Validate input params ***
+    if let Err(e) = params.validate() {
+        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
+    }
+
+    let mut manager = manager.lock().await;
+
+    match manager.create_new_session(&params).await {
+        Ok(session) => {
+            let creation_result = GamingSessionCreationResult {
+                event_plane_config: session.event_plane_config,
+                invitation_code: session.invitation_code,
+                session_id: session.session_id,
+            };
+            Ok(web::Json(creation_result))
+        }
+        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+    }
+}
+
 /// Creates a new Game. Returns Game Creation Result.
 #[utoipa::path(
     post,
@@ -80,7 +120,7 @@ use validator::Validate;
 #[post("/single-player-games")]
 pub(crate) async fn create_single_player_game(
     new_game_params: web::Json<NewSinglePlayerGameParams>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
     //
 
@@ -91,12 +131,12 @@ pub(crate) async fn create_single_player_game(
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
-    let mut games_manager = games_manager.lock().await;
+    let mut manager = manager.lock().await;
 
     let new_game_params: NewSinglePlayerGameParams = new_game_params.0;
 
-    match games_manager.create_new_single_player_game(&new_game_params.clone().session_id,
-                                                      &new_game_params.computer_skill_level).await {
+    match manager.create_new_single_player_game(&new_game_params.clone().session_id,
+                                                &new_game_params.computer_skill_level).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
@@ -122,7 +162,7 @@ pub(crate) async fn create_single_player_game(
 #[post("/two-player-games")]
 pub(crate) async fn create_two_player_game(
     new_game_params: web::Json<NewTwoPlayerGameParams>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
     //
 
@@ -133,55 +173,16 @@ pub(crate) async fn create_two_player_game(
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
-    let mut games_manager = games_manager.lock().await;
+    let mut manager = manager.lock().await;
 
     let new_game_params = new_game_params.0;
 
-    match games_manager.create_new_two_player_game(&new_game_params.session_id).await {
+    match manager.create_new_two_player_game(&new_game_params.session_id).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
             };
             Ok(web::Json(new_game_info))
-        }
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
-    }
-}
-
-/// Creates a new Gaming Session. Returns GamingSessionCreationResult.
-#[utoipa::path(
-    post,
-    tag = "TicTacToe",
-    path = "/v1/gaming-sessions",
-    responses(
-    (status = 200, description = "Gaming Session created successfully", body = GamingSessionCreationResult, content_type = "application/json"),
-    (status = 400, description = "Bad request - Malformed NewGamingSessionParams"),
-    (status = 500, description = "Internal server error")
-,), )]
-#[post("/gaming-sessions")]
-pub(crate) async fn create_gaming_session(
-    new_game_params: web::Json<NewGamingSessionParams>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
-    //
-
-    debug!("HTTP POST to /gaming-sessions. Params: {:?}", new_game_params);
-
-    // *** Validate input params ***
-    if let Err(e) = new_game_params.validate() {
-        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
-    }
-
-    let mut games_manager = games_manager.lock().await;
-
-    match games_manager.create_new_session(&new_game_params).await {
-        Ok(session) => {
-            let creation_result = GamingSessionCreationResult {
-                event_plane_config: session.event_plane_config,
-                invitation_code: session.invitation_code,
-                session_id: session.session_id,
-            };
-            Ok(web::Json(creation_result))
         }
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
@@ -202,7 +203,7 @@ pub(crate) async fn create_gaming_session(
 pub(crate) async fn end_game(
     end_game_params: web::Json<EndGameParams>,
     game_id: web::Path<String>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> HttpResponse {
     //
 
@@ -218,7 +219,7 @@ pub(crate) async fn end_game(
         return HttpResponse::BadRequest().body("Game ID exceeds maximum length");
     }
 
-    match games_manager.lock().await.end_game(&game_id, end_game_params.player_id.as_str(), end_game_params.session_id.as_str()).await {
+    match manager.lock().await.end_game(&game_id, end_game_params.player_id.as_str(), end_game_params.session_id.as_str()).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(error) => HttpResponse::from_error(error),
     }
@@ -239,7 +240,7 @@ pub(crate) async fn end_game(
 pub(crate) async fn end_gaming_session(
     params: web::Json<EndGamingSessionParams>,
     session_id: web::Path<String>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> HttpResponse {
     //
 
@@ -252,7 +253,7 @@ pub(crate) async fn end_gaming_session(
         return HttpResponse::BadRequest().body("Gaming Session ID exceeds maximum length");
     }
 
-    match games_manager.lock().await.end_gaming_session(params.player_id.as_str(), &session_id).await {
+    match manager.lock().await.end_gaming_session(params.player_id.as_str(), &session_id).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(error) => HttpResponse::from_error(error),
     }
@@ -273,16 +274,16 @@ pub(crate) async fn end_gaming_session(
 #[get("/games/{game_id}/turns")]
 pub(crate) async fn get_game_history(
     game_id: web::Path<String>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<Vec<GameState>>> {
     //
 
     debug!("HTTP GET to /games/{}/turns", game_id);
 
     // *** Validate input params ***
-    validate_game_id(&game_id)?;
+    validate_id_string(&game_id)?;
 
-    match games_manager.lock().await.get_game_history(&game_id).await {
+    match manager.lock().await.get_game_history(&game_id).await {
         Ok(history) => Ok(web::Json(history)),
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
@@ -303,16 +304,16 @@ pub(crate) async fn get_game_history(
 #[get("/games/{game_id}")]
 pub(crate) async fn get_game_info(
     game_id: web::Path<String>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameInfo>> {
     //
 
     debug!("HTTP GET to /games/{}", game_id);
 
     // *** Validate input params ***
-    validate_game_id(&game_id)?;
+    validate_id_string(&game_id)?;
 
-    match games_manager
+    match manager
         .lock()
         .await
         .get_game_by_id(game_id.as_str()).await
@@ -336,7 +337,7 @@ pub(crate) async fn get_game_info(
 #[post("/gaming-sessions/players")]
 pub(crate) async fn join_gaming_session(
     params: web::Json<JoinSessionParams>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
     //
 
@@ -347,10 +348,10 @@ pub(crate) async fn join_gaming_session(
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
-    let mut games_manager = games_manager.lock().await;
+    let mut manager = manager.lock().await;
     let second_player_params = params.into_inner();
 
-    match games_manager.add_player_to_session(&second_player_params).await {
+    match manager.add_player_to_session(&second_player_params).await {
         Ok(session) => {
             let game_session_addition_result = GamingSessionCreationResult {
                 event_plane_config: session.event_plane_config,
@@ -380,20 +381,20 @@ pub(crate) async fn join_gaming_session(
 pub(crate) async fn take_turn(
     game_id: web::Path<String>,
     game_turn_info: web::Json<GameTurnInfo>,
-    games_manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> impl Responder {
     //
 
     debug!("HTTP POST to /games/{}/turns", game_id);
 
     // *** Validate input params ***
-    validate_game_id(&game_id)?;
+    validate_id_string(&game_id)?;
 
     if let Err(e) = game_turn_info.validate() {
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
-    match games_manager
+    match manager
         .lock()
         .await
         .take_turn(&game_id, &game_turn_info).await
@@ -403,12 +404,12 @@ pub(crate) async fn take_turn(
     }
 }
 
-/// Verifies that the specified Game ID is formatted properly.
-fn validate_game_id(game_id: &str) -> actix_web::Result<()> {
-    if game_id.is_empty() {
-        Err(actix_web::error::ErrorBadRequest("Game ID is empty"))
-    } else if game_id.len() as u64 > ID_LENGTH_MAX {
-        Err(actix_web::error::ErrorBadRequest("Game ID exceeds maximum length"))
+/// Verifies that the specified ID is of the correct length.
+fn validate_id_string(id: &str) -> actix_web::Result<()> {
+    if id.is_empty() {
+        Err(actix_web::error::ErrorBadRequest("ID is empty"))
+    } else if id.len() as u64 > ID_LENGTH_MAX {
+        Err(actix_web::error::ErrorBadRequest("ID exceeds maximum length"))
     } else {
         Ok(())
     }

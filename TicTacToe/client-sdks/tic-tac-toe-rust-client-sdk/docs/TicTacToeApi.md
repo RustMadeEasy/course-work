@@ -108,7 +108,7 @@ No authorization required
 
 ## end_game
 
-> end_game(game_id)
+> end_game(game_id, end_game_params)
 Closes down the specified Game.
 
 Closes down the specified Game.
@@ -119,6 +119,7 @@ Closes down the specified Game.
 Name | Type | Description  | Required | Notes
 ------------- | ------------- | ------------- | ------------- | -------------
 **game_id** | **String** |  | [required] |
+**end_game_params** | [**EndGameParams**](EndGameParams.md) |  | [required] |
 
 ### Return type
 
@@ -130,7 +131,7 @@ No authorization required
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
+- **Content-Type**: application/json
 - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -138,7 +139,7 @@ No authorization required
 
 ## end_gaming_session
 
-> end_gaming_session(session_id)
+> end_gaming_session(session_id, end_gaming_session_params)
 Closes down the specified Gaming Session.
 
 Closes down the specified Gaming Session.
@@ -149,6 +150,7 @@ Closes down the specified Gaming Session.
 Name | Type | Description  | Required | Notes
 ------------- | ------------- | ------------- | ------------- | -------------
 **session_id** | **String** |  | [required] |
+**end_gaming_session_params** | [**EndGamingSessionParams**](EndGamingSessionParams.md) |  | [required] |
 
 ### Return type
 
@@ -160,7 +162,7 @@ No authorization required
 
 ### HTTP request headers
 
-- **Content-Type**: Not defined
+- **Content-Type**: application/json
 - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

@@ -25,9 +25,9 @@ enum GameInfoManagerError: Error {
 class GameInfoService {
 
     /// Creates a new Gaming Session. Returns the Game Info.
-    static func createGamingSession(sessionId: String, sessionOwnerDisplayName: String) async -> GameInfoServiceResult {
+    static func createGamingSession(sessionOwnerDisplayName: String) async -> GameInfoServiceResult {
 
-        let params = NewGamingSessionParams(sessionId: sessionId, sessionOwnerDisplayName: sessionOwnerDisplayName)
+        let params = NewGamingSessionParams(sessionOwnerDisplayName: sessionOwnerDisplayName)
         
         do {
 
@@ -122,12 +122,13 @@ class GameInfoService {
     }
 
     /// Closes down the specified Game.
-    static func endGame(gameId: String) async -> GameInfoServiceResult {
+    static func endGame(gameId: String, playerId: String, sessionId: String) async -> GameInfoServiceResult {
         
         do {
             
             let error: Error? = try await withCheckedThrowingContinuation { continuation in
-                TicTacToeAPI.endGame(gameId: gameId) { data, error in
+                let params = EndGameParams.init(playerId: playerId, sessionId: sessionId)
+                TicTacToeAPI.endGame(gameId: gameId, endGameParams: params) { data, error in
                     if error == nil {
                         DispatchQueue.main.async {
                             continuation.resume(returning: nil )
@@ -146,40 +147,66 @@ class GameInfoService {
         }
     }
     
-//    /// Joins an existing Game.
-//    static func joinGame(invitationCode: String, playerName: String) async -> GameInfoServiceResult {
-//        
-//        do {
-//            
-//            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-//                let params = AddPlayerParams(gameInvitationCode: invitationCode, playerDisplayName: playerName)
-//                TicTacToeAPI.addPlayer(addPlayerParams: params) { data, error in
-//                    if error == nil {
-//                        if data != nil {
-//                            DispatchQueue.main.async {
-//                                continuation.resume(returning: GameInfoServiceResult(newGameInfo: data) )
-//                            }
-//                        } else {
-//                            let error = GameInfoManagerError.emptyData;
-//                            print("joinGame() error: \(String(describing: error))")
-//                            continuation.resume(returning: GameInfoServiceResult(error: error))
-//                        }
-//                    } else {
-//                        print("joinGame() error: \(String(describing: error))")
-//                        continuation.resume(returning: GameInfoServiceResult(error: error))
-//                    }
-//                }
-//            }
-//            return result
-//            
-//        } catch {
-//            print("joinGame() error: \(String(describing: error))")
-//            return GameInfoServiceResult(gameInfo: nil, error: error)
-//        }
-//    }
+    /// Closes down the specified Gaming Session.
+    static func endGamingSession(playerId: String, sessionId: String) async -> GameInfoServiceResult {
+        
+        do {
+            
+            let error: Error? = try await withCheckedThrowingContinuation { continuation in
+                let params = EndGamingSessionParams.init(playerId: playerId)
+                TicTacToeAPI.endGamingSession(sessionId: sessionId, endGamingSessionParams: params) { data, error in
+                    if error == nil {
+                        DispatchQueue.main.async {
+                            continuation.resume(returning: nil )
+                        }
+                    } else {
+                        print("endGamingSession() error: \(String(describing: error))")
+                        continuation.resume(returning: error)
+                    }
+                }
+            }
+            return GameInfoServiceResult(error: error)
+            
+        } catch {
+            print("endGamingSession() error: \(String(describing: error))")
+            return GameInfoServiceResult(error: error)
+        }
+    }
+    
+    /// Joins a Gaming Session.
+    static func joinGamingSession(invitationCode: String, playerName: String) async -> GameInfoServiceResult {
+        
+        do {
+            
+            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
+                let params = JoinSessionParams.init(gameInvitationCode: invitationCode, playerDisplayName: playerName)
+                TicTacToeAPI.joinGamingSession(joinSessionParams: params) { data, error in
+                    if error == nil {
+                        if data != nil {
+                            DispatchQueue.main.async {
+                                continuation.resume(returning: GameInfoServiceResult(newGamingSessionInfo: data) )
+                            }
+                        } else {
+                            let error = GameInfoManagerError.emptyData;
+                            print("joinGame() error: \(String(describing: error))")
+                            continuation.resume(returning: GameInfoServiceResult(error: error))
+                        }
+                    } else {
+                        print("joinGame() error: \(String(describing: error))")
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
+                    }
+                }
+            }
+            return result
+            
+        } catch {
+            print("joinGame() error: \(String(describing: error))")
+            return GameInfoServiceResult(gameInfo: nil, error: error)
+        }
+    }
 
     /// Retrieves the specified Game info.
-    static func retrieveGameInfo(gameId: String) async -> GameInfoServiceResult {
+    static func getGameInfo(gameId: String) async -> GameInfoServiceResult {
                 
         do {
             
@@ -210,12 +237,12 @@ class GameInfoService {
     }
 
     /// Performs a Game move for the specified Player.
-    static func takeTurn(gameId: String, boardPosition: BoardPosition, localPlayerId: String) async -> GameInfoServiceResult {
+    static func takeTurn(gameId: String, boardPosition: BoardPosition, localPlayerId: String, sessionId: String) async -> GameInfoServiceResult {
         
         do {
             
             let error: Error? = try await withCheckedThrowingContinuation { continuation in
-                let turnInfo = GameTurnInfo(destination: boardPosition, playerId: localPlayerId)
+                let turnInfo = GameTurnInfo(destination: boardPosition, playerId: localPlayerId, sessionId: sessionId)
                 TicTacToeAPI.takeTurn(gameId: gameId, gameTurnInfo: turnInfo) { data, error in
                     if error == nil {
                         DispatchQueue.main.async {

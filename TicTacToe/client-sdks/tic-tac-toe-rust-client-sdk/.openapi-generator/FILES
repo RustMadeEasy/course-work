@@ -1,9 +1,12 @@
 .gitignore
+.openapi-generator-ignore
 .travis.yml
 Cargo.toml
 README.md
 docs/AutomaticPlayerSkillLevel.md
 docs/BoardPosition.md
+docs/EndGameParams.md
+docs/EndGamingSessionParams.md
 docs/EventPlaneConfig.md
 docs/EventPlaneTopicNames.md
 docs/GameCreationResult.md
@@ -27,6 +30,8 @@ src/apis/tic_tac_toe_api.rs
 src/lib.rs
 src/models/automatic_player_skill_level.rs
 src/models/board_position.rs
+src/models/end_game_params.rs
+src/models/end_gaming_session_params.rs
 src/models/event_plane_config.rs
 src/models/event_plane_topic_names.rs
 src/models/game_creation_result.rs
