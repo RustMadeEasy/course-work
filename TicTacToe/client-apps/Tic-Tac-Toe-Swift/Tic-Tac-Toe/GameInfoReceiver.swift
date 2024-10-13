@@ -10,8 +10,7 @@ import MQTTNIO
 import OpenAPIClient
 
 /// Defines handler for game info events.
-protocol GameInfoReceiverDelegate {
-    
+protocol GameInfoReceiverDelegate {    
     func onGameDeleted()
     func onGameEndedInStalemate()
     func onGameEndedInWin()
@@ -89,10 +88,18 @@ extension GameInfoReceiver {
         client.whenMessage { message in
             // Inform the delegate of the event
             switch message.topic {
+            case self.topicGameDeleted:
+                self.delegate.onGameDeleted()
             case self.topicGameEndedInStalemate:
                 self.delegate.onGameEndedInStalemate()
             case self.topicGameEndedInWin:
                 self.delegate.onGameEndedInWin()
+            case self.topicGameStarted:
+                self.delegate.onGameStarted()
+            case self.topicPlayerAddedToSession:
+                self.delegate.onPlayerAddedToSession()
+            case self.topicSessionDeleted:
+                self.delegate.onSessionDeleted()
             case self.topicTurnTaken:
                 self.delegate.onTurnTaken()
             default:

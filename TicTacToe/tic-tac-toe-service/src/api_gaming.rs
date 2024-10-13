@@ -349,9 +349,9 @@ pub(crate) async fn join_gaming_session(
     }
 
     let mut manager = manager.lock().await;
-    let second_player_params = params.into_inner();
+    let params = params.into_inner();
 
-    match manager.add_player_to_session(&second_player_params).await {
+    match manager.add_player_to_session(&params.game_invitation_code, &params.player_display_name).await {
         Ok(session) => {
             let game_session_addition_result = GamingSessionCreationResult {
                 event_plane_config: session.event_plane_config,

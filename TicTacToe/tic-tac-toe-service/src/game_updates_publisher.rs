@@ -43,32 +43,26 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
 
         debug!("GameUpdatesPublisher: received game_updated() for game {}", game.get_id());
 
-        let topic: String;
         let topic_prefix = session.get_event_plane_config().topic_prefix;
         let topic_prefix = topic_prefix.as_str();
 
-        match state_change {
+        let topic = match state_change {
             StateChanges::GameDeleted => {
-                topic = EventPlaneTopicNames::GameDeleted.build(topic_prefix);
+                EventPlaneTopicNames::GameDeleted.build(topic_prefix)
             }
             StateChanges::GameStarted => {
-                topic = EventPlaneTopicNames::GameStarted.build(topic_prefix);
+                EventPlaneTopicNames::GameStarted.build(topic_prefix)
             }
             StateChanges::GameTurnTaken => {
                 match game.get_current_game_state().play_status {
-                    PlayStatus::EndedInStalemate => topic = EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
-                    PlayStatus::EndedInWin => topic = EventPlaneTopicNames::GameEndedInWin.build(topic_prefix),
-                    PlayStatus::InProgress => topic = EventPlaneTopicNames::TurnTaken.build(topic_prefix),
+                    PlayStatus::EndedInStalemate => EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
+                    PlayStatus::EndedInWin => EventPlaneTopicNames::GameEndedInWin.build(topic_prefix),
+                    PlayStatus::InProgress => EventPlaneTopicNames::TurnTaken.build(topic_prefix),
                     PlayStatus::NotStarted => return, // Early return. Nothing to publish.
                 }
             }
-            StateChanges::PlayerAddedToSession => {
-                topic = EventPlaneTopicNames::PlayerAddedToSession.build(topic_prefix);
-            }
-            StateChanges::SessionDeleted => {
-                topic = EventPlaneTopicNames::SessionDeleted.build(topic_prefix);
-            }
-        }
+            _ => { return; }
+        };
 
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
     }
@@ -78,13 +72,20 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
 
         debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);
 
-        match state_change {
-            StateChanges::GameDeleted => {}
-            StateChanges::GameStarted => {}
-            StateChanges::GameTurnTaken => {}
-            StateChanges::PlayerAddedToSession => {}
-            StateChanges::SessionDeleted => {}
-        }
+        let topic_prefix = session.get_event_plane_config().topic_prefix;
+        let topic_prefix = topic_prefix.as_str();
+
+        let topic = match state_change {
+            StateChanges::PlayerAddedToSession => {
+                EventPlaneTopicNames::PlayerAddedToSession.build(topic_prefix)
+            }
+            StateChanges::SessionDeleted => {
+                EventPlaneTopicNames::SessionDeleted.build(topic_prefix)
+            }
+            _ => { return; }
+        };
+
+        let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
     }
 
     fn unique_id(&self) -> String {
