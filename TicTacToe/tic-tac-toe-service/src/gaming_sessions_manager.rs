@@ -15,6 +15,7 @@ use crate::gaming_session::GamingSession;
 use crate::models::requests::{GameTurnInfo, NewGamingSessionParams};
 use crate::models::responses::GamingSessionCreationResult;
 use crate::models::{AutomaticPlayerSkillLevel, GameMode, PlayerInfo};
+use crate::play_status::PlayStatus;
 use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
 use log::debug;
@@ -131,7 +132,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         debug!("GamesManager: create_new_single_player_game() called. Session ID: {:?}, Skill Level: {:?}", session_id, computer_skill_level);
 
-        let session = match self.get_session_by_session_id(session_id).await {
+        let mut session = match self.get_session_by_session_id(session_id).await {
             None => return Err(GameError::SessionNotFound),
             Some(session) => session,
         };
@@ -153,6 +154,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         self.upsert_game(&game).await;
 
+        session.current_game = Some(game.clone());
+        self.upsert_session(&session).await;
+
         self.notify_observers_of_session_change(StateChanges::PlayerAddedToSession, &session).await;
         self.notify_observers_of_game_change(StateChanges::GameStarted, &session, &game).await;
 
@@ -165,7 +169,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         debug!("GamesManager: create_new_two_player_game() called for Session ID: {:?}", session_id);
 
-        let session = match self.get_session_by_session_id(session_id).await {
+        let mut session = match self.get_session_by_session_id(session_id).await {
             Some(session) => session,
             None => return Err(GameError::SessionNotFound),
         };
@@ -181,6 +185,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         self.upsert_game(&game).await;
 
+        session.current_game = Some(game.clone());
+        self.upsert_session(&session).await;
+        
         self.notify_observers_of_game_change(StateChanges::GameStarted, &session, &game).await;
 
         Ok(game.clone())
@@ -271,10 +278,11 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         Ok(game.get_play_history())
     }
 
-    async fn upsert_game(&self, game: &T) -> bool {
+    async fn upsert_game(&mut self, game: &T) -> bool {
         match self.get_session_containing_game(&game.get_id()).await {
             Some(mut session) => {
                 session.set_game(game);
+                self.upsert_session(&session).await;
                 true
             }
             None => false,
@@ -379,16 +387,35 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             None => { return Err(GameError::SessionNotFound); }
         };
 
-        let mut game = self.get_game_by_id(game_id).await?;
+        if let Some(ref game) = session.current_game {
+            //
 
-        let new_game_state = game.take_turn(game_turn_info)?;
+            if game.get_id() != game_id {
+                return Err(GameError::GameNotFound);
+            }
 
-        // Update our Game instance.
-        self.upsert_game(&game).await;
+            match game.get_current_game_state().play_status {
+                PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
+                    return Err(GameError::GameHasAlreadyEnded);
+                }
+                PlayStatus::InProgress => {}
+                PlayStatus::NotStarted => {
+                    return Err(GameError::GameNotStarted);
+                }
+            }
 
-        self.notify_observers_of_game_change(StateChanges::GameTurnTaken, &session, &game).await;
+            let mut updated_game = game.clone();
+            let new_game_state = updated_game.take_turn(game_turn_info)?;
 
-        Ok(new_game_state)
+            // Update our Game instance.
+            self.upsert_game(&updated_game).await;
+
+            self.notify_observers_of_game_change(StateChanges::GameTurnTaken, &session, &updated_game).await;
+
+            Ok(new_game_state)
+        } else {
+            Err(GameError::GameNotFound)
+        }
     }
 }
 

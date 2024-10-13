@@ -69,6 +69,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     }
 
     fn take_turn_as_an_intermediate(&self, _game_board: GameBoard) -> Option<BoardPosition> {
+        return self.take_turn_as_a_beginner(_game_board);
         debug!("Taking AutomaticPlayer turn as an intermediate for game {}", self.game_id);
         // TODO: JD: finish
         // TODO: JD: consider blocking the opponent from winning
@@ -76,12 +77,14 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     }
 
     fn take_turn_as_an_expert(&self, _game_board: GameBoard) -> Option<BoardPosition> {
+        return self.take_turn_as_a_beginner(_game_board);
         debug!("Taking AutomaticPlayer turn as an expert for game {}", self.game_id);
         // TODO: JD: finish
         None
     }
 
     fn take_turn_as_a_master(&self, _game_board: GameBoard) -> Option<BoardPosition> {
+        return self.take_turn_as_a_beginner(_game_board);
         debug!("Taking AutomaticPlayer turn as a master for game {}", self.game_id);
         // TODO: JD: finish
         None
@@ -182,8 +185,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
 
         match state_change {
             StateChanges::GameDeleted => {}
-            StateChanges::GameStarted => {}
-            StateChanges::GameTurnTaken => {
+            StateChanges::GameStarted | StateChanges::GameTurnTaken | StateChanges::PlayerAddedToSession => {
                 let game_state = game.get_current_game_state();
                 match game_state.play_status {
                     PlayStatus::InProgress => {
@@ -198,7 +200,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
                     _ => {}
                 }
             }
-            StateChanges::PlayerAddedToSession => {}
             StateChanges::SessionDeleted => {}
         }
     }

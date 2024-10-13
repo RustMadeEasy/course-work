@@ -129,9 +129,16 @@ impl GameTrait for TicTacToeGame {
         // Randomly assign the game piece for each player
         player.game_piece = GamePiece::random_choice();
         other_player.game_piece = player.game_piece.opposite();
+        let starting_player = if player.game_piece == GamePiece::X {
+            player.clone()
+        } else {
+            other_player.clone()
+        };
+
+        // By convention, whoever has X starts first. 
 
         let game = Self {
-            current_player: None,
+            current_player: Some(starting_player),
             game_mode,
             id: Uuid::new_v4().to_string(),
             players: vec![player, other_player],

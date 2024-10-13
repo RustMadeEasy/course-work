@@ -7,66 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "96F55404-3FA7-44C8-8003-5F93B405FF2D"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "252"
-            endingLineNumber = "252"
-            landmarkName = "refreshGameInfo()"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "96F55404-3FA7-44C8-8003-5F93B405FF2D - a418870efbbe6d88"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Tic_Tac_Toe.GameInfoViewModel.refreshGameInfo() -&gt; ()"
-                  moduleName = "Tic-Tac-Toe.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "252"
-                  endingLineNumber = "252">
-               </Location>
-               <Location
-                  uuid = "96F55404-3FA7-44C8-8003-5F93B405FF2D - 888feb4714c528d8"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () async -&gt; () in Tic_Tac_Toe.GameInfoViewModel.refreshGameInfo() -&gt; ()"
-                  moduleName = "Tic-Tac-Toe.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "252"
-                  endingLineNumber = "252">
-               </Location>
-               <Location
-                  uuid = "96F55404-3FA7-44C8-8003-5F93B405FF2D - e40a013b7a6061ce"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for closure #1 () async -&gt; () in Tic_Tac_Toe.GameInfoViewModel.refreshGameInfo() -&gt; ()"
-                  moduleName = "Tic-Tac-Toe.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "252"
-                  endingLineNumber = "252">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "478FEAAA-E68A-4018-BD16-76B4FA40AD30"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -163,22 +103,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "6A65E432-849D-4DC1-9F65-DB756A21CECB"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "379"
-            endingLineNumber = "379"
-            landmarkName = "onTurnTaken()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "AF48A6D9-ECD0-4E60-B0F4-32FFE29ACE44"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -189,6 +113,22 @@
             startingLineNumber = "357"
             endingLineNumber = "357"
             landmarkName = "onSessionDeleted()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "91B54EC0-8852-4D1B-A42B-D50C01BDA6EC"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "379"
+            endingLineNumber = "379"
+            landmarkName = "onTurnTaken()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -318,7 +318,9 @@ pub(crate) async fn get_game_info(
         .await
         .get_game_by_id(game_id.as_str()).await
     {
-        Ok(game) => Ok(web::Json(GameInfo::from(game))),
+        Ok(game) => {
+            Ok(web::Json(GameInfo::from(game)))
+        }
         Err(error) => Err(actix_web::error::ErrorInternalServerError(error.to_string())),
     }
 }

@@ -72,7 +72,7 @@ impl GamePiece {
     pub fn random_choice() -> Self {
         match rand::random::<bool>() {
             true => Self::O,
-            false => Self::O,
+            false => Self::X,
         }
     }
 }
