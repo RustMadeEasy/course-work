@@ -41,13 +41,18 @@ use validator::Validate;
         Player A
             Create a new Session
             Subscribe to MQTT
-            Create a new Two-Player Game
             Manually invite Player B
         
         Player B
             Join the Session via Invitation Code
             Subscribe to MQTT
+            Get Session Current Games
+            Save game ID
+            Refresh Game Info
 
+        Player A
+            Create a new Two-Player Game
+            
         Player A and Player B:
             Play
             Play
@@ -97,6 +102,7 @@ pub(crate) async fn create_gaming_session(
     match manager.create_new_session(&params).await {
         Ok(session) => {
             let creation_result = GamingSessionCreationResult {
+                current_game_id: Default::default(),
                 event_plane_config: session.event_plane_config,
                 invitation_code: session.invitation_code,
                 session_id: session.session_id,
@@ -325,6 +331,44 @@ pub(crate) async fn get_game_info(
     }
 }
 
+/// Retrieves the Games in a Gaming Session.
+#[utoipa::path(
+    get,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions/{session_id}/current-games",
+    params(("session_id" = String, Path, description = "Session ID"),),
+    responses(
+    (status = 200, description = "Gaming Session Games retrieved successfully", body = Vec<GameInfo>, content_type = "application/json"),
+    (status = 400, description = "Bad request - Malformed Session ID"),
+    (status = 404, description = "Session not found"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[get("/gaming-sessions/{session_id}/current-games")]
+pub(crate) async fn get_session_current_games(
+    session_id: web::Path<String>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+) -> actix_web::Result<web::Json<Vec<GameInfo>>> {
+    //
+
+    debug!("HTTP GET to /gaming-sessions/{}/current-games", session_id);
+
+    // *** Validate input params ***
+    validate_id_string(&session_id)?;
+
+    match manager
+        .lock()
+        .await
+        .get_games_in_session(session_id.as_str()).await
+    {
+        Ok(games) => {
+            Ok(web::Json(games.into_iter().map(GameInfo::from).collect()))
+        }
+        Err(error) => {
+            Err(actix_web::error::ErrorInternalServerError(error))
+        }
+    }
+}
+
 /// Adds a Player to the Gaming Session.
 #[utoipa::path(
     post,
@@ -354,11 +398,12 @@ pub(crate) async fn join_gaming_session(
     let params = params.into_inner();
 
     match manager.add_player_to_session(&params.game_invitation_code, &params.player_display_name).await {
-        Ok(session) => {
+        Ok(result) => {
             let game_session_addition_result = GamingSessionCreationResult {
-                event_plane_config: session.event_plane_config,
-                invitation_code: session.invitation_code,
-                session_id: session.session_id,
+                current_game_id: result.current_game_id,
+                event_plane_config: result.event_plane_config,
+                invitation_code: result.invitation_code,
+                session_id: result.session_id,
             };
             Ok(web::Json(game_session_addition_result))
         }

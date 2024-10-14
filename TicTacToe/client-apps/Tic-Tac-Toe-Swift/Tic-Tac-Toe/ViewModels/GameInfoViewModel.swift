@@ -42,8 +42,8 @@ class GameInfoViewModel: ObservableObject {
     /// Indicates whether the Game has been started.
     @Published var hasGameStarted: Bool = false
     
-    /// Indicates that this client app instance is the one that started the Game.
-    @Published private var initiatedGame: Bool = false
+    /// Indicates that this client app instance is the one that started the Gaming Session.
+    @Published private var initiatedGamingSession: Bool = false
     
     /// The code used to invite a new player to the Game.
     @Published var invitationCode: String = ""
@@ -95,7 +95,7 @@ extension GameInfoViewModel {
         gameId = ""
         gameResults = ""
         hasGameStarted = false
-        initiatedGame = false
+        initiatedGamingSession = false
         invitationCode = ""
         isPlayerOneCurrentPlayer = false
         isPlayerTwoCurrentPlayer = false
@@ -135,7 +135,7 @@ extension GameInfoViewModel {
         if let newGameInfo = result.newGameInfo {
             
             DispatchQueue.main.async {
-                self._initiatedGame = Published(wrappedValue: true)
+                self._initiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
                 self.update(gameInfo: newGameInfo.gameInfo)
                 self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
@@ -145,32 +145,22 @@ extension GameInfoViewModel {
         return result.error
     }
     
-//    /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
-//    func createGame(eventPlaneConfig: EventPlaneConfig) async -> Error? {
-//        
-//        let result = if self.isTwoPlayer {
-//            await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId)
-//            
-//        } else {
-//            // TODO: JD: allow the UI to set the AutomaticPlayerSkillLevel
-//            await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId)
-//        }
-//        
-//        
-//        if let newGameInfo = result.newGameInfo {
-//            
-//            DispatchQueue.main.async {
-//                self._initiatedGame = Published(wrappedValue: true)
-//                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
-//                self.update(gameInfo: newGameInfo.gameInfo)
-//                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
-//                self._localPlayerName = Published(wrappedValue: newGameInfo.gameInfo.players.first!.displayName)
-//                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: eventPlaneConfig, delegate: self)
-//            }
-//        }
-//        
-//        return result.error
-//    }
+    func createTwoPlayerGame() async -> Error? {
+        
+        let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId)
+                
+        if let newGameInfo = result.newGameInfo {
+            
+            DispatchQueue.main.async {
+                self._initiatedGamingSession = Published(wrappedValue: true)
+                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
+                self.update(gameInfo: newGameInfo.gameInfo)
+                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+            }
+        }
+        
+        return result.error
+    }
     
     /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
     func createGamingSession(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
@@ -179,6 +169,7 @@ extension GameInfoViewModel {
         
         if let newGamingSessionInfo = result.newGamingSessionInfo {
             DispatchQueue.main.async {
+                self._initiatedGamingSession = Published(wrappedValue: true)
                 self.invitationCode = result.newGamingSessionInfo?.invitationCode ?? ""
                 self.gamingSessionId = result.newGamingSessionInfo?.sessionId ?? ""
                 // Setup MQTT listener
@@ -196,13 +187,28 @@ extension GameInfoViewModel {
         var result: Error? = nil
         
         // If this is the client that started the game, close it down on the server.
-        if self.initiatedGame {
+        if self.initiatedGamingSession {
             result = await GameInfoService.endGame(gameId: self.gameId, playerId: self.localPlayerId, sessionId: self.gamingSessionId).error
         }
         
         prepareForNewGame()
         
         return result
+    }
+    
+    /// Ends the current Gaming Session.
+    func endGamingSession() async -> Error? {
+        
+        // TODO: JD: finish
+        return nil
+    }
+    
+    /// Ends the current Gaming Session.
+    func getSessionCurrentGame() async {
+        let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
+        if result.error == nil && result.gameInfo != nil {
+            self.update(gameInfo: result.gameInfo!)
+        }
     }
     
     /// Generates the appropriate Game completion text.
@@ -222,13 +228,18 @@ extension GameInfoViewModel {
     }
     
     /// Joins a Gaming Session.
-    func joinGamingSession(invitationCode: String) async -> Error? {
+    func joinGamingSession(invitationCode: String) async -> Error? {        
         
-        let result = await GameInfoService.joinGamingSession(invitationCode: invitationCode, playerName: self.localPlayerName)
-        
-        if let newGameInfo = result.newGamingSessionInfo {
+        let result = await GameInfoService.joinGamingSession(invitationCode: self.invitationCode, playerName: self.localPlayerName)
+                
+        if let newGamingSessionInfo = result.newGamingSessionInfo {
+            
             DispatchQueue.main.async {
-                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGameInfo.eventPlaneConfig, delegate: self)
+                self._initiatedGamingSession = Published(wrappedValue: false)
+                self._gameId = Published(initialValue: newGamingSessionInfo.currentGameId)
+                self._gamingSessionId = Published(initialValue: newGamingSessionInfo.sessionId)
+                // Setup MQTT listener
+                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
             }
         }
         
@@ -248,7 +259,7 @@ extension GameInfoViewModel {
     }
     
     /// Retrieves new game state info from our Tic Tac Toe service.
-    private func refreshGameInfo() {
+    func refreshGameInfo() {
         Task {
             let result = await GameInfoService.getGameInfo(gameId: self.gameId)
             if result.error == nil && result.gameInfo != nil {
@@ -350,7 +361,11 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
     }
     
     func onPlayerAddedToSession() {
-        refreshGameInfo()
+        if self.initiatedGamingSession {
+            Task {
+                await self.createTwoPlayerGame()
+            }
+        }
     }
     
     func onSessionDeleted() {
@@ -370,11 +385,7 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
 
         // TODO: JD: ask for a rematch
     }
-    
-    func onPlayerAdded() {
-        refreshGameInfo()
-    }
-    
+        
     func onTurnTaken() {
         refreshGameInfo()
     }

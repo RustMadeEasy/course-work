@@ -173,6 +173,69 @@ class GameInfoService {
         }
     }
     
+    /// Retrieves the specified Game info.
+    static func getGameInfo(gameId: String) async -> GameInfoServiceResult {
+                
+        do {
+            
+            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
+                TicTacToeAPI.getGameInfo(gameId: gameId) { gameInfo, error in
+                    if error == nil {
+                        if gameInfo != nil {
+                            DispatchQueue.main.async {
+                                continuation.resume(returning: GameInfoServiceResult(gameInfo: gameInfo!) )
+                            }
+                        } else {
+                            let error = GameInfoManagerError.emptyData;
+                            print("retrieveGameInfo() error: \(String(describing: error))")
+                            continuation.resume(returning: GameInfoServiceResult(error: error))
+                        }
+                    } else {
+                        print("retrieveGameInfo() error: \(String(describing: error))")
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
+                    }
+                }
+            }
+            return result
+            
+        } catch {
+            print("retrieveGameInfo() error: \(String(describing: error))")
+            return GameInfoServiceResult(gameInfo: nil, error: error)
+        }
+    }
+
+    /// Retrieves the current Game in in the specified Gaming Session.
+    static func getSessionCurrentGame(sessionId: String) async -> GameInfoServiceResult {
+                
+        do {
+            
+            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
+                
+                TicTacToeAPI.getSessionCurrentGames(sessionId: sessionId) { games, error in
+                    if error == nil {
+                        if games != nil, !games!.isEmpty {
+                            DispatchQueue.main.async {
+                                continuation.resume(returning: GameInfoServiceResult(gameInfo: games!.first!) )
+                            }
+                        } else {
+                            let error = GameInfoManagerError.emptyData;
+                            print("retrieveGameInfo() error: \(String(describing: error))")
+                            continuation.resume(returning: GameInfoServiceResult(error: error))
+                        }
+                    } else {
+                        print("retrieveGameInfo() error: \(String(describing: error))")
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
+                    }
+                }
+            }
+            return result
+            
+        } catch {
+            print("retrieveGameInfo() error: \(String(describing: error))")
+            return GameInfoServiceResult(gameInfo: nil, error: error)
+        }
+    }
+
     /// Joins a Gaming Session.
     static func joinGamingSession(invitationCode: String, playerName: String) async -> GameInfoServiceResult {
         
@@ -201,37 +264,6 @@ class GameInfoService {
             
         } catch {
             print("joinGame() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
-        }
-    }
-
-    /// Retrieves the specified Game info.
-    static func getGameInfo(gameId: String) async -> GameInfoServiceResult {
-                
-        do {
-            
-            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                TicTacToeAPI.getGameInfo(gameId: gameId) { gameInfo, error in
-                    if error == nil {
-                        if gameInfo != nil {
-                            DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(gameInfo: gameInfo!) )
-                            }
-                        } else {
-                            let error = GameInfoManagerError.emptyData;
-                            print("retrieveGameInfo() error: \(String(describing: error))")
-                            continuation.resume(returning: GameInfoServiceResult(error: error))
-                        }
-                    } else {
-                        print("retrieveGameInfo() error: \(String(describing: error))")
-                        continuation.resume(returning: GameInfoServiceResult(error: error))
-                    }
-                }
-            }
-            return result
-            
-        } catch {
-            print("retrieveGameInfo() error: \(String(describing: error))")
             return GameInfoServiceResult(gameInfo: nil, error: error)
         }
     }

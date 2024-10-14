@@ -19,7 +19,6 @@ use verification_code_gen::verification_code_generator::VerificationCodeGenerato
 #[derive(Clone, Default, Deserialize, Serialize, ToSchema, Validate)]
 pub(crate) struct GamingSession<T: GameTrait + Clone + Send + Sync + 'static> {
     pub(crate) current_game: Option<T>,
-    // pub(crate) current_game_id: Option<String>,
     pub(crate) event_plane_config: EventPlaneConfig,
     /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
     pub(crate) session_id: String,

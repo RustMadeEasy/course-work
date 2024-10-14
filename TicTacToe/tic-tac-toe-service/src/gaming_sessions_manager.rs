@@ -50,10 +50,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     //
 
     /// Adds a Player to the Gaming Session.
-    pub(crate) async fn add_player_to_session(&mut self, game_invitation_code: &String, player_display_name: &String) -> Result<GamingSessionCreationResult, GameError> {
+    pub(crate) async fn add_player_to_session(&mut self,
+                                              game_invitation_code: &str,
+                                              player_display_name: &str) -> Result<GamingSessionCreationResult, GameError> {
         //
 
-        // debug!("GamesManager: add_player() called.");
+        debug!("GamesManager: add_player_to_session() called.");
 
         let mut session = match self.get_session_by_invitation_code(game_invitation_code).await {
             None => return Err(GameError::InvitationCodeNotFound),
@@ -62,10 +64,17 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         let new_player = PlayerInfo::new(player_display_name, false);
         session.add_participant(&new_player);
+        self.upsert_session(&session).await;
 
         self.notify_observers_of_session_change(StateChanges::PlayerAddedToSession, &session).await;
 
+        let current_game_id = match session.current_game {
+            None => "".to_string(),
+            Some(game) => game.get_id(),
+        };
+
         Ok(GamingSessionCreationResult {
+            current_game_id,
             event_plane_config: session.event_plane_config,
             invitation_code: session.invitation_code,
             session_id: session.session_id,
@@ -253,6 +262,23 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
                 self.notify_observers_of_session_change(StateChanges::SessionDeleted, &session).await;
 
                 Ok(())
+            }
+        }
+    }
+
+    /// Retrieves the specified Session and Game pair.
+    pub(crate) async fn get_games_in_session(&self, session_id: impl Into<String>) -> Result<Vec<T>, GameError> {
+        match self.get_session_by_session_id(&session_id.into()).await {
+            None => Err(GameError::SessionNotFound),
+            Some(session) => {
+                match session.current_game {
+                    None => {
+                        Err(GameError::GameNotFound)
+                    }
+                    Some(game) => {
+                        Ok(vec!(game))
+                    }
+                }
             }
         }
     }

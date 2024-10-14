@@ -303,6 +303,9 @@ pub mod responses {
     /// Models the results of a call to the Create Gaming Session endpoint.
     #[derive(Deserialize, Serialize, ToSchema)]
     pub struct GamingSessionCreationResult {
+        /// Identifies the Game currently setup for play.
+        pub(crate) current_game_id: String,
+        /// Specifies the configuration required for clients to subscribe to real-time Game state updates.
         pub(crate) event_plane_config: EventPlaneConfig,
         /// Unique Code that is used to invite others to the Gaming Session.
         pub(crate) invitation_code: String,
