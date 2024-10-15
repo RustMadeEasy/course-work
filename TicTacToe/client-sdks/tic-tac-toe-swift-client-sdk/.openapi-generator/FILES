@@ -25,6 +25,7 @@ OpenAPIClient/Classes/OpenAPIs/Models/GameState.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GameTurnInfo.swift
 OpenAPIClient/Classes/OpenAPIs/Models/GamingSessionCreationResult.swift
 OpenAPIClient/Classes/OpenAPIs/Models/JoinSessionParams.swift
+OpenAPIClient/Classes/OpenAPIs/Models/NewGamingSessionParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/NewSinglePlayerGameParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayStatus.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayerInfo.swift
@@ -48,6 +49,7 @@ docs/GameState.md
 docs/GameTurnInfo.md
 docs/GamingSessionCreationResult.md
 docs/JoinSessionParams.md
+docs/NewGamingSessionParams.md
 docs/NewSinglePlayerGameParams.md
 docs/PlayStatus.md
 docs/PlayerInfo.md

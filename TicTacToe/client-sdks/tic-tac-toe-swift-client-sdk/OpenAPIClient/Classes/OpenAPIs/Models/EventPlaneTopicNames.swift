@@ -17,6 +17,7 @@ public enum EventPlaneTopicNames: String, Codable, CaseIterable {
     case gameEndedInWin = "GameEndedInWin"
     case gameStarted = "GameStarted"
     case playerAddedToSession = "PlayerAddedToSession"
+    case playerReady = "PlayerReady"
     case sessionDeleted = "SessionDeleted"
     case turnTaken = "TurnTaken"
 }

@@ -18,7 +18,7 @@ use crate::gaming_sessions_manager::GamingSessionsManager;
 use crate::models::requests::{EndGameParams, EndGamingSessionParams, GameTurnInfo, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
 use crate::tic_tac_toe_game::TicTacToeGame;
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use log::debug;
 use validator::Validate;
 
@@ -31,7 +31,6 @@ use validator::Validate;
             Creates a new Gaming Session
             Subscribes to MQTT
             Creates a new Single-Player Game
-            Joins Game
             Plays
             Ends Game
             Ends Gaming Session
@@ -47,6 +46,7 @@ use validator::Validate;
         Player B
             Joins the Session via the Invitation Code
             Subscribes to MQTT
+            Indicates Readiness
 
         Player A
             Receives PlayerAddedToSession
@@ -105,9 +105,9 @@ pub(crate) async fn create_gaming_session(
     match manager.create_new_session(&params.session_owner_display_name).await {
         Ok(session) => {
             let creation_result = GamingSessionCreationResult {
-                current_game_id: Default::default(),
                 event_plane_config: session.event_plane_config,
                 invitation_code: session.invitation_code,
+                player_id: session.session_owner.player_id,
                 session_id: session.session_id,
             };
             Ok(web::Json(creation_result))
@@ -168,7 +168,7 @@ pub(crate) async fn create_single_player_game(
 #[utoipa::path(
     post,
     tag = "TicTacToe",
-    path = "/v1/gaming-session/two-player-games",
+    path = "/v1/gaming-session/{session_id}/two-player-games",
     responses(
     (status = 200, description = "Two-Player Game created successfully", body = GameCreationResult, content_type = "application/json"),
     (status = 500, description = "Internal server error")
@@ -187,19 +187,11 @@ pub(crate) async fn create_two_player_game(
 
     let mut manager = manager.lock().await;
 
-    // Create a session if there is not one already.
-    let session = match manager.get_session_by_session_id(&session_id).await {
-        Some(session) => *session,
-        None => {
-            return Err(actix_web::error::ErrorInternalServerError(GameError::SessionNotFound))
-        }
-    };
-
-    match manager.create_new_two_player_game(&session.session_id).await {
+    match manager.create_new_two_player_game(&session_id).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
-                session_id: session.session_id.clone(),
+                session_id: session_id.clone(),
             };
             Ok(web::Json(new_game_info))
         }
@@ -412,14 +404,41 @@ pub(crate) async fn join_gaming_session(
 
     match manager.add_player_to_session(&params.game_invitation_code, &params.player_display_name).await {
         Ok(result) => {
-            let game_session_addition_result = GamingSessionCreationResult {
-                current_game_id: result.current_game_id,
-                event_plane_config: result.event_plane_config,
-                invitation_code: result.invitation_code,
-                session_id: result.session_id,
-            };
-            Ok(web::Json(game_session_addition_result))
+            Ok(web::Json(result))
         }
+        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+    }
+}
+
+/// Sets a Player as ready to Play.
+#[utoipa::path(
+    put,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions/{session_id}/players/{player_id}/readiness",
+    responses(
+    (status = 200, description = "Notifies other Players that the newly added Player is ready to begin the Game"),
+    (status = 404, description = "No Gaming Session found"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[put("/gaming-sessions/{session_id}/players/{player_id}/readiness")]
+pub(crate) async fn note_player_readiness(
+    ids: web::Path<(String, String)>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+) -> impl Responder {
+    //
+
+    debug!("HTTP POST to /gaming-sessions/{}/players/{}/readiness.", ids.0, ids.1);
+
+    let (session_id, player_id) = ids.into_inner();
+
+    // *** Validate input params ***
+    validate_id_string(&session_id)?;
+    validate_id_string(&player_id)?;
+
+    let manager = manager.lock().await;
+
+    match manager.note_player_readiness(&session_id, &player_id).await {
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
 }

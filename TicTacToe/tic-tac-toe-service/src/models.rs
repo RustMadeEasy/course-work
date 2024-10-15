@@ -145,6 +145,8 @@ pub mod event_plane {
         GameStarted,
         /// Published when a new Player has been added to the Gaming Session.
         PlayerAddedToSession,
+        /// Published when a new Player is ready to begin the Game.
+        PlayerReady,
         /// Called when the Gaming Session has been deleted from the platform.
         SessionDeleted,
         /// Published when a Player has taken a new turn.
@@ -162,6 +164,7 @@ pub mod event_plane {
                 EventPlaneTopicNames::GameEndedInWin => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInWin),
                 EventPlaneTopicNames::GameStarted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameStarted),
                 EventPlaneTopicNames::PlayerAddedToSession => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerAddedToSession),
+                EventPlaneTopicNames::PlayerReady => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerReady),
                 EventPlaneTopicNames::TurnTaken => format!("{topic_prefix}/{}", EventPlaneTopicNames::TurnTaken),
                 EventPlaneTopicNames::SessionDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::SessionDeleted),
             }
@@ -279,12 +282,12 @@ pub mod responses {
     /// Models the results of a call to the Create Gaming Session endpoint.
     #[derive(Deserialize, Serialize, ToSchema)]
     pub struct GamingSessionCreationResult {
-        /// Identifies the Game currently setup for play.
-        pub(crate) current_game_id: String,
         /// Specifies the configuration required for clients to subscribe to real-time Game state updates.
         pub(crate) event_plane_config: EventPlaneConfig,
         /// Unique Code that is used to invite others to the Gaming Session.
         pub(crate) invitation_code: String,
+        /// ID of the Player added to the Gaming Session.
+        pub(crate) player_id: String,
         /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
         pub(crate) session_id: String,
     }

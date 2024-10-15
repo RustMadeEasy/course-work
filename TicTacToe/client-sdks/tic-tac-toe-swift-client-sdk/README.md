@@ -27,14 +27,16 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*TicTacToeAPI* | [**createSinglePlayerGame**](docs/TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/single-player-games | Creates a new Game. Returns Game Creation Result.
-*TicTacToeAPI* | [**createTwoPlayerGame**](docs/TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
+*TicTacToeAPI* | [**createGamingSession**](docs/TicTacToeAPI.md#creategamingsession) | **POST** /v1/gaming-sessions | Creates a new Gaming Session. Returns GamingSessionCreationResult.
+*TicTacToeAPI* | [**createSinglePlayerGame**](docs/TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/gaming-sessions/{session_id}/games | Creates a new Game. Returns Game Creation Result.
+*TicTacToeAPI* | [**createTwoPlayerGame**](docs/TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/{session_id}/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 *TicTacToeAPI* | [**endGame**](docs/TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 *TicTacToeAPI* | [**endGamingSession**](docs/TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 *TicTacToeAPI* | [**getGameHistory**](docs/TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
 *TicTacToeAPI* | [**getGameInfo**](docs/TicTacToeAPI.md#getgameinfo) | **GET** /v1/games/{game_id} | Retrieves details of the specified Game.
 *TicTacToeAPI* | [**getSessionCurrentGames**](docs/TicTacToeAPI.md#getsessioncurrentgames) | **GET** /v1/gaming-sessions/{session_id}/current-games | Retrieves the Games in a Gaming Session.
 *TicTacToeAPI* | [**joinGamingSession**](docs/TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
+*TicTacToeAPI* | [**notePlayerReadiness**](docs/TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Sets a Player as ready to Play.
 *TicTacToeAPI* | [**takeTurn**](docs/TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player.
 
 
@@ -54,6 +56,7 @@ Class | Method | HTTP request | Description
  - [GameTurnInfo](docs/GameTurnInfo.md)
  - [GamingSessionCreationResult](docs/GamingSessionCreationResult.md)
  - [JoinSessionParams](docs/JoinSessionParams.md)
+ - [NewGamingSessionParams](docs/NewGamingSessionParams.md)
  - [NewSinglePlayerGameParams](docs/NewSinglePlayerGameParams.md)
  - [PlayStatus](docs/PlayStatus.md)
  - [PlayerInfo](docs/PlayerInfo.md)

@@ -16,6 +16,7 @@ protocol GameInfoReceiverDelegate {
     func onGameEndedInWin()
     func onGameStarted()
     func onPlayerAddedToSession()
+    func onPlayerReady()
     func onSessionDeleted()
     func onTurnTaken()
 }
@@ -32,6 +33,7 @@ class GameInfoReceiver {
     private var topicGameEndedInWin: String!
     private var topicGameStarted: String!
     private var topicPlayerAddedToSession: String!
+    private var topicPlayerReady: String!
     private var topicSessionDeleted: String!
     private var topicTurnTaken: String!
     
@@ -58,6 +60,7 @@ extension GameInfoReceiver {
         self.topicGameEndedInWin = buildTopic(topic: EventPlaneTopicNames.gameEndedInWin)
         self.topicGameStarted = buildTopic(topic: EventPlaneTopicNames.gameStarted)
         self.topicPlayerAddedToSession = buildTopic(topic: EventPlaneTopicNames.playerAddedToSession)
+        self.topicPlayerReady = buildTopic(topic: EventPlaneTopicNames.playerReady)
         self.topicSessionDeleted = buildTopic(topic: EventPlaneTopicNames.sessionDeleted)
         self.topicTurnTaken = buildTopic(topic: EventPlaneTopicNames.turnTaken)
     }
@@ -98,6 +101,8 @@ extension GameInfoReceiver {
                 self.delegate.onGameStarted()
             case self.topicPlayerAddedToSession:
                 self.delegate.onPlayerAddedToSession()
+            case self.topicPlayerReady:
+                self.delegate.onPlayerReady()
             case self.topicSessionDeleted:
                 self.delegate.onSessionDeleted()
             case self.topicTurnTaken:

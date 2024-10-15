@@ -68,6 +68,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
             StateChanges::PlayerAddedToSession => {
                 EventPlaneTopicNames::PlayerAddedToSession.build(topic_prefix)
             }
+            StateChanges::PlayerReady => {
+                EventPlaneTopicNames::PlayerReady.build(topic_prefix)
+            }
             StateChanges::SessionDeleted => {
                 EventPlaneTopicNames::SessionDeleted.build(topic_prefix)
             }

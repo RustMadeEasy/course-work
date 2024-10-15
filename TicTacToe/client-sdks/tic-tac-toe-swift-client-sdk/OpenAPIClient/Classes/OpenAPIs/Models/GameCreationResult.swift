@@ -14,13 +14,17 @@ import AnyCodable
 public struct GameCreationResult: Codable, JSONEncodable, Hashable {
 
     public var gameInfo: GameInfo
+    /** ID of the Gaming Session. */
+    public var sessionId: String
 
-    public init(gameInfo: GameInfo) {
+    public init(gameInfo: GameInfo, sessionId: String) {
         self.gameInfo = gameInfo
+        self.sessionId = sessionId
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case gameInfo = "game_info"
+        case sessionId = "session_id"
     }
 
     // Encodable protocol methods
@@ -28,6 +32,7 @@ public struct GameCreationResult: Codable, JSONEncodable, Hashable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(gameInfo, forKey: .gameInfo)
+        try container.encode(sessionId, forKey: .sessionId)
     }
 }
 

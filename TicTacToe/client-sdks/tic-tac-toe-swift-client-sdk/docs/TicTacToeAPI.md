@@ -4,35 +4,37 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**createSinglePlayerGame**](TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/single-player-games | Creates a new Game. Returns Game Creation Result.
-[**createTwoPlayerGame**](TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
+[**createGamingSession**](TicTacToeAPI.md#creategamingsession) | **POST** /v1/gaming-sessions | Creates a new Gaming Session. Returns GamingSessionCreationResult.
+[**createSinglePlayerGame**](TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/gaming-sessions/{session_id}/games | Creates a new Game. Returns Game Creation Result.
+[**createTwoPlayerGame**](TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/{session_id}/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
 [**getGameInfo**](TicTacToeAPI.md#getgameinfo) | **GET** /v1/games/{game_id} | Retrieves details of the specified Game.
 [**getSessionCurrentGames**](TicTacToeAPI.md#getsessioncurrentgames) | **GET** /v1/gaming-sessions/{session_id}/current-games | Retrieves the Games in a Gaming Session.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
+[**notePlayerReadiness**](TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Sets a Player as ready to Play.
 [**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player.
 
 
-# **createSinglePlayerGame**
+# **createGamingSession**
 ```swift
-    open class func createSinglePlayerGame(newSinglePlayerGameParams: NewSinglePlayerGameParams, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
+    open class func createGamingSession(newGamingSessionParams: NewGamingSessionParams, completion: @escaping (_ data: GamingSessionCreationResult?, _ error: Error?) -> Void)
 ```
 
-Creates a new Game. Returns Game Creation Result.
+Creates a new Gaming Session. Returns GamingSessionCreationResult.
 
-Creates a new Game. Returns Game Creation Result.
+Creates a new Gaming Session. Returns GamingSessionCreationResult.
 
 ### Example
 ```swift
 // The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
 import OpenAPIClient
 
-let newSinglePlayerGameParams = NewSinglePlayerGameParams(computerSkillLevel: AutomaticPlayerSkillLevel(), sessionId: "sessionId_example", sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewSinglePlayerGameParams | 
+let newGamingSessionParams = NewGamingSessionParams(sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewGamingSessionParams | 
 
-// Creates a new Game. Returns Game Creation Result.
-TicTacToeAPI.createSinglePlayerGame(newSinglePlayerGameParams: newSinglePlayerGameParams) { (response, error) in
+// Creates a new Gaming Session. Returns GamingSessionCreationResult.
+TicTacToeAPI.createGamingSession(newGamingSessionParams: newGamingSessionParams) { (response, error) in
     guard error == nil else {
         print(error)
         return
@@ -48,6 +50,58 @@ TicTacToeAPI.createSinglePlayerGame(newSinglePlayerGameParams: newSinglePlayerGa
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **newGamingSessionParams** | [**NewGamingSessionParams**](NewGamingSessionParams.md) |  | 
+
+### Return type
+
+[**GamingSessionCreationResult**](GamingSessionCreationResult.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **createSinglePlayerGame**
+```swift
+    open class func createSinglePlayerGame(sessionId: String, newSinglePlayerGameParams: NewSinglePlayerGameParams, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
+```
+
+Creates a new Game. Returns Game Creation Result.
+
+Creates a new Game. Returns Game Creation Result.
+
+### Example
+```swift
+// The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
+import OpenAPIClient
+
+let sessionId = "sessionId_example" // String | 
+let newSinglePlayerGameParams = NewSinglePlayerGameParams(computerSkillLevel: AutomaticPlayerSkillLevel()) // NewSinglePlayerGameParams | 
+
+// Creates a new Game. Returns Game Creation Result.
+TicTacToeAPI.createSinglePlayerGame(sessionId: sessionId, newSinglePlayerGameParams: newSinglePlayerGameParams) { (response, error) in
+    guard error == nil else {
+        print(error)
+        return
+    }
+
+    if (response) {
+        dump(response)
+    }
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sessionId** | **String** |  | 
  **newSinglePlayerGameParams** | [**NewSinglePlayerGameParams**](NewSinglePlayerGameParams.md) |  | 
 
 ### Return type
@@ -416,6 +470,58 @@ No authorization required
 
  - **Content-Type**: application/json
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **notePlayerReadiness**
+```swift
+    open class func notePlayerReadiness(sessionId: String, playerId: String, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
+```
+
+Sets a Player as ready to Play.
+
+Sets a Player as ready to Play.
+
+### Example
+```swift
+// The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
+import OpenAPIClient
+
+let sessionId = "sessionId_example" // String | 
+let playerId = "playerId_example" // String | 
+
+// Sets a Player as ready to Play.
+TicTacToeAPI.notePlayerReadiness(sessionId: sessionId, playerId: playerId) { (response, error) in
+    guard error == nil else {
+        print(error)
+        return
+    }
+
+    if (response) {
+        dump(response)
+    }
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sessionId** | **String** |  | 
+ **playerId** | **String** |  | 
+
+### Return type
+
+Void (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

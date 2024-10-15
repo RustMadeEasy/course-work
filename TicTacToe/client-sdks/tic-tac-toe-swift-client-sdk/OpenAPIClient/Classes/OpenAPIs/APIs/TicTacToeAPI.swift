@@ -13,15 +13,60 @@ import AnyCodable
 open class TicTacToeAPI {
 
     /**
+     Creates a new Gaming Session. Returns GamingSessionCreationResult.
+     
+     - parameter newGamingSessionParams: (body)  
+     - parameter apiResponseQueue: The queue on which api response is dispatched.
+     - parameter completion: completion handler to receive the data and the error objects
+     */
+    @discardableResult
+    open class func createGamingSession(newGamingSessionParams: NewGamingSessionParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GamingSessionCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
+        return createGamingSessionWithRequestBuilder(newGamingSessionParams: newGamingSessionParams).execute(apiResponseQueue) { result in
+            switch result {
+            case let .success(response):
+                completion(response.body, nil)
+            case let .failure(error):
+                completion(nil, error)
+            }
+        }
+    }
+
+    /**
+     Creates a new Gaming Session. Returns GamingSessionCreationResult.
+     - POST /v1/gaming-sessions
+     - Creates a new Gaming Session. Returns GamingSessionCreationResult.
+     - parameter newGamingSessionParams: (body)  
+     - returns: RequestBuilder<GamingSessionCreationResult> 
+     */
+    open class func createGamingSessionWithRequestBuilder(newGamingSessionParams: NewGamingSessionParams) -> RequestBuilder<GamingSessionCreationResult> {
+        let localVariablePath = "/v1/gaming-sessions"
+        let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: newGamingSessionParams)
+
+        let localVariableUrlComponents = URLComponents(string: localVariableURLString)
+
+        let localVariableNillableHeaders: [String: Any?] = [
+            "Content-Type": "application/json",
+        ]
+
+        let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+
+        let localVariableRequestBuilder: RequestBuilder<GamingSessionCreationResult>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+
+        return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
+    }
+
+    /**
      Creates a new Game. Returns Game Creation Result.
      
+     - parameter sessionId: (path)  
      - parameter newSinglePlayerGameParams: (body)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func createSinglePlayerGame(newSinglePlayerGameParams: NewSinglePlayerGameParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
-        return createSinglePlayerGameWithRequestBuilder(newSinglePlayerGameParams: newSinglePlayerGameParams).execute(apiResponseQueue) { result in
+    open class func createSinglePlayerGame(sessionId: String, newSinglePlayerGameParams: NewSinglePlayerGameParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
+        return createSinglePlayerGameWithRequestBuilder(sessionId: sessionId, newSinglePlayerGameParams: newSinglePlayerGameParams).execute(apiResponseQueue) { result in
             switch result {
             case let .success(response):
                 completion(response.body, nil)
@@ -33,13 +78,17 @@ open class TicTacToeAPI {
 
     /**
      Creates a new Game. Returns Game Creation Result.
-     - POST /v1/single-player-games
+     - POST /v1/gaming-sessions/{session_id}/games
      - Creates a new Game. Returns Game Creation Result.
+     - parameter sessionId: (path)  
      - parameter newSinglePlayerGameParams: (body)  
      - returns: RequestBuilder<GameCreationResult> 
      */
-    open class func createSinglePlayerGameWithRequestBuilder(newSinglePlayerGameParams: NewSinglePlayerGameParams) -> RequestBuilder<GameCreationResult> {
-        let localVariablePath = "/v1/single-player-games"
+    open class func createSinglePlayerGameWithRequestBuilder(sessionId: String, newSinglePlayerGameParams: NewSinglePlayerGameParams) -> RequestBuilder<GameCreationResult> {
+        var localVariablePath = "/v1/gaming-sessions/{session_id}/games"
+        let sessionIdPreEscape = "\(APIHelper.mapValueToPathItem(sessionId))"
+        let sessionIdPostEscape = sessionIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{session_id}", with: sessionIdPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
         let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: newSinglePlayerGameParams)
 
@@ -77,13 +126,13 @@ open class TicTacToeAPI {
 
     /**
      Creates a new Two-Player Game. Returns Game Creation Result.
-     - POST /v1/gaming-session/two-player-games
+     - POST /v1/gaming-session/{session_id}/two-player-games
      - Creates a new Two-Player Game. Returns Game Creation Result.
      - parameter sessionId: (path)  
      - returns: RequestBuilder<GameCreationResult> 
      */
     open class func createTwoPlayerGameWithRequestBuilder(sessionId: String) -> RequestBuilder<GameCreationResult> {
-        var localVariablePath = "/v1/gaming-session/two-player-games"
+        var localVariablePath = "/v1/gaming-session/{session_id}/two-player-games"
         let sessionIdPreEscape = "\(APIHelper.mapValueToPathItem(sessionId))"
         let sessionIdPostEscape = sessionIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{session_id}", with: sessionIdPostEscape, options: .literal, range: nil)
@@ -384,6 +433,58 @@ open class TicTacToeAPI {
         let localVariableRequestBuilder: RequestBuilder<GamingSessionCreationResult>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
 
         return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
+    }
+
+    /**
+     Sets a Player as ready to Play.
+     
+     - parameter sessionId: (path)  
+     - parameter playerId: (path)  
+     - parameter apiResponseQueue: The queue on which api response is dispatched.
+     - parameter completion: completion handler to receive the data and the error objects
+     */
+    @discardableResult
+    open class func notePlayerReadiness(sessionId: String, playerId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: Void?, _ error: Error?) -> Void)) -> RequestTask {
+        return notePlayerReadinessWithRequestBuilder(sessionId: sessionId, playerId: playerId).execute(apiResponseQueue) { result in
+            switch result {
+            case .success:
+                completion((), nil)
+            case let .failure(error):
+                completion(nil, error)
+            }
+        }
+    }
+
+    /**
+     Sets a Player as ready to Play.
+     - PUT /v1/gaming-sessions/{session_id}/players/{player_id}/readiness
+     - Sets a Player as ready to Play.
+     - parameter sessionId: (path)  
+     - parameter playerId: (path)  
+     - returns: RequestBuilder<Void> 
+     */
+    open class func notePlayerReadinessWithRequestBuilder(sessionId: String, playerId: String) -> RequestBuilder<Void> {
+        var localVariablePath = "/v1/gaming-sessions/{session_id}/players/{player_id}/readiness"
+        let sessionIdPreEscape = "\(APIHelper.mapValueToPathItem(sessionId))"
+        let sessionIdPostEscape = sessionIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{session_id}", with: sessionIdPostEscape, options: .literal, range: nil)
+        let playerIdPreEscape = "\(APIHelper.mapValueToPathItem(playerId))"
+        let playerIdPostEscape = playerIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{player_id}", with: playerIdPostEscape, options: .literal, range: nil)
+        let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
+        let localVariableParameters: [String: Any]? = nil
+
+        let localVariableUrlComponents = URLComponents(string: localVariableURLString)
+
+        let localVariableNillableHeaders: [String: Any?] = [
+            :
+        ]
+
+        let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+
+        let localVariableRequestBuilder: RequestBuilder<Void>.Type = OpenAPIClientAPI.requestBuilderFactory.getNonDecodableBuilder()
+
+        return localVariableRequestBuilder.init(method: "PUT", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
     }
 
     /**

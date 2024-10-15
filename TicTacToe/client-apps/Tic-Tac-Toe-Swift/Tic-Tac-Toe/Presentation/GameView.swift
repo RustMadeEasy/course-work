@@ -88,10 +88,9 @@ struct GameView: View {
         })
         .task {
             if !self.gameInfoVM.invitationCode.isEmpty {
-//                await joinGamingSession()
+                await joinGamingSession()
             } else if self.gameInfoVM.isTwoPlayer {
-                // The Two-Player Game will be created once we receive notification that another Player has joined the session
-//                await self.createGamingSessionForTwoPlayerGame()
+                await self.beginTwoPlayerGameCreation()
             } else {
                 await createSinglePlayerGame()
             }
@@ -178,33 +177,42 @@ struct GameView: View {
     /// Creates a new Single-Player Game.
     private func createSinglePlayerGame() async {
         
-        if !self.gameInfoVM.isTwoPlayer {
-            if await self.gameInfoVM.createSinglePlayerGame() != nil {
-                showGameCreationError = true
-            }
-        } else {
-            if await self.gameInfoVM.createTwoPlayerGame() != nil {
+        self.gameInfoVM.isTwoPlayer = false
+        
+        await self.gameInfoVM.createGamingSession { succeeded, error in
+            if succeeded {
+                Task {
+                    if await self.gameInfoVM.createSinglePlayerGame() != nil {
+                        showGameCreationError = true
+                    }
+                }
+            } else {
                 showGameCreationError = true
             }
         }
     }
         
-//    /// Creates a new Gaming Session.
-//    private func createGamingSessionForTwoPlayerGame() async {
-//        await self.gameInfoVM.createGamingSession { succeeded, error in
-//            if !succeeded {
-//                showGameCreationError = true
-//            }
-//        }
-//    }
+    /// Begins the creation process for a new Two-Player Game. The first step is to create the Gaming Session. This returns the Invitation Code. When the Invitation Code is accepted, GameInfoViewModel will receive the onPlayerAddedToSession() event and will create the Two Player Game.
+    private func beginTwoPlayerGameCreation() async {
         
-//    /// Joins an existing Ganing Session.
-//    private func joinGamingSession() async {
-//        if await self.gameInfoVM.joinGamingSession(invitationCode: self.gameInfoVM.invitationCode) == nil {
-//        } else {
-//            showGameCreationError = true
-//        }
-//    }
+        self.gameInfoVM.localPlayerInitiatedGamingSession = true
+        self.gameInfoVM.isTwoPlayer = true
+
+        await self.gameInfoVM.createGamingSession { succeeded, error in
+            if succeeded {
+            } else {
+                showGameCreationError = true
+            }
+        }
+    }
+        
+    /// Joins an existing Gaming Session.
+    private func joinGamingSession() async {
+        if await self.gameInfoVM.joinGamingSession(invitationCode: self.gameInfoVM.invitationCode) == nil {
+        } else {
+            showGameCreationError = true
+        }
+    }
         
     /// Creates a new GameInfoViewModel instance. The invitation code must be provided when joining an existing Game.
     public init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {

@@ -68,16 +68,10 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         self.notify_observers_of_session_change(StateChanges::PlayerAddedToSession, &session).await;
 
-
-        let current_game_id = match session.current_game {
-            None => "".to_string(),
-            Some(game) => game.get_id(),
-        };
-
         Ok(GamingSessionCreationResult {
-            current_game_id,
             event_plane_config: session.event_plane_config,
             invitation_code: session.invitation_code,
+            player_id: new_player.player_id,
             session_id: session.session_id,
         })
     }
@@ -93,6 +87,22 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         self.upsert_session(&session).await;
 
         Ok(session.clone())
+    }
+
+    /// Notifies all Game Session listeners that the players are ready to being a Game.
+    pub(crate) async fn note_player_readiness(&self, session_id: &str, _player_id: &str) -> Result<(), GameError> {
+        //
+
+        debug!("GamesManager: note_player_readiness() called.");
+
+        let session = match self.get_session_by_session_id(session_id).await {
+            None => return Err(GameError::SessionNotFound),
+            Some(session) => session,
+        };
+
+        self.notify_observers_of_session_change(StateChanges::PlayerReady, &session).await;
+
+        Ok(())
     }
 
     /// Retrieves the Gaming Session by Invitation Code.
@@ -177,11 +187,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     pub(crate) async fn create_new_two_player_game(&mut self, session_id: &str) -> Result<T, GameError> {
         //
 
-        debug!("GamesManager: create_new_two_player_game() called for Session ID: {:?}", session_id);
+        debug!("GamesManager: create_new_two_player_game() called for Session ID: {}", session_id);
 
-        let mut session = match self.get_session_by_session_id(session_id).await {
-            Some(session) => session,
-            None => return Err(GameError::SessionNotFound),
+        let mut session = match self.get_session_by_session_id(&session_id).await {
+            Some(session) => *session,
+            None => {
+                return Err(GameError::SessionNotFound);
+            }
         };
 
         if session.participants.len() < 2 {
@@ -451,14 +463,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     //
 
-    async fn notify_observers_of_game_change(&mut self, game_state_change: StateChanges, session: &GamingSession<T>, game: &T) {
+    async fn notify_observers_of_game_change(&self, game_state_change: StateChanges, session: &GamingSession<T>, game: &T) {
         debug!("GamesManager: notifying observers of game stage change: {:?}.", game_state_change);
         for observer in self.observers.iter() {
             let _ = observer.session_updated(&game_state_change, session, Some(game)).await;
         }
     }
 
-    async fn notify_observers_of_session_change(&mut self, state_change: StateChanges, game_session: &GamingSession<T>) {
+    async fn notify_observers_of_session_change(&self, state_change: StateChanges, game_session: &GamingSession<T>) {
         debug!("GamesManager: notifying observers of Gaming Session change: {:?}.", state_change);
         for observer in self.observers.iter() {
             let _ = observer.session_updated(&state_change, game_session, None).await;
