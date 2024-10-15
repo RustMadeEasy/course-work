@@ -175,43 +175,34 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutomaticPlayer<T> {
     //
 
-    async fn game_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: &T) {
+    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: Option<&T>) {
         //
 
-        debug!("AutomaticPlayer: received game_updated() for game {}", game.get_id());
+        if let Some(game) = game {
+            debug!("AutomaticPlayer: received session_updated() for session {} and game {}", session.session_id, game.get_id());
 
-        match state_change {
-            StateChanges::GameDeleted => {}
-            StateChanges::GameStarted | StateChanges::GameTurnTaken | StateChanges::PlayerAddedToSession => {
-                let game_state = game.get_current_game_state();
-                match game_state.play_status {
-                    PlayStatus::InProgress => {
-                        // Is it my turn?
-                        if let Some(current_player) = game.get_current_player() {
-                            if current_player.player_id == self.player_info.player_id {
-                                self.take_turn(game, session.session_id.clone()).await;
+            match state_change {
+                StateChanges::GameDeleted => {}
+                StateChanges::GameStarted | StateChanges::GameTurnTaken | StateChanges::PlayerAddedToSession => {
+                    let game_state = game.get_current_game_state();
+                    match game_state.play_status {
+                        PlayStatus::InProgress => {
+                            // Is it my turn?
+                            if let Some(current_player) = game.get_current_player() {
+                                if current_player.player_id == self.player_info.player_id {
+                                    self.take_turn(game, session.session_id.clone()).await;
+                                }
                             }
                         }
+                        PlayStatus::NotStarted => {} // Early return. Nothing to do.
+                        _ => {}
                     }
-                    PlayStatus::NotStarted => {} // Early return. Nothing to do.
-                    _ => {}
                 }
+                StateChanges::SessionCreated => {}
+                StateChanges::SessionDeleted => {}
             }
-            StateChanges::SessionDeleted => {}
-        }
-    }
-
-    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>) {
-        //
-
-        debug!("AutomaticPlayer: received session_updated() for session {}", session.session_id);
-
-        match state_change {
-            StateChanges::GameDeleted => {}
-            StateChanges::GameStarted => {}
-            StateChanges::GameTurnTaken => {}
-            StateChanges::PlayerAddedToSession => {}
-            StateChanges::SessionDeleted => {}
+        } else {
+            debug!("AutomaticPlayer: received session_updated() for session {}", session.session_id);
         }
     }
 

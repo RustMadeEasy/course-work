@@ -61,6 +61,35 @@ impl TicTacToeGame {
 impl GameTrait for TicTacToeGame {
     //
 
+    /// Sets up the players for the first turn.
+    fn begin(&mut self) -> Result<Self, GameError> {
+        //
+
+        debug!("TicTacToeGame::begin()");
+
+        if self.players.len() < 2 {
+            return Err(GameError::SessionHasTooFewPlayers);
+        }
+
+        let mut player = self.players.first().unwrap().clone();
+        let mut other_player = self.players.last().unwrap().clone();
+
+        // Randomly assign the game piece for each player
+        player.game_piece = GamePiece::random_choice();
+        other_player.game_piece = player.game_piece.opposite();
+
+        // By convention, whoever has X starts first.
+        let starting_player = if player.game_piece == GamePiece::X {
+            player.clone()
+        } else {
+            other_player.clone()
+        };
+
+        self.current_player = Some(starting_player);
+
+        Ok(self.clone())
+    }
+
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState {
         //
@@ -115,33 +144,16 @@ impl GameTrait for TicTacToeGame {
         self.play_history.last().map(|game_state| game_state.created_date)
     }
 
-    fn new(game_mode: GameMode,
-           player: &PlayerInfo,
-           other_player: &PlayerInfo,
-           session_id: &str) -> Result<Self, GameError> {
+    fn new(game_mode: GameMode, player: &PlayerInfo, other_player: &PlayerInfo, session_id: &str) -> Result<Self, GameError> {
         //
 
-        debug!("TicTacToeGame::new() Creating new game. Session ID: {:?} with Player: {:?} and player: {:?}", session_id, player, other_player);
-
-        let mut player = player.clone();
-        let mut other_player = other_player.clone();
-
-        // Randomly assign the game piece for each player
-        player.game_piece = GamePiece::random_choice();
-        other_player.game_piece = player.game_piece.opposite();
-        let starting_player = if player.game_piece == GamePiece::X {
-            player.clone()
-        } else {
-            other_player.clone()
-        };
-
-        // By convention, whoever has X starts first. 
+        debug!("TicTacToeGame::new() Creating new game. Session ID: {:?} with Player: {:?}", session_id, player);
 
         let game = Self {
-            current_player: Some(starting_player),
+            current_player: None,
             game_mode,
             id: Uuid::new_v4().to_string(),
-            players: vec![player, other_player],
+            players: vec![player.clone(), other_player.clone()],
             play_history: vec![],
         };
 

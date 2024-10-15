@@ -12,7 +12,7 @@ use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::game_updates_publisher::GameUpdatesPublisher;
 use crate::gaming_session::GamingSession;
-use crate::models::requests::{GameTurnInfo, NewGamingSessionParams};
+use crate::models::requests::GameTurnInfo;
 use crate::models::responses::GamingSessionCreationResult;
 use crate::models::{AutomaticPlayerSkillLevel, GameMode, PlayerInfo};
 use crate::play_status::PlayStatus;
@@ -68,6 +68,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         self.notify_observers_of_session_change(StateChanges::PlayerAddedToSession, &session).await;
 
+
         let current_game_id = match session.current_game {
             None => "".to_string(),
             Some(game) => game.get_id(),
@@ -82,16 +83,16 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Creates a new Gaming Session.
-    pub(crate) async fn create_new_session(&mut self, params: &NewGamingSessionParams) -> Result<GamingSession<T>, GameError> {
+    pub(crate) async fn create_new_session(&mut self, session_owner_display_name: &str) -> Result<GamingSession<T>, GameError> {
         //
 
-        debug!("GamesManager: create_new_session() called. Params: {:?}", params);
+        debug!("GamesManager: create_new_session() called.");
 
-        let player_one = PlayerInfo::new(&params.session_owner_display_name, false);
+        let player_one = PlayerInfo::new(session_owner_display_name, false);
         let session = GamingSession::new(player_one, MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT);
         self.upsert_session(&session).await;
 
-        self.notify_observers_of_session_change(StateChanges::PlayerAddedToSession, &session).await;
+        self.notify_observers_of_session_change(StateChanges::SessionCreated, &session).await;
 
         Ok(session.clone())
     }
@@ -102,7 +103,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Retrieves the Gaming Session by ID.
-    async fn get_session_by_session_id(&self, session_id: &str) -> Option<Box<GamingSession<T>>> {
+    pub(crate) async fn get_session_by_session_id(&self, session_id: &str) -> Option<Box<GamingSession<T>>> {
         self.sessions.lock().await.iter().find(|it| it.1.session_id.as_str() == session_id).map(|it| it.1.clone())
     }
 
@@ -153,13 +154,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         let computer_player = PlayerInfo::new(AutomaticPlayer::<T>::get_name().as_str(), true);
 
-        let game = T::new(GameMode::SinglePlayer, human_player, &computer_player, &session.session_id)?;
+        let mut game = T::new(GameMode::SinglePlayer, human_player, &computer_player, &session.session_id)?;
 
         // Create an AutomaticPlayer to play against Player One.
         let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), computer_player, computer_skill_level);
 
         // Make sure the AutomaticPlayer can follow the Game.
         self.observers.push(Box::new(auto_player));
+
+        game.begin()?;
 
         self.upsert_game(&game).await;
 
@@ -184,13 +187,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         };
 
         if session.participants.len() < 2 {
-            return Err(GameError::InvalidSession);
+            return Err(GameError::SessionHasTooFewPlayers);
         }
 
-        let game = T::new(GameMode::TwoPlayers,
+        let mut game = T::new(GameMode::TwoPlayers,
                           session.participants.first().unwrap(),
-                          session.participants.get(1).unwrap(),
+                              session.participants.last().unwrap(),
                           &session.session_id)?;
+
+        game.begin()?;
 
         self.upsert_game(&game).await;
 
@@ -451,14 +456,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     async fn notify_observers_of_game_change(&mut self, game_state_change: StateChanges, session: &GamingSession<T>, game: &T) {
         debug!("GamesManager: notifying observers of game stage change: {:?}.", game_state_change);
         for observer in self.observers.iter() {
-            let _ = observer.game_updated(&game_state_change, session, game).await;
+            let _ = observer.session_updated(&game_state_change, session, Some(game)).await;
         }
     }
 
     async fn notify_observers_of_session_change(&mut self, state_change: StateChanges, game_session: &GamingSession<T>) {
         debug!("GamesManager: notifying observers of Gaming Session change: {:?}.", state_change);
         for observer in self.observers.iter() {
-            let _ = observer.session_updated(&state_change, game_session).await;
+            let _ = observer.session_updated(&state_change, game_session, None).await;
         }
     }
 

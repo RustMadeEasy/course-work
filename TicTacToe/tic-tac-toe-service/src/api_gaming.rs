@@ -12,9 +12,10 @@
  * @author JoelDavisEngineering@Gmail.com
  */
 
+use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::gaming_sessions_manager::GamingSessionsManager;
-use crate::models::requests::{EndGameParams, EndGamingSessionParams, GameTurnInfo, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, NewTwoPlayerGameParams, ID_LENGTH_MAX};
+use crate::models::requests::{EndGameParams, EndGamingSessionParams, GameTurnInfo, JoinSessionParams, NewSinglePlayerGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
 use crate::tic_tac_toe_game::TicTacToeGame;
 use actix_web::{delete, get, post, web, HttpResponse, Responder};
@@ -39,20 +40,22 @@ use validator::Validate;
     Two Player session:
 
         Player A
-            Create a new Session
-            Subscribe to MQTT
-            Manually invite Player B
+            Creates a new Session
+            Subscribes to MQTT
+            Manually invites Player B
         
         Player B
-            Join the Session via Invitation Code
-            Subscribe to MQTT
-            Get Session Current Games
-            Save game ID
-            Refresh Game Info
+            Joins the Session via Invitation Code
+            Subscribes to MQTT
 
         Player A
-            Create a new Two-Player Game
-            
+            Receives PlayerAddedToSession
+            Creates a new Two-Player Game
+
+        Player B
+            Receives GameStarted
+            Joins Game by Session ID 
+     
         Player A and Player B:
             Play
             Play
@@ -73,45 +76,45 @@ use validator::Validate;
             Exit Gaming Session
  */
 
-/// Creates a new Gaming Session. Returns GamingSessionCreationResult.
-#[utoipa::path(
-    post,
-    tag = "TicTacToe",
-    path = "/v1/gaming-sessions",
-    responses(
-    (status = 200, description = "Gaming Session created successfully", body = GamingSessionCreationResult, content_type = "application/json"),
-    (status = 400, description = "Bad request - Malformed NewGamingSessionParams"),
-    (status = 500, description = "Internal server error")
-,), )]
-#[post("/gaming-sessions")]
-pub(crate) async fn create_gaming_session(
-    params: web::Json<NewGamingSessionParams>,
-    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
-    //
-
-    debug!("HTTP POST to /gaming-sessions. Params: {:?}", params);
-
-    // *** Validate input params ***
-    if let Err(e) = params.validate() {
-        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
-    }
-
-    let mut manager = manager.lock().await;
-
-    match manager.create_new_session(&params).await {
-        Ok(session) => {
-            let creation_result = GamingSessionCreationResult {
-                current_game_id: Default::default(),
-                event_plane_config: session.event_plane_config,
-                invitation_code: session.invitation_code,
-                session_id: session.session_id,
-            };
-            Ok(web::Json(creation_result))
-        }
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
-    }
-}
+// /// Creates a new Gaming Session. Returns GamingSessionCreationResult.
+// #[utoipa::path(
+//     post,
+//     tag = "TicTacToe",
+//     path = "/v1/gaming-sessions",
+//     responses(
+//     (status = 200, description = "Gaming Session created successfully", body = GamingSessionCreationResult, content_type = "application/json"),
+//     (status = 400, description = "Bad request - Malformed NewGamingSessionParams"),
+//     (status = 500, description = "Internal server error")
+// ,), )]
+// #[post("/gaming-sessions")]
+// pub(crate) async fn create_gaming_session(
+//     params: web::Json<NewGamingSessionParams>,
+//     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+// ) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
+//     //
+// 
+//     debug!("HTTP POST to /gaming-sessions. Params: {:?}", params);
+// 
+//     // *** Validate input params ***
+//     if let Err(e) = params.validate() {
+//         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
+//     }
+// 
+//     let mut manager = manager.lock().await;
+// 
+//     match manager.create_new_session(&params).await {
+//         Ok(session) => {
+//             let creation_result = GamingSessionCreationResult {
+//                 current_game_id: Default::default(),
+//                 event_plane_config: session.event_plane_config,
+//                 invitation_code: session.invitation_code,
+//                 session_id: session.session_id,
+//             };
+//             Ok(web::Json(creation_result))
+//         }
+//         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+//     }
+// }
 
 /// Creates a new Game. Returns Game Creation Result.
 #[utoipa::path(
@@ -141,8 +144,23 @@ pub(crate) async fn create_single_player_game(
 
     let new_game_params: NewSinglePlayerGameParams = new_game_params.0;
 
-    match manager.create_new_single_player_game(&new_game_params.clone().session_id,
-                                                &new_game_params.computer_skill_level).await {
+    // Create a session if there is not one already.
+    let session = match new_game_params.session_id {
+        Some(session_id) => manager.get_session_by_session_id(&session_id).await,
+        None => None,
+    };
+
+    let session = match session {
+        Some(session) => *session,
+        None => {
+            match manager.create_new_session(new_game_params.session_owner_display_name.as_str()).await {
+                Ok(session) => { session }
+                Err(error) => { return Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+            }
+        }
+    };
+
+    match manager.create_new_single_player_game(session.session_id.as_str(), &new_game_params.computer_skill_level).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
@@ -159,31 +177,35 @@ pub(crate) async fn create_single_player_game(
 #[utoipa::path(
     post,
     tag = "TicTacToe",
-    path = "/v1/two-player-games",
+    path = "/v1/gaming-session/two-player-games",
     responses(
     (status = 200, description = "Two-Player Game created successfully", body = GameCreationResult, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed NewTwoPlayerGameParams"),
     (status = 500, description = "Internal server error")
 ,), )]
-#[post("/two-player-games")]
+#[post("/gaming-session/{session_id}/two-player-games")]
 pub(crate) async fn create_two_player_game(
-    new_game_params: web::Json<NewTwoPlayerGameParams>,
+    session_id: web::Path<String>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<GameCreationResult>> {
     //
 
-    debug!("HTTP POST to /two-player-games. Params: {:?}", new_game_params);
+    debug!("HTTP POST to /gaming-session/two-player-games. Session-Id: {:?}", session_id);
 
     // *** Validate input params ***
-    if let Err(e) = new_game_params.validate() {
-        return Err(actix_web::error::ErrorBadRequest(e.to_string()));
-    }
+    validate_id_string(&session_id)?;
 
     let mut manager = manager.lock().await;
 
-    let new_game_params = new_game_params.0;
+    // Create a session if there is not one already.
+    let session = match manager.get_session_by_session_id(&session_id).await {
+        Some(session) => *session,
+        None => {
+            return Err(actix_web::error::ErrorInternalServerError(GameError::SessionNotFound))
+        }
+    };
 
-    match manager.create_new_two_player_game(&new_game_params.session_id).await {
+    match manager.create_new_two_player_game(&session.session_id).await {
         Ok(game) => {
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),

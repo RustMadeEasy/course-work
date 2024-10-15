@@ -20,7 +20,9 @@ public class ClipboardHelper {
         #if os(iOS)
             UIPasteboard.general.setValue(text, forPasteboardType: "public.plain-text")
         #else
-            NSPasteboard.general.setString(text, forType: NSPasteboard.PasteboardType.string)
+            let pasteboard = NSPasteboard.general
+            pasteboard.declareTypes([.string], owner: nil)
+            pasteboard.setString(text, forType: .string)
         #endif
     }
 }

@@ -38,10 +38,10 @@ impl GameUpdatesPublisher {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for GameUpdatesPublisher {
     //
 
-    async fn game_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: &T) {
+    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: Option<&T>) {
         //
 
-        debug!("GameUpdatesPublisher: received game_updated() for game {}", game.get_id());
+        debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);
 
         let topic_prefix = session.get_event_plane_config().topic_prefix;
         let topic_prefix = topic_prefix.as_str();
@@ -54,35 +54,26 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
                 EventPlaneTopicNames::GameStarted.build(topic_prefix)
             }
             StateChanges::GameTurnTaken => {
-                match game.get_current_game_state().play_status {
-                    PlayStatus::EndedInStalemate => EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
-                    PlayStatus::EndedInWin => EventPlaneTopicNames::GameEndedInWin.build(topic_prefix),
-                    PlayStatus::InProgress => EventPlaneTopicNames::TurnTaken.build(topic_prefix),
-                    PlayStatus::NotStarted => return, // Early return. Nothing to publish.
+                if let Some(game) = game {
+                    match game.get_current_game_state().play_status {
+                        PlayStatus::EndedInStalemate => EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
+                        PlayStatus::EndedInWin => EventPlaneTopicNames::GameEndedInWin.build(topic_prefix),
+                        PlayStatus::InProgress => EventPlaneTopicNames::TurnTaken.build(topic_prefix),
+                        PlayStatus::NotStarted => return, // Early return. Nothing to publish.
+                    }
+                } else {
+                    return // Early return. Nothing to publish.
                 }
             }
-            _ => { return; }
-        };
-
-        let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;
-    }
-
-    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>) {
-        //
-
-        debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);
-
-        let topic_prefix = session.get_event_plane_config().topic_prefix;
-        let topic_prefix = topic_prefix.as_str();
-
-        let topic = match state_change {
             StateChanges::PlayerAddedToSession => {
                 EventPlaneTopicNames::PlayerAddedToSession.build(topic_prefix)
             }
             StateChanges::SessionDeleted => {
                 EventPlaneTopicNames::SessionDeleted.build(topic_prefix)
             }
-            _ => { return; }
+            StateChanges::SessionCreated => {
+                EventPlaneTopicNames::SessionCreated.build(topic_prefix)
+            }
         };
 
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;

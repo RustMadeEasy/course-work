@@ -4,66 +4,16 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**createGamingSession**](TicTacToeAPI.md#creategamingsession) | **POST** /v1/gaming-sessions | Creates a new Gaming Session. Returns GamingSessionCreationResult.
 [**createSinglePlayerGame**](TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/single-player-games | Creates a new Game. Returns Game Creation Result.
 [**createTwoPlayerGame**](TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
 [**getGameInfo**](TicTacToeAPI.md#getgameinfo) | **GET** /v1/games/{game_id} | Retrieves details of the specified Game.
+[**getSessionCurrentGames**](TicTacToeAPI.md#getsessioncurrentgames) | **GET** /v1/gaming-sessions/{session_id}/current-games | Retrieves the Games in a Gaming Session.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
 [**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player.
 
-
-# **createGamingSession**
-```swift
-    open class func createGamingSession(newGamingSessionParams: NewGamingSessionParams, completion: @escaping (_ data: GamingSessionCreationResult?, _ error: Error?) -> Void)
-```
-
-Creates a new Gaming Session. Returns GamingSessionCreationResult.
-
-Creates a new Gaming Session. Returns GamingSessionCreationResult.
-
-### Example
-```swift
-// The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
-import OpenAPIClient
-
-let newGamingSessionParams = NewGamingSessionParams(sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewGamingSessionParams | 
-
-// Creates a new Gaming Session. Returns GamingSessionCreationResult.
-TicTacToeAPI.createGamingSession(newGamingSessionParams: newGamingSessionParams) { (response, error) in
-    guard error == nil else {
-        print(error)
-        return
-    }
-
-    if (response) {
-        dump(response)
-    }
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **newGamingSessionParams** | [**NewGamingSessionParams**](NewGamingSessionParams.md) |  | 
-
-### Return type
-
-[**GamingSessionCreationResult**](GamingSessionCreationResult.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **createSinglePlayerGame**
 ```swift
@@ -79,7 +29,7 @@ Creates a new Game. Returns Game Creation Result.
 // The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
 import OpenAPIClient
 
-let newSinglePlayerGameParams = NewSinglePlayerGameParams(computerSkillLevel: AutomaticPlayerSkillLevel(), sessionId: "sessionId_example") // NewSinglePlayerGameParams | 
+let newSinglePlayerGameParams = NewSinglePlayerGameParams(computerSkillLevel: AutomaticPlayerSkillLevel(), sessionId: "sessionId_example", sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewSinglePlayerGameParams | 
 
 // Creates a new Game. Returns Game Creation Result.
 TicTacToeAPI.createSinglePlayerGame(newSinglePlayerGameParams: newSinglePlayerGameParams) { (response, error) in
@@ -129,7 +79,7 @@ Creates a new Two-Player Game. Returns Game Creation Result.
 // The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
 import OpenAPIClient
 
-let newTwoPlayerGameParams = NewTwoPlayerGameParams(sessionId: "sessionId_example") // NewTwoPlayerGameParams | 
+let newTwoPlayerGameParams = NewTwoPlayerGameParams(sessionId: "sessionId_example", sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewTwoPlayerGameParams | 
 
 // Creates a new Two-Player Game. Returns Game Creation Result.
 TicTacToeAPI.createTwoPlayerGame(newTwoPlayerGameParams: newTwoPlayerGameParams) { (response, error) in
@@ -357,6 +307,56 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GameInfo**](GameInfo.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getSessionCurrentGames**
+```swift
+    open class func getSessionCurrentGames(sessionId: String, completion: @escaping (_ data: [GameInfo]?, _ error: Error?) -> Void)
+```
+
+Retrieves the Games in a Gaming Session.
+
+Retrieves the Games in a Gaming Session.
+
+### Example
+```swift
+// The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
+import OpenAPIClient
+
+let sessionId = "sessionId_example" // String | Session ID
+
+// Retrieves the Games in a Gaming Session.
+TicTacToeAPI.getSessionCurrentGames(sessionId: sessionId) { (response, error) in
+    guard error == nil else {
+        print(error)
+        return
+    }
+
+    if (response) {
+        dump(response)
+    }
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **sessionId** | **String** | Session ID | 
+
+### Return type
+
+[**[GameInfo]**](GameInfo.md)
 
 ### Authorization
 

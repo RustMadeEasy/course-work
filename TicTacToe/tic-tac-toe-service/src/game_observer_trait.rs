@@ -4,8 +4,7 @@ use async_trait::async_trait;
 
 #[async_trait]
 pub(crate) trait GameObserverTrait<T: GameTrait + Clone + Send + Sync + 'static> {
-    async fn game_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: &T);
-    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>);
+    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: Option<&T>);
     fn unique_id(&self) -> String;
 }
 
@@ -15,5 +14,6 @@ pub(crate) enum StateChanges {
     GameStarted,
     GameTurnTaken,
     PlayerAddedToSession,
+    SessionCreated,
     SessionDeleted,
 }

@@ -24,46 +24,46 @@ enum GameInfoManagerError: Error {
 /// Performs all access to our Tic-Tac-Toe API.
 class GameInfoService {
 
-    /// Creates a new Gaming Session. Returns the Game Info.
-    static func createGamingSession(sessionOwnerDisplayName: String) async -> GameInfoServiceResult {
-
-        let params = NewGamingSessionParams(sessionOwnerDisplayName: sessionOwnerDisplayName)
-        
-        do {
-
-            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                TicTacToeAPI.createGamingSession(newGamingSessionParams: params, completion: { data, error in
-                    if error == nil {
-                        if data != nil {
-                            DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(newGamingSessionInfo: data) )
-                            }
-                        } else {
-                            let error = GameInfoManagerError.emptyData;
-                            print("createGamingSession() error: \(String(describing: error))")
-                            continuation.resume(returning: GameInfoServiceResult(error: error))
-                        }
-                    } else {
-                        print("createGamingSession() error: \(String(describing: error))")
-                        continuation.resume(returning: GameInfoServiceResult(error: error))
-                    }
-                })
-            }
-            return result
-            
-        } catch {
-            print("createGamingSession() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
-        }
-    }
+//    /// Creates a new Gaming Session. Returns the Game Info.
+//    static func createGamingSession(sessionOwnerDisplayName: String) async -> GameInfoServiceResult {
+//
+//        let params = NewGamingSessionParams(sessionOwnerDisplayName: sessionOwnerDisplayName)
+//        
+//        do {
+//
+//            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
+//                TicTacToeAPI.createGamingSession(newGamingSessionParams: params, completion: { data, error in
+//                    if error == nil {
+//                        if data != nil {
+//                            DispatchQueue.main.async {
+//                                continuation.resume(returning: GameInfoServiceResult(newGamingSessionInfo: data) )
+//                            }
+//                        } else {
+//                            let error = GameInfoManagerError.emptyData;
+//                            print("createGamingSession() error: \(String(describing: error))")
+//                            continuation.resume(returning: GameInfoServiceResult(error: error))
+//                        }
+//                    } else {
+//                        print("createGamingSession() error: \(String(describing: error))")
+//                        continuation.resume(returning: GameInfoServiceResult(error: error))
+//                    }
+//                })
+//            }
+//            return result
+//            
+//        } catch {
+//            print("createGamingSession() error: \(String(describing: error))")
+//            return GameInfoServiceResult(gameInfo: nil, error: error)
+//        }
+//    }
     
     /// Creates a new Single-Player Game. Returns GameCreationResult.
-    static func createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel, sessionId: String) async -> GameInfoServiceResult {
+    static func createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel, sessionId: String, localPlayerName: String) async -> GameInfoServiceResult {
 
         do {
 
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                let params = NewSinglePlayerGameParams(computerSkillLevel: computerSkillLevel, sessionId: sessionId)
+                let params = NewSinglePlayerGameParams(computerSkillLevel: computerSkillLevel, sessionId: sessionId, sessionOwnerDisplayName: localPlayerName)
                 TicTacToeAPI.createSinglePlayerGame(newSinglePlayerGameParams: params) { data, error in
                     if error == nil {
                         if data != nil {
@@ -90,12 +90,12 @@ class GameInfoService {
     }
 
     /// Creates a new Single-Player Game. Returns GameCreationResult.
-    static func createTwoPlayerGame(sessionId: String) async -> GameInfoServiceResult {
+    static func createTwoPlayerGame(sessionId: String, localPlayerName: String) async -> GameInfoServiceResult {
 
         do {
 
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                let params = NewTwoPlayerGameParams(sessionId: sessionId)
+                let params = NewTwoPlayerGameParams(sessionId: sessionId, sessionOwnerDisplayName: localPlayerName)
                 TicTacToeAPI.createTwoPlayerGame(newTwoPlayerGameParams: params) { data, error in
                     if error == nil {
                         if data != nil {

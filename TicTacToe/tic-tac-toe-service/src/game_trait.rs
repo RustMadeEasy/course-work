@@ -22,7 +22,8 @@ use chrono::{DateTime, Utc};
 pub(crate) trait GameTrait: Sized {
     //
 
-    // TODO: HD: generalize GameState, GameTurnInfo, NewGameParams, and PlayerInfo.
+    /// Sets up the players for the first turn.
+    fn begin(&mut self) -> Result<Self, GameError>;
 
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState;

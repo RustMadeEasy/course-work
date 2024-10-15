@@ -27,7 +27,6 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*TicTacToeAPI* | [**createGamingSession**](docs/TicTacToeAPI.md#creategamingsession) | **POST** /v1/gaming-sessions | Creates a new Gaming Session. Returns GamingSessionCreationResult.
 *TicTacToeAPI* | [**createSinglePlayerGame**](docs/TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/single-player-games | Creates a new Game. Returns Game Creation Result.
 *TicTacToeAPI* | [**createTwoPlayerGame**](docs/TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 *TicTacToeAPI* | [**endGame**](docs/TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
@@ -55,7 +54,6 @@ Class | Method | HTTP request | Description
  - [GameTurnInfo](docs/GameTurnInfo.md)
  - [GamingSessionCreationResult](docs/GamingSessionCreationResult.md)
  - [JoinSessionParams](docs/JoinSessionParams.md)
- - [NewGamingSessionParams](docs/NewGamingSessionParams.md)
  - [NewSinglePlayerGameParams](docs/NewSinglePlayerGameParams.md)
  - [NewTwoPlayerGameParams](docs/NewTwoPlayerGameParams.md)
  - [PlayStatus](docs/PlayStatus.md)

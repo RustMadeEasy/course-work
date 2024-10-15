@@ -13,21 +13,25 @@ import AnyCodable
 /** Models info needed to start a new Two-Player Game. */
 public struct NewTwoPlayerGameParams: Codable, JSONEncodable, Hashable {
 
-    public var sessionId: String
+    public var sessionId: String?
+    public var sessionOwnerDisplayName: String
 
-    public init(sessionId: String) {
+    public init(sessionId: String? = nil, sessionOwnerDisplayName: String) {
         self.sessionId = sessionId
+        self.sessionOwnerDisplayName = sessionOwnerDisplayName
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case sessionId = "session_id"
+        case sessionOwnerDisplayName = "session_owner_display_name"
     }
 
     // Encodable protocol methods
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(sessionId, forKey: .sessionId)
+        try container.encodeIfPresent(sessionId, forKey: .sessionId)
+        try container.encode(sessionOwnerDisplayName, forKey: .sessionOwnerDisplayName)
     }
 }
 

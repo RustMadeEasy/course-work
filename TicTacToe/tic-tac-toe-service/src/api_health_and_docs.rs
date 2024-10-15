@@ -15,9 +15,7 @@ use crate::models::requests::EndGameParams;
 use crate::models::requests::EndGamingSessionParams;
 use crate::models::requests::GameTurnInfo;
 use crate::models::requests::JoinSessionParams;
-use crate::models::requests::NewGamingSessionParams;
 use crate::models::requests::NewSinglePlayerGameParams;
-use crate::models::requests::NewTwoPlayerGameParams;
 use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
 use crate::models::responses::GamingSessionCreationResult;
@@ -43,7 +41,6 @@ use utoipa::OpenApi;
     paths(
         create_single_player_game,
         create_two_player_game,
-        create_gaming_session,
         end_game,
         end_gaming_session,
         get_game_history,
@@ -68,8 +65,6 @@ use utoipa::OpenApi;
         GamingSessionCreationResult,
         JoinSessionParams,
         NewSinglePlayerGameParams,
-        NewTwoPlayerGameParams,
-        NewGamingSessionParams,
         PlayerInfo,
         PlayStatus,
     ))

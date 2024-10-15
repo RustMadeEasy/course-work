@@ -130,7 +130,7 @@ extension GameInfoViewModel {
     func createSinglePlayerGame() async -> Error? {
         
         // TODO: JD: allow the UI to set the AutomaticPlayerSkillLevel
-        let result = await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId)
+        let result = await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId, localPlayerName: self.localPlayerName)
                 
         if let newGameInfo = result.newGameInfo {
             
@@ -147,7 +147,7 @@ extension GameInfoViewModel {
     
     func createTwoPlayerGame() async -> Error? {
         
-        let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId)
+        let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId, localPlayerName: self.localPlayerName)
                 
         if let newGameInfo = result.newGameInfo {
             
@@ -162,24 +162,24 @@ extension GameInfoViewModel {
         return result.error
     }
     
-    /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
-    func createGamingSession(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
-        
-        let result = await GameInfoService.createGamingSession(sessionOwnerDisplayName: self.localPlayerName)
-        
-        if let newGamingSessionInfo = result.newGamingSessionInfo {
-            DispatchQueue.main.async {
-                self._initiatedGamingSession = Published(wrappedValue: true)
-                self.invitationCode = result.newGamingSessionInfo?.invitationCode ?? ""
-                self.gamingSessionId = result.newGamingSessionInfo?.sessionId ?? ""
-                // Setup MQTT listener
-                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
-                completion(true, nil)
-            }
-        } else {
-            completion(false, result.error)
-        }
-    }
+//    /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
+//    func createGamingSession(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
+//        
+//        let result = await GameInfoService.createGamingSession(sessionOwnerDisplayName: self.localPlayerName)
+//        
+//        if let newGamingSessionInfo = result.newGamingSessionInfo {
+//            DispatchQueue.main.async {
+//                self._initiatedGamingSession = Published(wrappedValue: true)
+//                self.invitationCode = result.newGamingSessionInfo?.invitationCode ?? ""
+//                self.gamingSessionId = result.newGamingSessionInfo?.sessionId ?? ""
+//                // Setup MQTT listener
+//                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
+//                completion(true, nil)
+//            }
+//        } else {
+//            completion(false, result.error)
+//        }
+//    }
     
     /// Ends the current game and stops the auto updating of the game info.
     func endGame() async -> Error? {
@@ -207,6 +207,7 @@ extension GameInfoViewModel {
     func getSessionCurrentGame() async {
         let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
         if result.error == nil && result.gameInfo != nil {
+            self.gameId = result.gameInfo!.id
             self.update(gameInfo: result.gameInfo!)
         }
     }
@@ -227,24 +228,28 @@ extension GameInfoViewModel {
         }
     }
     
-    /// Joins a Gaming Session.
-    func joinGamingSession(invitationCode: String) async -> Error? {        
-        
-        let result = await GameInfoService.joinGamingSession(invitationCode: self.invitationCode, playerName: self.localPlayerName)
-                
-        if let newGamingSessionInfo = result.newGamingSessionInfo {
-            
-            DispatchQueue.main.async {
-                self._initiatedGamingSession = Published(wrappedValue: false)
-                self._gameId = Published(initialValue: newGamingSessionInfo.currentGameId)
-                self._gamingSessionId = Published(initialValue: newGamingSessionInfo.sessionId)
-                // Setup MQTT listener
-                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
-            }
-        }
-        
-        return result.error
-    }
+//    /// Joins a Gaming Session.
+//    func joinGamingSession(invitationCode: String) async -> Error? {        
+//        
+//        let result = await GameInfoService.joinGamingSession(invitationCode: self.invitationCode, playerName: self.localPlayerName)
+//                
+//        if let newGamingSessionInfo = result.newGamingSessionInfo {
+//            
+//            DispatchQueue.main.async {
+//                self._initiatedGamingSession = Published(wrappedValue: false)
+//                self._gameId = Published(initialValue: newGamingSessionInfo.currentGameId)
+//                self._gamingSessionId = Published(initialValue: newGamingSessionInfo.sessionId)
+//                // Setup MQTT listener
+//                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
+//                Task {
+//                    await self.getSessionCurrentGame()
+//                    self.refreshGameInfo()
+//                }
+//            }
+//        }
+//        
+//        return result.error
+//    }
     
     
     /// When a Game has been won, this function determines whether the specified position (block) represents a position that won the Game.
@@ -356,16 +361,12 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
         refreshGameInfo()
     }
     
-    func onGameStarted() {
+    func onGameStarted() {        
         refreshGameInfo()
     }
     
     func onPlayerAddedToSession() {
-        if self.initiatedGamingSession {
-            Task {
-                await self.createTwoPlayerGame()
-            }
-        }
+        refreshGameInfo()
     }
     
     func onSessionDeleted() {
