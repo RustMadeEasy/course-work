@@ -92,8 +92,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         let session = GamingSession::new(player_one, MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT);
         self.upsert_session(&session).await;
 
-        self.notify_observers_of_session_change(StateChanges::SessionCreated, &session).await;
-
         Ok(session.clone())
     }
 
@@ -191,9 +189,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         }
 
         let mut game = T::new(GameMode::TwoPlayers,
-                          session.participants.first().unwrap(),
+                              session.participants.first().unwrap(),
                               session.participants.last().unwrap(),
-                          &session.session_id)?;
+                              &session.session_id)?;
 
         game.begin()?;
 

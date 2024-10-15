@@ -18,9 +18,6 @@ struct Position {
 /// Provides control over a Tic-Tac-Toe Game.
 class GameInfoViewModel: ObservableObject {
     
-//    /// ID of the Gaming Session.
-//    @Published var eventPlaneConfig: EventPlaneConfig? = nil
-    
     /// Specifies the locations of the Game pieces
     @Published private var gameBoard: [[GamePiece]] = []
     
@@ -356,7 +353,7 @@ extension GameInfoViewModel {
 
 /// GameInfoReceiverDelegate implementation
 extension GameInfoViewModel: GameInfoReceiverDelegate {
-
+    
     func onGameDeleted() {
         refreshGameInfo()
     }
@@ -369,10 +366,6 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
         refreshGameInfo()
     }
     
-    func onSessionDeleted() {
-        refreshGameInfo()
-    }
-        
     func onGameEndedInStalemate() {
 
         refreshGameInfo()
@@ -385,6 +378,10 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
         refreshGameInfo()
 
         // TODO: JD: ask for a rematch
+    }
+
+    func onSessionDeleted() {
+        refreshGameInfo()
     }
         
     func onTurnTaken() {

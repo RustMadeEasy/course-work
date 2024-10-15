@@ -95,8 +95,7 @@ class GameInfoService {
         do {
 
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                let params = NewTwoPlayerGameParams(sessionId: sessionId, sessionOwnerDisplayName: localPlayerName)
-                TicTacToeAPI.createTwoPlayerGame(newTwoPlayerGameParams: params) { data, error in
+                TicTacToeAPI.createTwoPlayerGame(sessionId: sessionId) { data, error in
                     if error == nil {
                         if data != nil {
                             DispatchQueue.main.async {

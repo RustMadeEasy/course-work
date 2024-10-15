@@ -14,6 +14,5 @@ pub(crate) enum StateChanges {
     GameStarted,
     GameTurnTaken,
     PlayerAddedToSession,
-    SessionCreated,
     SessionDeleted,
 }

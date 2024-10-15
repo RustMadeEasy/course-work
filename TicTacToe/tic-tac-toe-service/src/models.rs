@@ -145,8 +145,6 @@ pub mod event_plane {
         GameStarted,
         /// Published when a new Player has been added to the Gaming Session.
         PlayerAddedToSession,
-        /// Called when a new Gaming Session has been created.
-        SessionCreated,
         /// Called when the Gaming Session has been deleted from the platform.
         SessionDeleted,
         /// Published when a Player has taken a new turn.
@@ -165,8 +163,7 @@ pub mod event_plane {
                 EventPlaneTopicNames::GameStarted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameStarted),
                 EventPlaneTopicNames::PlayerAddedToSession => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerAddedToSession),
                 EventPlaneTopicNames::TurnTaken => format!("{topic_prefix}/{}", EventPlaneTopicNames::TurnTaken),
-                EventPlaneTopicNames::SessionDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::SessionCreated),
-                EventPlaneTopicNames::SessionCreated => format!("{topic_prefix}/{}", EventPlaneTopicNames::SessionDeleted),
+                EventPlaneTopicNames::SessionDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::SessionDeleted),
             }
         }
 
@@ -225,14 +222,17 @@ pub mod requests {
         pub player_display_name: String,
     }
 
+    /// Models info needed to start a new Gaming Session.
+    #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
+    pub struct NewGamingSessionParams {
+        #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
+        pub session_owner_display_name: String,
+    }
+
     /// Models info needed to start a new Single-Player Game.
     #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
     pub struct NewSinglePlayerGameParams {
         pub computer_skill_level: AutomaticPlayerSkillLevel,
-        #[validate(length(max = "ID_LENGTH_MAX"))]
-        pub session_id: Option<String>,
-        #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
-        pub session_owner_display_name: String,
     }
 }
 
@@ -276,21 +276,6 @@ pub mod responses {
         }
     }
 
-    // /// Models the results of a call to add a Player to a Gaming Session.
-    // #[derive(Deserialize, Serialize, ToSchema)]
-    // pub struct GamingSessionAdditionResult {
-    //     //
-    //
-    //     /// The ID of the Session's current Game.
-    //     pub(crate) current_game_id: String,
-    //
-    //     /// Specifies the configuration required for clients to subscribe to real-time Game state updates.
-    //     pub(crate) event_plane_config: EventPlaneConfig,
-    //
-    //     /// The ID of the Gaming Session.
-    //     pub(crate) session_id: String,
-    // }
-
     /// Models the results of a call to the Create Gaming Session endpoint.
     #[derive(Deserialize, Serialize, ToSchema)]
     pub struct GamingSessionCreationResult {
@@ -309,5 +294,7 @@ pub mod responses {
     pub struct GameCreationResult {
         /// The initial Game state.
         pub(crate) game_info: GameInfo,
+        /// ID of the Gaming Session.
+        pub(crate) session_id: String,
     }
 }

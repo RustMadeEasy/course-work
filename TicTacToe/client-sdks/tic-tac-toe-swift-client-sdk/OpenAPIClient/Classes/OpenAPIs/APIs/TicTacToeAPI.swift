@@ -59,13 +59,13 @@ open class TicTacToeAPI {
     /**
      Creates a new Two-Player Game. Returns Game Creation Result.
      
-     - parameter newTwoPlayerGameParams: (body)  
+     - parameter sessionId: (path)  
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func createTwoPlayerGame(newTwoPlayerGameParams: NewTwoPlayerGameParams, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
-        return createTwoPlayerGameWithRequestBuilder(newTwoPlayerGameParams: newTwoPlayerGameParams).execute(apiResponseQueue) { result in
+    open class func createTwoPlayerGame(sessionId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
+        return createTwoPlayerGameWithRequestBuilder(sessionId: sessionId).execute(apiResponseQueue) { result in
             switch result {
             case let .success(response):
                 completion(response.body, nil)
@@ -77,20 +77,23 @@ open class TicTacToeAPI {
 
     /**
      Creates a new Two-Player Game. Returns Game Creation Result.
-     - POST /v1/two-player-games
+     - POST /v1/gaming-session/two-player-games
      - Creates a new Two-Player Game. Returns Game Creation Result.
-     - parameter newTwoPlayerGameParams: (body)  
+     - parameter sessionId: (path)  
      - returns: RequestBuilder<GameCreationResult> 
      */
-    open class func createTwoPlayerGameWithRequestBuilder(newTwoPlayerGameParams: NewTwoPlayerGameParams) -> RequestBuilder<GameCreationResult> {
-        let localVariablePath = "/v1/two-player-games"
+    open class func createTwoPlayerGameWithRequestBuilder(sessionId: String) -> RequestBuilder<GameCreationResult> {
+        var localVariablePath = "/v1/gaming-session/two-player-games"
+        let sessionIdPreEscape = "\(APIHelper.mapValueToPathItem(sessionId))"
+        let sessionIdPostEscape = sessionIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{session_id}", with: sessionIdPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: newTwoPlayerGameParams)
+        let localVariableParameters: [String: Any]? = nil
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
         let localVariableNillableHeaders: [String: Any?] = [
-            "Content-Type": "application/json",
+            :
         ]
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)

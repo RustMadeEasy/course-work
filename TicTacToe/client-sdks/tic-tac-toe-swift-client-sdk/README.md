@@ -28,7 +28,7 @@ All URIs are relative to *http://localhost*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *TicTacToeAPI* | [**createSinglePlayerGame**](docs/TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/single-player-games | Creates a new Game. Returns Game Creation Result.
-*TicTacToeAPI* | [**createTwoPlayerGame**](docs/TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
+*TicTacToeAPI* | [**createTwoPlayerGame**](docs/TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 *TicTacToeAPI* | [**endGame**](docs/TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 *TicTacToeAPI* | [**endGamingSession**](docs/TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 *TicTacToeAPI* | [**getGameHistory**](docs/TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
@@ -55,7 +55,6 @@ Class | Method | HTTP request | Description
  - [GamingSessionCreationResult](docs/GamingSessionCreationResult.md)
  - [JoinSessionParams](docs/JoinSessionParams.md)
  - [NewSinglePlayerGameParams](docs/NewSinglePlayerGameParams.md)
- - [NewTwoPlayerGameParams](docs/NewTwoPlayerGameParams.md)
  - [PlayStatus](docs/PlayStatus.md)
  - [PlayerInfo](docs/PlayerInfo.md)
 

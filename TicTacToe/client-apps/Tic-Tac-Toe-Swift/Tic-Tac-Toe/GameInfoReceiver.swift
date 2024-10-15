@@ -10,7 +10,7 @@ import MQTTNIO
 import OpenAPIClient
 
 /// Defines handler for game info events.
-protocol GameInfoReceiverDelegate {    
+protocol GameInfoReceiverDelegate {
     func onGameDeleted()
     func onGameEndedInStalemate()
     func onGameEndedInWin()

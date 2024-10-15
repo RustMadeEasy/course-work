@@ -198,7 +198,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
                         _ => {}
                     }
                 }
-                StateChanges::SessionCreated => {}
                 StateChanges::SessionDeleted => {}
             }
         } else {

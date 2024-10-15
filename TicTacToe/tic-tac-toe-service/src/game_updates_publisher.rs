@@ -71,9 +71,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
             StateChanges::SessionDeleted => {
                 EventPlaneTopicNames::SessionDeleted.build(topic_prefix)
             }
-            StateChanges::SessionCreated => {
-                EventPlaneTopicNames::SessionCreated.build(topic_prefix)
-            }
         };
 
         let _ = self.event_publisher.publish(topic.as_str(), PublisherQoS::AtLeastOnce).await;

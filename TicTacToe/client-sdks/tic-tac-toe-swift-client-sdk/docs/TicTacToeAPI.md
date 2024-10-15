@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**createSinglePlayerGame**](TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/single-player-games | Creates a new Game. Returns Game Creation Result.
-[**createTwoPlayerGame**](TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
+[**createTwoPlayerGame**](TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
@@ -67,7 +67,7 @@ No authorization required
 
 # **createTwoPlayerGame**
 ```swift
-    open class func createTwoPlayerGame(newTwoPlayerGameParams: NewTwoPlayerGameParams, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
+    open class func createTwoPlayerGame(sessionId: String, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
 ```
 
 Creates a new Two-Player Game. Returns Game Creation Result.
@@ -79,10 +79,10 @@ Creates a new Two-Player Game. Returns Game Creation Result.
 // The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
 import OpenAPIClient
 
-let newTwoPlayerGameParams = NewTwoPlayerGameParams(sessionId: "sessionId_example", sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewTwoPlayerGameParams | 
+let sessionId = "sessionId_example" // String | 
 
 // Creates a new Two-Player Game. Returns Game Creation Result.
-TicTacToeAPI.createTwoPlayerGame(newTwoPlayerGameParams: newTwoPlayerGameParams) { (response, error) in
+TicTacToeAPI.createTwoPlayerGame(sessionId: sessionId) { (response, error) in
     guard error == nil else {
         print(error)
         return
@@ -98,7 +98,7 @@ TicTacToeAPI.createTwoPlayerGame(newTwoPlayerGameParams: newTwoPlayerGameParams)
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **newTwoPlayerGameParams** | [**NewTwoPlayerGameParams**](NewTwoPlayerGameParams.md) |  | 
+ **sessionId** | **String** |  | 
 
 ### Return type
 
@@ -110,7 +110,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
