@@ -162,15 +162,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         let computer_player = PlayerInfo::new(AutomaticPlayer::<T>::get_name().as_str(), true);
 
-        let mut game = T::new(GameMode::SinglePlayer, human_player, &computer_player, &session.session_id)?;
+        let game = T::new(GameMode::SinglePlayer, human_player, &computer_player, &session.session_id)?;
 
         // Create an AutomaticPlayer to play against Player One.
         let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), computer_player, computer_skill_level);
 
         // Make sure the AutomaticPlayer can follow the Game.
         self.observers.push(Box::new(auto_player));
-
-        game.begin()?;
 
         self.upsert_game(&game).await;
 
@@ -200,18 +198,16 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             return Err(GameError::SessionHasTooFewPlayers);
         }
 
-        let mut game = T::new(GameMode::TwoPlayers,
-                              session.participants.first().unwrap(),
-                              session.participants.last().unwrap(),
-                              &session.session_id)?;
-
-        game.begin()?;
+        let game = T::new(GameMode::TwoPlayers,
+                          session.participants.first().unwrap(),
+                          session.participants.last().unwrap(),
+                          &session.session_id)?;
 
         self.upsert_game(&game).await;
 
         session.current_game = Some(game.clone());
         self.upsert_session(&session).await;
-        
+
         self.notify_observers_of_game_change(StateChanges::GameStarted, &session, &game).await;
 
         Ok(game.clone())

@@ -80,7 +80,7 @@ impl PlayerInfo {
                       is_automated: bool) -> Self {
         Self {
             display_name: display_name.into(),
-            game_piece: GamePiece::None,
+            game_piece: GamePiece::Unselected,
             is_automated,
             player_id: Uuid::new_v4().to_string(),
         }

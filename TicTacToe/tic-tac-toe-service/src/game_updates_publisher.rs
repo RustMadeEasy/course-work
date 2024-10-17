@@ -62,7 +62,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
                         PlayStatus::NotStarted => return, // Early return. Nothing to publish.
                     }
                 } else {
-                    return // Early return. Nothing to publish.
+                    return; // Early return. Nothing to publish.
                 }
             }
             StateChanges::PlayerAddedToSession => {

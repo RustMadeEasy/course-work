@@ -127,6 +127,11 @@ impl GameState {
 
         debug!("place_game_piece position: {:?}", position);
 
+        // If the Game Pieces have not been chosen, then the Game has not started.
+        if current_player.game_piece == GamePiece::Unselected || other_player.game_piece == GamePiece::Unselected {
+            return Err(GameError::PlayerPieceNotSelected);
+        }
+
         // *** Verify that a valid board location is being specified ***
         if !Self::is_valid_board_position(position) {
             return Err(InvalidBoardPosition);
@@ -149,7 +154,7 @@ impl GameState {
         let mut game_board: GameBoard = self.game_board;
 
         // Make sure the newly specified space is not already occupied
-        if game_board[position.row][position.column] != GamePiece::None {
+        if game_board[position.row][position.column] != GamePiece::Unselected {
             return Err(BoardLocationAlreadyOccupied);
         }
 
@@ -234,6 +239,11 @@ impl GameState {
             current_player_game_piece,
             other_player_game_piece,
         );
+
+        // If the Game Pieces have not been chosen, then the Game has not started.
+        if *current_player_game_piece == GamePiece::Unselected || *other_player_game_piece == GamePiece::Unselected {
+            return PlayOutcome::new(&PlayStatus::NotStarted);
+        }
 
         // If there are no spaces filled, then the Game has not started.
         if as_binary.0 == 0 && as_binary.1 == 0 {

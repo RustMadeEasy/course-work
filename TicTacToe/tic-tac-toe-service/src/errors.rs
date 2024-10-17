@@ -27,6 +27,7 @@ pub enum GameError {
     InvalidBoardPosition,
     InvitationCodeNotFound,
     InvalidSession,
+    PlayerPieceNotSelected,
     PlayerNotFound,
     SessionHasTooFewPlayers,
     SessionNotFound,
@@ -42,7 +43,8 @@ impl ResponseError for GameError {
             GameError::SessionHasTooFewPlayers |
             GameError::GameNotStarted |
             GameError::InvalidBoardPosition |
-            GameError::InvalidSession => {
+            GameError::InvalidSession |
+            GameError::PlayerPieceNotSelected => {
                 StatusCode::BAD_REQUEST
             }
 

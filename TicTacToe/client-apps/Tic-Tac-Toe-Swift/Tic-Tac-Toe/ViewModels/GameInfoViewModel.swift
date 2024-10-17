@@ -112,7 +112,7 @@ extension GameInfoViewModel {
 
         let gamePiece = self.gameBoard[pos.row][pos.column]
         return switch gamePiece {
-        case ._none:
+        case .unselected:
             ""
         case .x:
             "X"

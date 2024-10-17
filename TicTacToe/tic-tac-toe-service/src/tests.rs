@@ -170,8 +170,8 @@ mod game_board_tests {
             match board_state.place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
             {
                 Ok(board_state) => board_state,
-                Err(_) => {
-                    panic!()
+                Err(error) => {
+                    panic!("{:?}", error);
                 }
             };
 
@@ -242,8 +242,8 @@ mod game_board_tests {
                 // Double check that the location now contains the piece we specified
                 assert_eq!(board_state.game_board[0][0], GamePiece::O)
             }
-            Err(_) => {
-                panic!()
+            Err(error) => {
+                panic!("{:?}", error);
             }
         }
     }
@@ -252,8 +252,11 @@ mod game_board_tests {
     fn test_winning_moves() {
         //
 
-        let player_one = PlayerInfo::new(Uuid::new_v4(), false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut player_two = PlayerInfo::new(Uuid::new_v4(), false);
+
+        player_one.game_piece = GamePiece::X;
+        player_two.game_piece = GamePiece::O;
 
         /*
         X  -  X
@@ -362,8 +365,8 @@ mod game_play_tests {
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
-            Err(_) => {
-                panic!();
+            Err(error) => {
+                panic!("{:?}", error);
             }
         }
 
@@ -398,8 +401,8 @@ mod game_play_tests {
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
-            Err(_) => {
-                panic!();
+            Err(error) => {
+                panic!("{:?}", error);
             }
         }
 
@@ -414,8 +417,8 @@ mod game_play_tests {
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
-            Err(_) => {
-                panic!();
+            Err(error) => {
+                panic!("{:?}", error);
             }
         }
 
@@ -428,54 +431,54 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let player_one = PlayerInfo::new(Uuid::new_v4(), false);
-        let player_two = PlayerInfo::new(Uuid::new_v4(), false);
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers,
+                                          &PlayerInfo::new(Uuid::new_v4(), false),
+                                          &PlayerInfo::new(Uuid::new_v4(), false),
+                                          Uuid::new_v4().to_string().as_str()).unwrap();
 
-        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, &player_two, Uuid::new_v4().to_string().as_str()).unwrap();
+        let first_destination = BoardPosition::new(0, 0);
+        let second_destination = BoardPosition::new(1, 1);
 
-        game.current_player = Some(player_one.clone());
-
-        let player_one_destination = BoardPosition::new(0, 0);
-        let player_two_destination = BoardPosition::new(1, 1);
+        let first_player_game_piece = game.current_player.clone().unwrap().game_piece;
 
         // Let Player One take their turn
         let turn_info = GameTurnInfo {
-            destination: player_one_destination.clone(),
-            player_id: player_one.player_id.clone(),
+            destination: first_destination.clone(),
+            player_id: game.current_player.clone().unwrap().player_id,
             session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
-            Err(_) => {
-                panic!();
+            Err(error) => {
+                panic!("{:?}", error);
             }
         }
 
-        // Verify that position 0:0 contains Player One's game piece.
+        // Verify that position 0:0 contains the current Player's game piece.
         assert_eq!(
-            game.get_current_game_state().get_game_board()[player_one_destination.row]
-                [player_one_destination.column],
-            game.players.first().unwrap().game_piece
+            game.get_current_game_state().get_game_board()[first_destination.row][first_destination.column],
+            first_player_game_piece
         );
+
+        let second_player_game_piece = game.current_player.clone().unwrap().game_piece;
 
         // Let Player Two take their turn.
         let turn_info = GameTurnInfo {
-            destination: player_two_destination.clone(),
-            player_id: player_two.player_id.clone(),
+            destination: second_destination.clone(),
+            player_id: game.current_player.clone().unwrap().player_id,
             session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
             Ok(_) => {}
-            Err(_) => {
-                panic!();
+            Err(error) => {
+                panic!("{:?}", error);
             }
         }
 
         // Verify that position 1:1 contains Player One's game piece.
         assert_eq!(
-            game.get_current_game_state().get_game_board()[player_two_destination.row]
-                [player_two_destination.column],
-            game.players.get(1).unwrap().game_piece
+            game.get_current_game_state().get_game_board()[second_destination.row][second_destination.column],
+            second_player_game_piece
         );
     }
 }

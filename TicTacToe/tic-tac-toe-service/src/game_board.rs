@@ -51,7 +51,7 @@ impl BoardPosition {
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema)]
 pub(crate) enum GamePiece {
     #[default]
-    None,
+    Unselected,
     X,
     O,
 }
@@ -62,7 +62,7 @@ impl GamePiece {
     /// Selects the opposite game piece. If self is X, then O is returned. If self is O, X is returned. If self is None, None is returned.
     pub(crate) fn opposite(&self) -> Self {
         match self {
-            GamePiece::None => GamePiece::None,
+            GamePiece::Unselected => GamePiece::Unselected,
             GamePiece::X => GamePiece::O,
             GamePiece::O => GamePiece::X,
         }

@@ -157,7 +157,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
         for row in grid.iter().enumerate() {
             for column in row.1.iter().enumerate() {
                 let game_piece = column.1;
-                if *game_piece == GamePiece::None {
+                if *game_piece == GamePiece::Unselected {
                     empty_locations.push(BoardPosition::new(row.0, column.0));
                 }
             }

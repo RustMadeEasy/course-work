@@ -12,7 +12,7 @@ import AnyCodable
 
 /** Models a Game Piece with which the Tic-Tac-Toe Game is played. */
 public enum GamePiece: String, Codable, CaseIterable {
-    case _none = "None"
+    case unselected = "Unselected"
     case x = "X"
     case o = "O"
 }

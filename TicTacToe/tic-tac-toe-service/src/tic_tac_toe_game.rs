@@ -49,27 +49,11 @@ pub(crate) struct TicTacToeGame {
 impl TicTacToeGame {
     //
 
-    /// Determines whether the specified board location is occupied by a Game piece.
-    fn is_location_occupied(game_board: &GameBoard, position: &BoardPosition) -> bool {
-        if !GameState::is_valid_board_position(position) {
-            return false;
-        }
-        game_board[position.row][position.column] != GamePiece::None
-    }
-}
-
-impl GameTrait for TicTacToeGame {
-    //
-
     /// Sets up the players for the first turn.
-    fn begin(&mut self) -> Result<Self, GameError> {
+    fn begin(&mut self) {
         //
 
         debug!("TicTacToeGame::begin()");
-
-        if self.players.len() < 2 {
-            return Err(GameError::SessionHasTooFewPlayers);
-        }
 
         let mut player = self.players.first().unwrap().clone();
         let mut other_player = self.players.last().unwrap().clone();
@@ -85,10 +69,25 @@ impl GameTrait for TicTacToeGame {
             other_player.clone()
         };
 
-        self.current_player = Some(starting_player);
+        // Update the list
+        self.players.clear();
+        self.players.push(player.clone());
+        self.players.push(other_player.clone());
 
-        Ok(self.clone())
+        self.current_player = Some(starting_player);
     }
+
+    /// Determines whether the specified board location is occupied by a Game piece.
+    fn is_location_occupied(game_board: &GameBoard, position: &BoardPosition) -> bool {
+        if !GameState::is_valid_board_position(position) {
+            return false;
+        }
+        game_board[position.row][position.column] != GamePiece::Unselected
+    }
+}
+
+impl GameTrait for TicTacToeGame {
+    //
 
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState {
@@ -144,18 +143,21 @@ impl GameTrait for TicTacToeGame {
         self.play_history.last().map(|game_state| game_state.created_date)
     }
 
+    /// Creates a new Game instance. Note that the begin() function must be called 
     fn new(game_mode: GameMode, player: &PlayerInfo, other_player: &PlayerInfo, session_id: &str) -> Result<Self, GameError> {
         //
 
         debug!("TicTacToeGame::new() Creating new game. Session ID: {:?} with Player: {:?}", session_id, player);
 
-        let game = Self {
+        let mut game = Self {
             current_player: None,
             game_mode,
             id: Uuid::new_v4().to_string(),
             players: vec![player.clone(), other_player.clone()],
             play_history: vec![],
         };
+
+        game.begin();
 
         Ok(game)
     }
