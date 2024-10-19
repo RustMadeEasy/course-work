@@ -39,12 +39,12 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     }
 
     /// Creates a new AutomaticPlayer instance.
-    pub(crate) fn new(game_id: &str, player_info: PlayerInfo, skill_level: &AutomaticPlayerSkillLevel) -> Self {
+    pub(crate) fn new(game_id: &str, player_info: &PlayerInfo, skill_level: &AutomaticPlayerSkillLevel) -> Self {
         info!("Creating AutomaticPlayer {}", game_id);
         Self {
             game_id: game_id.to_string(),
             phantom_type: Default::default(),
-            player_info,
+            player_info: player_info.clone(),
             skill_level: skill_level.clone(),
         }
     }

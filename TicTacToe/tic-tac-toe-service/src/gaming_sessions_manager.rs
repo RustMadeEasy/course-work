@@ -72,7 +72,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             event_plane_config: session.event_plane_config,
             initiating_player: session.session_owner,
             invitation_code: session.invitation_code,
-            other_player,
+            other_player: Some(other_player),
             session_id: session.session_id,
         })
     }
@@ -166,13 +166,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         let game = T::new(GameMode::SinglePlayer, human_player, &computer_player, &session.session_id)?;
 
         // Create an AutomaticPlayer to play against Player One.
-        let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), computer_player, computer_skill_level);
+        let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), &computer_player, computer_skill_level);
 
         // Make sure the AutomaticPlayer can follow the Game.
         self.observers.push(Box::new(auto_player));
 
         self.upsert_game(&game).await;
 
+        session.participants.push(computer_player.clone());
         session.current_game = Some(game.clone());
         self.upsert_session(&session).await;
 

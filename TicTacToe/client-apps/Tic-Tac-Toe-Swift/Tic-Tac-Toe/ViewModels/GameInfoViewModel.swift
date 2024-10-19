@@ -148,7 +148,7 @@ extension GameInfoViewModel {
         
         let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId, localPlayerName: self.localPlayerName)
                 
-        if let newGameInfo = result.newGameInfo {            
+        if let newGameInfo = result.newGameInfo {
             DispatchQueue.main.async {
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
@@ -293,9 +293,9 @@ extension GameInfoViewModel {
             if self.localPlayerInitiatedGamingSession {
                 self._localPlayerId = Published(wrappedValue: info.initiatingPlayer.playerId)
                 self._localPlayerName = Published(wrappedValue: info.initiatingPlayer.displayName)
-            } else {
-                self._localPlayerId = Published(wrappedValue: info.otherPlayer.playerId)
-                self._localPlayerName = Published(wrappedValue: info.otherPlayer.displayName)
+            } else if let otherPlayer = info.otherPlayer {
+                self._localPlayerId = Published(wrappedValue: otherPlayer.playerId)
+                self._localPlayerName = Published(wrappedValue: otherPlayer.displayName)
             }
 
             // Setup MQTT listener

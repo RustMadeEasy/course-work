@@ -291,7 +291,7 @@ pub mod responses {
         /// Unique Code that is used to invite others to the Gaming Session.
         pub(crate) invitation_code: String,
         /// ID of the guest Player.
-        pub(crate) other_player: PlayerInfo,
+        pub(crate) other_player: Option<PlayerInfo>,
         /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
         pub(crate) session_id: String,
     }

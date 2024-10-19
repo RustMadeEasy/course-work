@@ -105,12 +105,11 @@ pub(crate) async fn create_gaming_session(
 
     match manager.create_new_session(&params.session_owner_display_name).await {
         Ok(session) => {
-            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &session.participants)?;
             let creation_result = GamingSessionCreationResult {
                 event_plane_config: session.event_plane_config,
                 initiating_player: session.session_owner,
                 invitation_code: session.invitation_code,
-                other_player,
+                other_player: None,
                 session_id: session.session_id,
             };
             Ok(web::Json(creation_result))
@@ -155,7 +154,7 @@ pub(crate) async fn create_single_player_game(
 
     match manager.create_new_single_player_game(session.session_id.as_str(), &new_game_params.computer_skill_level).await {
         Ok(game) => {
-            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &session.participants)?;
+            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &game.players)?;
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
                 initiating_player: session.session_owner,

@@ -17,11 +17,11 @@ public struct GamingSessionCreationResult: Codable, JSONEncodable, Hashable {
     public var initiatingPlayer: PlayerInfo
     /** Unique Code that is used to invite others to the Gaming Session. */
     public var invitationCode: String
-    public var otherPlayer: PlayerInfo
+    public var otherPlayer: PlayerInfo?
     /** Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications. */
     public var sessionId: String
 
-    public init(eventPlaneConfig: EventPlaneConfig, initiatingPlayer: PlayerInfo, invitationCode: String, otherPlayer: PlayerInfo, sessionId: String) {
+    public init(eventPlaneConfig: EventPlaneConfig, initiatingPlayer: PlayerInfo, invitationCode: String, otherPlayer: PlayerInfo? = nil, sessionId: String) {
         self.eventPlaneConfig = eventPlaneConfig
         self.initiatingPlayer = initiatingPlayer
         self.invitationCode = invitationCode
@@ -44,7 +44,7 @@ public struct GamingSessionCreationResult: Codable, JSONEncodable, Hashable {
         try container.encode(eventPlaneConfig, forKey: .eventPlaneConfig)
         try container.encode(initiatingPlayer, forKey: .initiatingPlayer)
         try container.encode(invitationCode, forKey: .invitationCode)
-        try container.encode(otherPlayer, forKey: .otherPlayer)
+        try container.encodeIfPresent(otherPlayer, forKey: .otherPlayer)
         try container.encode(sessionId, forKey: .sessionId)
     }
 }
