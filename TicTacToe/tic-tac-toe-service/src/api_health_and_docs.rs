@@ -20,6 +20,7 @@ use crate::models::requests::NewSinglePlayerGameParams;
 use crate::models::responses::GameCreationResult;
 use crate::models::responses::GameInfo;
 use crate::models::responses::GamingSessionCreationResult;
+use crate::models::responses::TurnResult;
 use crate::models::AutomaticPlayerSkillLevel;
 use crate::models::GameMode;
 use crate::models::PlayerInfo;
@@ -71,6 +72,7 @@ use utoipa::OpenApi;
         NewSinglePlayerGameParams,
         PlayerInfo,
         PlayStatus,
+        TurnResult,
     ))
 )]
 pub(crate) struct ApiDoc;
@@ -99,9 +101,6 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
 /// Responds with the health of the Service.
 #[get("/health")]
 pub(crate) async fn health() -> HttpResponse {
-    //
-
     debug!("HTTP GET to /health");
-
     HttpResponse::Ok().json(web::Json("Up"))
 }

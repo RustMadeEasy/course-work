@@ -24,26 +24,26 @@ mod auto_player_tests {
             .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
 
         // Make sure AutomaticPlayer can detect the empty locations.
-        let empty_locations = AutomaticPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board).unwrap();
+        let empty_locations = AutomaticPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.new_game_state.game_board).unwrap();
         assert_eq!(empty_locations[0], BoardPosition::new(0, 1));
         assert_eq!(empty_locations[1], BoardPosition::new(1, 0));
 
@@ -55,32 +55,32 @@ mod auto_player_tests {
             .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 1), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 1), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
 
         // Make sure AutomaticPlayer can detect that a full board has no empty locations.
-        let empty_locations = AutomaticPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.game_board);
+        let empty_locations = AutomaticPlayer::<TicTacToeGame>::determine_empty_locations(&board_state.new_game_state.game_board);
         assert!(empty_locations.is_none());
     }
 }
@@ -112,16 +112,16 @@ mod game_board_tests {
             .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
             .unwrap();
         // Make sure that the Play Status Game indicates InProgress since the Game has not ended
-        assert_eq!(board_state.play_status, PlayStatus::InProgress);
+        assert_eq!(board_state.new_game_state.play_status, PlayStatus::InProgress);
     }
 
     #[test]
@@ -177,7 +177,7 @@ mod game_board_tests {
 
         // Have Player Two attempt to move to the same space (0:0)
         let result =
-            new_board_state.place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one);
+            new_board_state.new_game_state.place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one);
         if result.is_ok() {
             panic!()
         }
@@ -200,31 +200,31 @@ mod game_board_tests {
             .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 0), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 1), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 1), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
         // Make sure the Game ended in a Stalemate
-        assert_eq!(board_state.play_status, PlayStatus::EndedInStalemate);
+        assert_eq!(board_state.new_game_state.play_status, PlayStatus::EndedInStalemate);
     }
 
     #[test]
@@ -240,7 +240,7 @@ mod game_board_tests {
         {
             Ok(board_state) => {
                 // Double check that the location now contains the piece we specified
-                assert_eq!(board_state.game_board[0][0], GamePiece::O)
+                assert_eq!(board_state.new_game_state.game_board[0][0], GamePiece::O)
             }
             Err(error) => {
                 panic!("{:?}", error);
@@ -266,26 +266,26 @@ mod game_board_tests {
             .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
         // Make sure Player One won
-        assert_eq!(board_state.play_status, PlayStatus::EndedInWin);
-        assert_eq!(board_state.winning_player_id.unwrap(), player_one.player_id);
+        assert_eq!(board_state.new_game_state.play_status, PlayStatus::EndedInWin);
+        assert_eq!(board_state.winning_player.unwrap().player_id, player_one.player_id);
 
         /*
         O  O  O
@@ -295,27 +295,27 @@ mod game_board_tests {
             .place_game_piece(&BoardPosition::new(0, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 0), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 0), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 2), &player_two, &player_one)
             .unwrap();
 
         // Make sure Player Two won
-        assert_eq!(board_state.play_status, PlayStatus::EndedInWin);
-        assert_eq!(board_state.winning_player_id.unwrap(), player_two.player_id);
+        assert_eq!(board_state.new_game_state.play_status, PlayStatus::EndedInWin);
+        assert_eq!(board_state.winning_player.unwrap().player_id, player_two.player_id);
     }
 }
 
@@ -506,7 +506,7 @@ mod game_state_tests {
         let board_state = GameState::new()
             .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
             .unwrap();
-        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.new_game_state.game_board, &player_one.game_piece, &player_two.game_piece);
         assert_eq!(binary_representation.0, 0b_100_000_000);
 
         /*
@@ -517,25 +517,25 @@ mod game_state_tests {
             .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(0, 2), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 1), &player_one, &player_two)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(1, 2), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 0), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 1), &player_two, &player_one)
             .unwrap();
         board_state = board_state
-            .place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
+            .new_game_state.place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
 
-        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.new_game_state.game_board, &player_one.game_piece, &player_two.game_piece);
         assert_eq!(binary_representation.0, 0b_101_010_001);
         assert_eq!(binary_representation.1, 0b_000_001_110);
     }

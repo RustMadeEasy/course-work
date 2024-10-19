@@ -29,7 +29,7 @@ mod game_state;
 mod game_trait;
 mod gaming_sessions_manager;
 mod models;
-mod play_outcome;
+pub mod play_outcome;
 mod play_status;
 mod tests;
 mod auto_player;

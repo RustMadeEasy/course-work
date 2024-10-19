@@ -1,11 +1,11 @@
-# GameState
+# TurnResult
 
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**gameBoard** | [[GamePiece]] | The board on which the Game is played. | 
-**idOfPlayerWhoMadeMove** | **String** | ID of the Player who made this Move. | 
-**playStatus** | [**PlayStatus**](PlayStatus.md) |  | 
+**newGameState** | [**GameState**](GameState.md) |  | 
+**winningLocations** | [BoardPosition] | If the Game has ended in a win, this contains the winning board positions. | [optional] 
+**winningPlayer** | [**PlayerInfo**](PlayerInfo.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

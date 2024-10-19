@@ -18,10 +18,11 @@ pub(crate) const MAX_BOARD_ROWS: usize = 3;
 /// Specifies the locations of the Game pieces in Row/Column grid format.
 pub(crate) type GameBoard = [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS];
 
-/* The following constants are various patterns on a Game board. These binary representations
-    allow for very performant checks for winning moves, stalemate situations, etc.
-*/
+// Binary representation of a completely full Tic-Tac-Toe board.
 pub(crate) const BIN_FULL_BOARD: i16 = 0b_111_111_111;
+
+/* The following constants represent the 3-across winning move patterns on a Tic-tac-Toe Game board.
+    As they are binary, they allow for very performant checks for winning moves. */
 pub(crate) const BIN_THREE_ACROSS_HORIZONTAL_TOP: i16 = 0b_111_000_000;
 pub(crate) const BIN_THREE_ACROSS_HORIZONTAL_MIDDLE: i16 = 0b_000_111_000;
 pub(crate) const BIN_THREE_ACROSS_HORIZONTAL_BOTTOM: i16 = 0b_000_000_111;
@@ -49,7 +50,7 @@ impl BoardPosition {
 
 /// Models a Game Piece with which the Tic-Tac-Toe Game is played.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema)]
-pub(crate) enum GamePiece {
+pub enum GamePiece {
     #[default]
     Unselected,
     X,
@@ -59,7 +60,8 @@ pub(crate) enum GamePiece {
 impl GamePiece {
     //
 
-    /// Selects the opposite game piece. If self is X, then O is returned. If self is O, X is returned. If self is None, None is returned.
+    /// Selects the opposite game piece. If self is X, then O is returned. If self is O, X is 
+    /// returned. If self is Unselected, Unselected is returned.
     pub(crate) fn opposite(&self) -> Self {
         match self {
             GamePiece::Unselected => GamePiece::Unselected,

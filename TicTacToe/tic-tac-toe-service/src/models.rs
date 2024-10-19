@@ -45,15 +45,15 @@ pub enum GameMode {
 
 /// Models a Tic-Tac-Toe Game Player.
 #[derive(Clone, Debug, Default, Deserialize, Serialize, ToSchema, Validate)]
-pub(crate) struct PlayerInfo {
+pub struct PlayerInfo {
     /// Name of the Player.
-    pub(crate) display_name: String,
+    pub display_name: String,
     /// The Game Piece with which the Tic-Tac-Toe Game is played.
-    pub(crate) game_piece: GamePiece,
+    pub game_piece: GamePiece,
     /// Indicates that this Player's moves are automated, i.e., guided by this service.
-    pub(crate) is_automated: bool,
+    pub is_automated: bool,
     /// Unique ID of the Player.
-    pub(crate) player_id: String,
+    pub player_id: String,
 }
 
 impl PlayerInfo {
@@ -64,6 +64,8 @@ impl PlayerInfo {
         player_id: impl Into<String>,
         players: &[PlayerInfo],
     ) -> Result<PlayerInfo, GameError> {
+        //
+
         if players.len() < 2 {
             return Err(GameError::PlayerNotFound);
         }
@@ -240,14 +242,14 @@ pub mod requests {
 }
 
 pub mod responses {
-    use serde::{Deserialize, Serialize};
-    use utoipa::ToSchema;
-
+    use crate::game_board::BoardPosition;
     use crate::game_state::GameState;
     use crate::game_trait::GameTrait;
     use crate::models::event_plane::EventPlaneConfig;
     use crate::models::PlayerInfo;
     use crate::tic_tac_toe_game::TicTacToeGame;
+    use serde::{Deserialize, Serialize};
+    use utoipa::ToSchema;
 
     /// Models the current view of a Game.
     #[derive(Deserialize, Serialize, ToSchema)]
@@ -284,10 +286,12 @@ pub mod responses {
     pub struct GamingSessionCreationResult {
         /// Specifies the configuration required for clients to subscribe to real-time Game state updates.
         pub(crate) event_plane_config: EventPlaneConfig,
+        /// The Player who initiated the Gaming Session.
+        pub(crate) initiating_player: PlayerInfo,
         /// Unique Code that is used to invite others to the Gaming Session.
         pub(crate) invitation_code: String,
-        /// ID of the Player added to the Gaming Session.
-        pub(crate) player_id: String,
+        /// ID of the guest Player.
+        pub(crate) other_player: PlayerInfo,
         /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
         pub(crate) session_id: String,
     }
@@ -297,7 +301,21 @@ pub mod responses {
     pub struct GameCreationResult {
         /// The initial Game state.
         pub(crate) game_info: GameInfo,
+        /// The Player who initiated the Gaming Session.
+        pub(crate) initiating_player: PlayerInfo,
+        /// ID of the guest Player.
+        pub(crate) other_player: PlayerInfo,
         /// ID of the Gaming Session.
         pub(crate) session_id: String,
+    }
+
+    #[derive(Clone, Deserialize, Serialize, ToSchema)]
+    pub struct TurnResult {
+        /// The state of the Game after the turn has been taken.
+        pub new_game_state: GameState,
+        /// If the Game has ended in a win, this contains the winning board positions.
+        pub winning_locations: Option<Vec<BoardPosition>>,
+        /// If the Game has ended in a win, this indicates the winning Player.
+        pub winning_player: Option<PlayerInfo>,
     }
 }

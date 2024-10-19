@@ -10,10 +10,11 @@ import OpenAPIClient
 
 /// The data set returned by the GameInfoService methods.
 struct GameInfoServiceResult {
-    var newGameInfo: GameCreationResult?
-    var newGamingSessionInfo: GamingSessionCreationResult?
-    var gameInfo: GameInfo?
-    var error: Error?
+    var gameInfo: GameInfo? = nil
+    var newGameInfo: GameCreationResult? = nil
+    var newGamingSessionInfo: GamingSessionCreationResult? = nil
+    var turnResult: TurnResult? = nil
+    var error: Error? = nil
 }
 
 /// Enumerates the errors potentially returned by the GameInfoService methods.
@@ -296,20 +297,20 @@ class GameInfoService {
         
         do {
             
-            let error: Error? = try await withCheckedThrowingContinuation { continuation in
+            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
                 let turnInfo = GameTurnInfo(destination: boardPosition, playerId: localPlayerId, sessionId: sessionId)
                 TicTacToeAPI.takeTurn(gameId: gameId, gameTurnInfo: turnInfo) { data, error in
-                    if error == nil {
+                    if let data = data {
                         DispatchQueue.main.async {
-                            continuation.resume(returning: nil)
+                            continuation.resume(returning: GameInfoServiceResult(turnResult: data))
                         }
                     } else {
                         print("takeTurn() error: \(String(describing: error))")
-                        continuation.resume(returning: error)
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
                     }
                 }
             }
-            return GameInfoServiceResult(error: error)
+            return result
             
         } catch {
             print("takeTurn() error: \(String(describing: error))")

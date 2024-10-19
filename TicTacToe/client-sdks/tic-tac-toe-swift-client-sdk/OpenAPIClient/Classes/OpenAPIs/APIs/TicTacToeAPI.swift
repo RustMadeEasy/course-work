@@ -496,11 +496,11 @@ open class TicTacToeAPI {
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func takeTurn(gameId: String, gameTurnInfo: GameTurnInfo, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: Void?, _ error: Error?) -> Void)) -> RequestTask {
+    open class func takeTurn(gameId: String, gameTurnInfo: GameTurnInfo, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: TurnResult?, _ error: Error?) -> Void)) -> RequestTask {
         return takeTurnWithRequestBuilder(gameId: gameId, gameTurnInfo: gameTurnInfo).execute(apiResponseQueue) { result in
             switch result {
-            case .success:
-                completion((), nil)
+            case let .success(response):
+                completion(response.body, nil)
             case let .failure(error):
                 completion(nil, error)
             }
@@ -513,9 +513,9 @@ open class TicTacToeAPI {
      - Make a Game move (turn) for the specified Player.
      - parameter gameId: (path)  
      - parameter gameTurnInfo: (body)  
-     - returns: RequestBuilder<Void> 
+     - returns: RequestBuilder<TurnResult> 
      */
-    open class func takeTurnWithRequestBuilder(gameId: String, gameTurnInfo: GameTurnInfo) -> RequestBuilder<Void> {
+    open class func takeTurnWithRequestBuilder(gameId: String, gameTurnInfo: GameTurnInfo) -> RequestBuilder<TurnResult> {
         var localVariablePath = "/v1/games/{game_id}/turns"
         let gameIdPreEscape = "\(APIHelper.mapValueToPathItem(gameId))"
         let gameIdPostEscape = gameIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -531,7 +531,7 @@ open class TicTacToeAPI {
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
-        let localVariableRequestBuilder: RequestBuilder<Void>.Type = OpenAPIClientAPI.requestBuilderFactory.getNonDecodableBuilder()
+        let localVariableRequestBuilder: RequestBuilder<TurnResult>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
 
         return localVariableRequestBuilder.init(method: "POST", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
     }

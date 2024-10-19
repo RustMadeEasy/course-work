@@ -16,7 +16,8 @@ use crate::errors::GameError;
 use crate::game_state::GameState;
 use crate::gaming_sessions_manager::GamingSessionsManager;
 use crate::models::requests::{EndGameParams, EndGamingSessionParams, GameTurnInfo, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, ID_LENGTH_MAX};
-use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
+use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult, TurnResult};
+use crate::models::PlayerInfo;
 use crate::tic_tac_toe_game::TicTacToeGame;
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use log::debug;
@@ -104,10 +105,12 @@ pub(crate) async fn create_gaming_session(
 
     match manager.create_new_session(&params.session_owner_display_name).await {
         Ok(session) => {
+            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &session.participants)?;
             let creation_result = GamingSessionCreationResult {
                 event_plane_config: session.event_plane_config,
+                initiating_player: session.session_owner,
                 invitation_code: session.invitation_code,
-                player_id: session.session_owner.player_id,
+                other_player,
                 session_id: session.session_id,
             };
             Ok(web::Json(creation_result))
@@ -152,8 +155,11 @@ pub(crate) async fn create_single_player_game(
 
     match manager.create_new_single_player_game(session.session_id.as_str(), &new_game_params.computer_skill_level).await {
         Ok(game) => {
+            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &session.participants)?;
             let new_game_info = GameCreationResult {
                 game_info: GameInfo::from(game.clone()),
+                initiating_player: session.session_owner,
+                other_player,
                 session_id: session.session_id.clone(),
             };
             Ok(web::Json(new_game_info))
@@ -187,10 +193,18 @@ pub(crate) async fn create_two_player_game(
 
     let mut manager = manager.lock().await;
 
+    let session = match manager.get_session_by_session_id(&session_id).await {
+        None => return Err(actix_web::error::ErrorInternalServerError(GameError::SessionNotFound)),
+        Some(session) => session,
+    };
+
     match manager.create_new_two_player_game(&session_id).await {
-        Ok(game) => {
+        Ok(result) => {
+            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &session.participants)?;
             let new_game_info = GameCreationResult {
-                game_info: GameInfo::from(game.clone()),
+                game_info: GameInfo::from(result.0.clone()),
+                initiating_player: session.session_owner,
+                other_player,
                 session_id: session_id.clone(),
             };
             Ok(web::Json(new_game_info))
@@ -277,7 +291,7 @@ pub(crate) async fn end_gaming_session(
     tag = "TicTacToe",
     path = "/v1/games/{game_id}/turns",
     responses(
-    (status = 200, description = "Game history retrieved successfully", body = Vec < GameState >, content_type = "application/json"),
+    (status = 200, description = "Game history retrieved successfully", body = Vec<GameState>, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed Game ID"),
     (status = 404, description = "Game not found"),
     (status = 500, description = "Internal server error")
@@ -417,6 +431,7 @@ pub(crate) async fn join_gaming_session(
     path = "/v1/gaming-sessions/{session_id}/players/{player_id}/readiness",
     responses(
     (status = 200, description = "Notifies other Players that the newly added Player is ready to begin the Game"),
+    (status = 400, description = "Bad request - Malformed Session ID or Player ID"),
     (status = 404, description = "No Gaming Session found"),
     (status = 500, description = "Internal server error")
 ,), )]
@@ -449,7 +464,7 @@ pub(crate) async fn note_player_readiness(
     tag = "TicTacToe",
     path = "/v1/games/{game_id}/turns",
     responses(
-    (status = 200, description = "Game turn added successfully"),
+    (status = 200, description = "Game turn added successfully", body = TurnResult, content_type = "application/json"),
     (status = 400, description = "Bad Request - Malformed Game ID, Invalid Board Position"),
     (status = 404, description = "Not Found - Game Not Found"),
     (status = 405, description = "Method Not Allowed - Wrong Player Taking Turn"),
@@ -461,7 +476,7 @@ pub(crate) async fn take_turn(
     game_id: web::Path<String>,
     game_turn_info: web::Json<GameTurnInfo>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> impl Responder {
+) -> actix_web::Result<web::Json<TurnResult>> {
     //
 
     debug!("HTTP POST to /games/{}/turns", game_id);
@@ -478,7 +493,7 @@ pub(crate) async fn take_turn(
         .await
         .take_turn(&game_id, &game_turn_info).await
     {
-        Ok(_) => Ok(HttpResponse::Ok().finish()),
+        Ok(turn_info) => Ok(web::Json(turn_info)),
         Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
     }
 }

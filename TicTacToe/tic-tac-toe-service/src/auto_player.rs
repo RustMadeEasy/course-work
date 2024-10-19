@@ -6,7 +6,7 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::game_board::{BoardPosition, GameBoard, GamePiece};
-use crate::game_observer_trait::{GameObserverTrait, StateChanges};
+use crate::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
 use crate::game_trait::GameTrait;
 use crate::gaming_session::GamingSession;
 use crate::models::requests::GameTurnInfo;
@@ -17,7 +17,7 @@ use log::{debug, error, info};
 use std::marker::PhantomData;
 use tokio::time::{sleep, Duration};
 
-// To help make the auto-player feel like more human, we deliberate on the move for anywhere
+// To help make the auto-player feel more human, we deliberate on the move for anywhere
 // between MIN_DELIBERATION_TIME and MAX_DELIBERATION_TIME seconds.
 static MAX_DELIBERATION_TIME: f32 = 3_f32;
 static MIN_DELIBERATION_TIME: usize = 1;
@@ -33,11 +33,12 @@ pub(crate) struct AutomaticPlayer<T: GameTrait + Clone + Send + Sync> {
 impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
-    /// Specifies the name of the AutomaticPlayer.
+    /// Returns the name of the AutomaticPlayer.
     pub(crate) fn get_name() -> String {
         "Reema".to_string()
     }
 
+    /// Creates a new AutomaticPlayer instance.
     pub(crate) fn new(game_id: &str, player_info: PlayerInfo, skill_level: &AutomaticPlayerSkillLevel) -> Self {
         info!("Creating AutomaticPlayer {}", game_id);
         Self {
@@ -52,6 +53,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
+    /// Takes a turn with the skill level of a beginning player.
     fn take_turn_as_a_beginner(&self, game_board: GameBoard) -> Option<BoardPosition> {
         //
 
@@ -68,6 +70,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
         }
     }
 
+    /// Takes a turn with the skill level of an intermediate player.
     fn take_turn_as_an_intermediate(&self, _game_board: GameBoard) -> Option<BoardPosition> {
         debug!("Taking AutomaticPlayer turn as an intermediate for game {}", self.game_id);
         // TODO: JD: consider blocking the opponent from winning
@@ -75,12 +78,14 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
         self.take_turn_as_a_beginner(_game_board)
     }
 
+    /// Takes a turn with the skill level of an expert player.
     fn take_turn_as_an_expert(&self, _game_board: GameBoard) -> Option<BoardPosition> {
         debug!("Taking AutomaticPlayer turn as an expert for game {}", self.game_id);
         // TODO: JD: finish
         self.take_turn_as_a_beginner(_game_board)
     }
 
+    /// Takes a turn with the skill level of a master-level player.
     fn take_turn_as_a_master(&self, _game_board: GameBoard) -> Option<BoardPosition> {
         debug!("Taking AutomaticPlayer turn as a master for game {}", self.game_id);
         // TODO: JD: finish
@@ -94,7 +99,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     pub(crate) async fn take_turn(&self, game: &T, session_id: String) {
         //
 
-        info!("Taking AutomaticPlayer turn for game {}", self.game_id);
+        info!("Taking AutomaticPlayer turn for Game {}", self.game_id);
 
         let game_board = game.get_current_game_state().game_board;
 
@@ -154,6 +159,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 
         let mut empty_locations: Vec<BoardPosition> = Vec::new();
 
+        // Gather the locations that are marked as Unselected.
         for row in grid.iter().enumerate() {
             for column in row.1.iter().enumerate() {
                 let game_piece = column.1;
@@ -172,18 +178,19 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 
 // GameObserverTrait implementation
 #[async_trait]
-impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for AutomaticPlayer<T> {
+impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T> for AutomaticPlayer<T> {
     //
 
-    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: Option<&T>) {
+    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<&T>) {
         //
 
         if let Some(game) = game {
+            //
+
             debug!("AutomaticPlayer: received session_updated() for session {} and game {}", session.session_id, game.get_id());
 
             match state_change {
-                StateChanges::GameDeleted => {}
-                StateChanges::GameStarted | StateChanges::GameTurnTaken | StateChanges::PlayerAddedToSession => {
+                GamingSessionStateChanges::GameStarted | GamingSessionStateChanges::GameTurnTaken => {
                     let game_state = game.get_current_game_state();
                     match game_state.play_status {
                         PlayStatus::InProgress => {
@@ -198,14 +205,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Auto
                         _ => {}
                     }
                 }
-                StateChanges::PlayerReady => {}
-                StateChanges::SessionDeleted => {}
+                GamingSessionStateChanges::GameDeleted | GamingSessionStateChanges::PlayerReady | GamingSessionStateChanges::SessionDeleted => {}
             }
-        } else {
-            debug!("AutomaticPlayer: received session_updated() for session {}", session.session_id);
         }
     }
 
+    /// Returns the unique ID of this instance.
     fn unique_id(&self) -> String {
         self.game_id.clone()
     }

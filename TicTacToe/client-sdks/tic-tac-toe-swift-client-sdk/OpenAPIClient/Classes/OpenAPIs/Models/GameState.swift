@@ -18,25 +18,17 @@ public struct GameState: Codable, JSONEncodable, Hashable {
     /** ID of the Player who made this Move. */
     public var idOfPlayerWhoMadeMove: String
     public var playStatus: PlayStatus
-    /** If the Game has ended in a win, this contains the winning board positions. */
-    public var winningLocations: [BoardPosition]?
-    /** If the Game has ended in a win, this indicates the ID of the winning Player. */
-    public var winningPlayerId: String?
 
-    public init(gameBoard: [[GamePiece]], idOfPlayerWhoMadeMove: String, playStatus: PlayStatus, winningLocations: [BoardPosition]? = nil, winningPlayerId: String? = nil) {
+    public init(gameBoard: [[GamePiece]], idOfPlayerWhoMadeMove: String, playStatus: PlayStatus) {
         self.gameBoard = gameBoard
         self.idOfPlayerWhoMadeMove = idOfPlayerWhoMadeMove
         self.playStatus = playStatus
-        self.winningLocations = winningLocations
-        self.winningPlayerId = winningPlayerId
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case gameBoard = "game_board"
         case idOfPlayerWhoMadeMove = "id_of_player_who_made_move"
         case playStatus = "play_status"
-        case winningLocations = "winning_locations"
-        case winningPlayerId = "winning_player_id"
     }
 
     // Encodable protocol methods
@@ -46,8 +38,6 @@ public struct GameState: Codable, JSONEncodable, Hashable {
         try container.encode(gameBoard, forKey: .gameBoard)
         try container.encode(idOfPlayerWhoMadeMove, forKey: .idOfPlayerWhoMadeMove)
         try container.encode(playStatus, forKey: .playStatus)
-        try container.encodeIfPresent(winningLocations, forKey: .winningLocations)
-        try container.encodeIfPresent(winningPlayerId, forKey: .winningPlayerId)
     }
 }
 

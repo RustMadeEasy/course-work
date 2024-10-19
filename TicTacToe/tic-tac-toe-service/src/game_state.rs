@@ -5,14 +5,13 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use chrono::{DateTime, Utc};
-use log::debug;
 /**
  * Defines Game State related structs and enums.
- *
- * © 2024 Rust Made Easy. All rights reserved.
- * @author JoelDavisEngineering@Gmail.com
  */
+
+use chrono::{DateTime, Utc};
+use log::debug;
+
 
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -28,6 +27,7 @@ use crate::game_board::{
     BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT,
     BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS,
 };
+use crate::models::responses::TurnResult;
 use crate::models::PlayerInfo;
 use crate::play_outcome::PlayOutcome;
 use crate::play_status::PlayStatus;
@@ -35,19 +35,20 @@ use crate::play_status::PlayStatus;
 /// Models the state of a Game at a particular Move (turn).
 #[derive(Clone, Deserialize, Serialize, ToSchema)]
 pub(crate) struct GameState {
-    /// The time at which this Game State was created.
+    //
+
+    /// The time at which this Game State was created. This is used for cleanup of abandoned Games.
     #[serde(skip)]
     pub(crate) created_date: DateTime<Utc>,
+
     /// ID of the Player who made this Move.
     id_of_player_who_made_move: String,
+
     /// The board on which the Game is played.
     pub(crate) game_board: [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS],
+
     /// The current status of the Game.
     pub(crate) play_status: PlayStatus,
-    /// If the Game has ended in a win, this contains the winning board positions.
-    pub(crate) winning_locations: Option<Vec<BoardPosition>>,
-    /// If the Game has ended in a win, this indicates the ID of the winning Player.
-    pub(crate) winning_player_id: Option<String>,
 }
 
 // Initialization
@@ -61,8 +62,6 @@ impl GameState {
             id_of_player_who_made_move: "".to_string(),
             game_board: Default::default(),
             play_status: PlayStatus::NotStarted,
-            winning_locations: None,
-            winning_player_id: None,
         }
     }
 
@@ -76,8 +75,6 @@ impl GameState {
             id_of_player_who_made_move: current_player_id.to_string(),
             game_board: Default::default(),
             play_status: play_status.clone(),
-            winning_locations: None,
-            winning_player_id: None,
         }
     }
 }
@@ -122,7 +119,7 @@ impl GameState {
         position: &BoardPosition,
         current_player: &PlayerInfo,
         other_player: &PlayerInfo,
-    ) -> Result<GameState, GameError> {
+    ) -> Result<TurnResult, GameError> {
         //
 
         debug!("place_game_piece position: {:?}", position);
@@ -145,7 +142,7 @@ impl GameState {
         // Disallow any further changes once the Game has ended. Just forward our current state.
         match self.play_status {
             PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
-                return Ok(self.clone());
+                return Err(GameError::GameHasAlreadyEnded);
             }
             PlayStatus::InProgress | PlayStatus::NotStarted => {}
         }
@@ -164,19 +161,21 @@ impl GameState {
         // Determine how this move impacts the Game.
         let outcome = Self::determine_outcome_of_play(
             &game_board,
-            &current_player.player_id,
+            &current_player,
             &current_player.game_piece,
             &other_player.game_piece,
         );
 
         // Return a new Game board state
-        Ok(Self {
-            created_date: Utc::now(),
-            id_of_player_who_made_move: current_player.player_id.clone(),
-            game_board,
-            play_status: outcome.play_status,
+        Ok(TurnResult {
+            new_game_state: Self {
+                created_date: Utc::now(),
+                id_of_player_who_made_move: current_player.player_id.clone(),
+                game_board,
+                play_status: outcome.play_status,
+            },
             winning_locations: outcome.winning_position,
-            winning_player_id: outcome.winning_player_id,
+            winning_player: outcome.winning_player,
         })
     }
 }
@@ -226,7 +225,7 @@ impl GameState {
     /// Returns PlayOutcome.
     fn determine_outcome_of_play(
         game_board: &GameBoard,
-        current_player_id: &str,
+        current_player: &PlayerInfo,
         current_player_game_piece: &GamePiece,
         other_player_game_piece: &GamePiece,
     ) -> PlayOutcome {
@@ -276,7 +275,7 @@ impl GameState {
             PlayOutcome::new_with_win_details(
                 &PlayStatus::EndedInWin,
                 &GameState::winning_board_positions_from_binary(current_player_binary_representation).unwrap(),
-                current_player_id,
+                current_player,
             )
         } else if (as_binary.0 | as_binary.1) == BIN_FULL_BOARD {
             PlayOutcome::new(&PlayStatus::EndedInStalemate)

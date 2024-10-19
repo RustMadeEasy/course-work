@@ -30,6 +30,7 @@ OpenAPIClient/Classes/OpenAPIs/Models/NewGamingSessionParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/NewSinglePlayerGameParams.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayStatus.swift
 OpenAPIClient/Classes/OpenAPIs/Models/PlayerInfo.swift
+OpenAPIClient/Classes/OpenAPIs/Models/TurnResult.swift
 OpenAPIClient/Classes/OpenAPIs/OpenISO8601DateFormatter.swift
 OpenAPIClient/Classes/OpenAPIs/SynchronizedDictionary.swift
 OpenAPIClient/Classes/OpenAPIs/URLSessionImplementations.swift
@@ -55,5 +56,6 @@ docs/NewSinglePlayerGameParams.md
 docs/PlayStatus.md
 docs/PlayerInfo.md
 docs/TicTacToeAPI.md
+docs/TurnResult.md
 git_push.sh
 project.yml

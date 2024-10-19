@@ -11,6 +11,7 @@ use crate::game_board::{BoardPosition, GameBoard, GamePiece};
 use crate::game_state::GameState;
 use crate::game_trait::GameTrait;
 use crate::models::requests::GameTurnInfo;
+use crate::models::responses::TurnResult;
 use crate::models::{GameMode, PlayerInfo};
 use crate::play_status::PlayStatus;
 use chrono::{DateTime, Utc};
@@ -44,6 +45,12 @@ pub(crate) struct TicTacToeGame {
 
     /// The list of Players engaged in the Game
     pub(crate) players: Vec<PlayerInfo>,
+
+    /// If the Game has ended in a win, this contains the winning board positions.
+    pub(crate) winning_locations: Option<Vec<BoardPosition>>,
+
+    /// If the Game has ended in a win, this indicates the ID of the winning Player.
+    pub(crate) winning_player_id: Option<String>,
 }
 
 impl TicTacToeGame {
@@ -155,6 +162,8 @@ impl GameTrait for TicTacToeGame {
             id: Uuid::new_v4().to_string(),
             players: vec![player.clone(), other_player.clone()],
             play_history: vec![],
+            winning_locations: None,
+            winning_player_id: None,
         };
 
         game.begin();
@@ -163,7 +172,7 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Make a Game move for the specified Player.
-    fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<GameState, GameError> {
+    fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<TurnResult, GameError> {
         //
 
         debug!("TicTacToeGame: taking game turn. Params: {:?}", game_turn_info);
@@ -205,7 +214,7 @@ impl GameTrait for TicTacToeGame {
         )?;
 
         // Add this move to our Game Play History
-        self.play_history.push(final_board_state.clone());
+        self.play_history.push(final_board_state.new_game_state.clone());
 
         // Change Players
         self.current_player = Some(other_player);

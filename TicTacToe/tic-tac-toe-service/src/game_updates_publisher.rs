@@ -1,4 +1,4 @@
-use crate::game_observer_trait::{GameObserverTrait, StateChanges};
+use crate::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
 use crate::game_trait::GameTrait;
 use crate::gaming_session::GamingSession;
 use crate::models::event_plane::EventPlaneTopicNames;
@@ -35,10 +35,10 @@ impl GameUpdatesPublisher {
 }
 
 #[async_trait]
-impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for GameUpdatesPublisher {
+impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T> for GameUpdatesPublisher {
     //
 
-    async fn session_updated(&self, state_change: &StateChanges, session: &GamingSession<T>, game: Option<&T>) {
+    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<&T>) {
         //
 
         debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);
@@ -47,13 +47,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
         let topic_prefix = topic_prefix.as_str();
 
         let topic = match state_change {
-            StateChanges::GameDeleted => {
+            GamingSessionStateChanges::GameDeleted => {
                 EventPlaneTopicNames::GameDeleted.build(topic_prefix)
             }
-            StateChanges::GameStarted => {
+            GamingSessionStateChanges::GameStarted => {
                 EventPlaneTopicNames::GameStarted.build(topic_prefix)
             }
-            StateChanges::GameTurnTaken => {
+            GamingSessionStateChanges::GameTurnTaken => {
                 if let Some(game) = game {
                     match game.get_current_game_state().play_status {
                         PlayStatus::EndedInStalemate => EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
@@ -65,13 +65,10 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GameObserverTrait<T> for Game
                     return; // Early return. Nothing to publish.
                 }
             }
-            StateChanges::PlayerAddedToSession => {
-                EventPlaneTopicNames::PlayerAddedToSession.build(topic_prefix)
-            }
-            StateChanges::PlayerReady => {
+            GamingSessionStateChanges::PlayerReady => {
                 EventPlaneTopicNames::PlayerReady.build(topic_prefix)
             }
-            StateChanges::SessionDeleted => {
+            GamingSessionStateChanges::SessionDeleted => {
                 EventPlaneTopicNames::SessionDeleted.build(topic_prefix)
             }
         };

@@ -3,4 +3,126 @@
    uuid = "489A458E-DC65-444F-8D83-CB0353493F01"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "23F82224-0583-47E7-9937-6762371DC158"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "137"
+            endingLineNumber = "137"
+            landmarkName = "createSinglePlayerGame()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "23F82224-0583-47E7-9937-6762371DC158 - e3b4bf95773d27d0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for Tic_Tac_Toe.GameInfoViewModel.createSinglePlayerGame() async -&gt; Swift.Optional&lt;Swift.Error&gt;"
+                  moduleName = "Tic-Tac-Toe.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "137"
+                  endingLineNumber = "137">
+               </Location>
+               <Location
+                  uuid = "23F82224-0583-47E7-9937-6762371DC158 - 69ac363bbd97c935"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Swift.MainActor @Sendable () -&gt; () in Tic_Tac_Toe.GameInfoViewModel.createSinglePlayerGame() async -&gt; Swift.Optional&lt;Swift.Error&gt;"
+                  moduleName = "Tic-Tac-Toe.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "138"
+                  endingLineNumber = "138">
+               </Location>
+               <Location
+                  uuid = "23F82224-0583-47E7-9937-6762371DC158 - 69ac363bbd97c9d4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Swift.MainActor @Sendable () -&gt; () in Tic_Tac_Toe.GameInfoViewModel.createSinglePlayerGame() async -&gt; Swift.Optional&lt;Swift.Error&gt;"
+                  moduleName = "Tic-Tac-Toe.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "137"
+                  endingLineNumber = "137">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "44103568-51D8-466B-99EC-2AA6F6564F0C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "170"
+            endingLineNumber = "170"
+            landmarkName = "createGamingSession(completion:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "44103568-51D8-466B-99EC-2AA6F6564F0C - ffe1976daa1e246b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for Tic_Tac_Toe.GameInfoViewModel.createGamingSession(completion: (Swift.Bool, Swift.Optional&lt;Swift.Error&gt;) -&gt; ()) async -&gt; ()"
+                  moduleName = "Tic-Tac-Toe.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "170"
+                  endingLineNumber = "170">
+               </Location>
+               <Location
+                  uuid = "44103568-51D8-466B-99EC-2AA6F6564F0C - ffe1976daa1e246b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for Tic_Tac_Toe.GameInfoViewModel.createGamingSession(completion: (Swift.Bool, Swift.Optional&lt;Swift.Error&gt;) -&gt; ()) async -&gt; ()"
+                  moduleName = "Tic-Tac-Toe.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "170"
+                  endingLineNumber = "170">
+               </Location>
+               <Location
+                  uuid = "44103568-51D8-466B-99EC-2AA6F6564F0C - 8541be9a4d5677df"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Swift.MainActor @Sendable () -&gt; () in Tic_Tac_Toe.GameInfoViewModel.createGamingSession(completion: (Swift.Bool, Swift.Optional&lt;Swift.Error&gt;) -&gt; ()) async -&gt; ()"
+                  moduleName = "Tic-Tac-Toe.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/test/Downloads/RME/course-work/TicTacToe/client-apps/Tic-Tac-Toe-Swift/Tic-Tac-Toe/ViewModels/GameInfoViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "170"
+                  endingLineNumber = "170">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

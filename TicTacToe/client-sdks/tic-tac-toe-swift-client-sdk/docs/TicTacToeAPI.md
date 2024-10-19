@@ -527,7 +527,7 @@ No authorization required
 
 # **takeTurn**
 ```swift
-    open class func takeTurn(gameId: String, gameTurnInfo: GameTurnInfo, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
+    open class func takeTurn(gameId: String, gameTurnInfo: GameTurnInfo, completion: @escaping (_ data: TurnResult?, _ error: Error?) -> Void)
 ```
 
 Make a Game move (turn) for the specified Player.
@@ -564,7 +564,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-Void (empty response body)
+[**TurnResult**](TurnResult.md)
 
 ### Authorization
 
@@ -573,7 +573,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

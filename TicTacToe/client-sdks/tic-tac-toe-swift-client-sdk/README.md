@@ -60,6 +60,7 @@ Class | Method | HTTP request | Description
  - [NewSinglePlayerGameParams](docs/NewSinglePlayerGameParams.md)
  - [PlayStatus](docs/PlayStatus.md)
  - [PlayerInfo](docs/PlayerInfo.md)
+ - [TurnResult](docs/TurnResult.md)
 
 
 <a id="documentation-for-authorization"></a>

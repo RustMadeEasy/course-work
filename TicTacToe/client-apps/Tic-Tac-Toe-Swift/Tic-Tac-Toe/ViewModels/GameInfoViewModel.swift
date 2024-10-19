@@ -60,6 +60,9 @@ class GameInfoViewModel: ObservableObject {
     /// Name of the local Player, i.e. the Player using this app instance.
     @Published var localPlayerName: String = ""
     
+    /// ID of the other Player, i.e. the local Player's opponent.
+    @Published var otherPlayerId: String = ""
+    
     /// Name of the other Player, i.e. the local Player's opponent.
     @Published var otherPlayerName: String = ""
     
@@ -130,11 +133,10 @@ extension GameInfoViewModel {
         let result = await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId, localPlayerName: self.localPlayerName)
 
         if let newGameInfo = result.newGameInfo {
-            
             DispatchQueue.main.async {
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
-                self.update(gameInfo: newGameInfo.gameInfo)
+                self.update(turnResult: TurnResult(newGameState: newGameInfo.gameInfo.gameState))
                 self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
             }
         }
@@ -146,12 +148,11 @@ extension GameInfoViewModel {
         
         let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId, localPlayerName: self.localPlayerName)
                 
-        if let newGameInfo = result.newGameInfo {
-            
+        if let newGameInfo = result.newGameInfo {            
             DispatchQueue.main.async {
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
-                self.update(gameInfo: newGameInfo.gameInfo)
+                self.update(turnResult: TurnResult(newGameState: newGameInfo.gameInfo.gameState))
                 self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
             }
         }
@@ -166,12 +167,8 @@ extension GameInfoViewModel {
         
         if let newGamingSessionInfo = result.newGamingSessionInfo {
             DispatchQueue.main.async {
-                self._gamingSessionId = Published(wrappedValue: result.newGamingSessionInfo?.sessionId ?? "")
-                self._invitationCode = Published(wrappedValue: result.newGamingSessionInfo?.invitationCode ?? "")
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
-                self._localPlayerId = Published(wrappedValue: result.newGamingSessionInfo?.playerId ?? "")
-                // Setup MQTT listener
-                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
+                self.initializeGame(info: newGamingSessionInfo)
                 completion(true, nil)
             }
         } else {
@@ -204,15 +201,15 @@ extension GameInfoViewModel {
     /// Ends the current Gaming Session.
     func getSessionCurrentGame() async {
         let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
-        if result.error == nil && result.gameInfo != nil {
-            self._gameId = Published(initialValue: result.gameInfo!.id)
-            self.update(gameInfo: result.gameInfo!)
+        if let gameInfo = result.gameInfo {
+            self._gameId = Published(initialValue: gameInfo.id)
+            self.update(turnResult: TurnResult(newGameState: gameInfo.gameState))
         }
     }
     
     /// Generates the appropriate Game completion text.
-    private func getGameResults(gameInfo: GameInfo, winningPlayerName: String) -> String {
-        switch gameInfo.gameState.playStatus {
+    private func getGameResults(gameState: GameState, winningPlayerName: String) -> String {
+        switch gameState.playStatus {
         case .endedInStalemate:
             return String(localized: "This game has ended in a stalemate.")
         case .endedInWin:
@@ -234,12 +231,9 @@ extension GameInfoViewModel {
         if let newGamingSessionInfo = result.newGamingSessionInfo {
             
             DispatchQueue.main.async {
-                self._gamingSessionId = Published(wrappedValue: result.newGamingSessionInfo?.sessionId ?? "")
-                self._invitationCode = Published(wrappedValue: result.newGamingSessionInfo?.invitationCode ?? "")
-                self._localPlayerInitiatedGamingSession = Published(wrappedValue: false)
-                self._localPlayerId = Published(wrappedValue: result.newGamingSessionInfo?.playerId ?? "")
-                // Setup MQTT listener
-                self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: newGamingSessionInfo.eventPlaneConfig, delegate: self)
+                
+                self.initializeGame(info: newGamingSessionInfo)
+
                 Task {
                     await GameInfoService.notePlayerReadiness(sessionId: self.gamingSessionId, playerId: self.localPlayerId)
                 }
@@ -264,8 +258,8 @@ extension GameInfoViewModel {
     func refreshGameInfo() {
         Task {
             let result = await GameInfoService.getGameInfo(gameId: self.gameId)
-            if result.error == nil && result.gameInfo != nil {
-                self.update(gameInfo: result.gameInfo!)
+            if let gameInfo = result.gameInfo {
+                self.update(turnResult: TurnResult(newGameState: gameInfo.gameState))
             }
         }
     }
@@ -277,67 +271,82 @@ extension GameInfoViewModel {
                                                     boardPosition: BoardPosition(column: pos.column, row: pos.row),
                                                     localPlayerId: self.localPlayerId, sessionId: self.gamingSessionId)
         
-        if result.error == nil && result.gameInfo != nil {
+        if let gameInfo = result.gameInfo {
             // Even though we update the Game Info periodically, let's take this
             //  opportunity to update it immediately.
-            self.update(gameInfo: result.gameInfo!)
+            self.update(turnResult: TurnResult(newGameState: gameInfo.gameState))
         }
         
         return result.error
     }
     
-    /// Updates this instance with the values of the passed in GameInfo.
-    private func update(gameInfo: GameInfo) {
+    /// Performs the inital setup of the Game parameters.
+    private func initializeGame(info: GamingSessionCreationResult) {
+        //
+        
+        DispatchQueue.main.async {
+                        
+            self._gamingSessionId = Published(wrappedValue: info.sessionId)
+            
+            self._invitationCode = Published(wrappedValue: info.invitationCode)
+
+            if self.localPlayerInitiatedGamingSession {
+                self._localPlayerId = Published(wrappedValue: info.initiatingPlayer.playerId)
+                self._localPlayerName = Published(wrappedValue: info.initiatingPlayer.displayName)
+            } else {
+                self._localPlayerId = Published(wrappedValue: info.otherPlayer.playerId)
+                self._localPlayerName = Published(wrappedValue: info.otherPlayer.displayName)
+            }
+
+            // Setup MQTT listener
+            self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: info.eventPlaneConfig, delegate: self)
+        }
+    }
+
+    /// Updates this instance with the values of the passed in TurnResult.
+    private func update(turnResult: TurnResult) {
         
         DispatchQueue.main.async {
             
-            self.gameBoard = gameInfo.gameState.gameBoard
+            self.gameBoard = turnResult.newGameState.gameBoard
             
-            self.gameEnded = gameInfo.gameState.playStatus == .endedInStalemate || gameInfo.gameState.playStatus == .endedInWin
+            self.gameEnded = turnResult.newGameState.playStatus == .endedInStalemate || turnResult.newGameState.playStatus == .endedInWin
             
-            self.hasGameStarted = gameInfo.gameState.playStatus != .notStarted
+            self.hasGameStarted = turnResult.newGameState.playStatus != .notStarted
             
-            // isPlayerOneCurrentPlayer
-            if gameInfo.gameState.playStatus == .inProgress {
-                self.isPlayerOneCurrentPlayer = gameInfo.players.first?.playerId == gameInfo.currentPlayer?.playerId ?? ""
-            } else {
-                self.isPlayerOneCurrentPlayer = false
-            }
+//            // isPlayerOneCurrentPlayer
+//            
+//            if turnResult.newGameState.playStatus == .inProgress {
+//                isPlayerOneCurrentPlayer = turnResult.newGameState.idOfPlayerWhoMadeMove != self.id
+//            } else {
+//                self.isPlayerOneCurrentPlayer = false
+//                self.isPlayerTwoCurrentPlayer = false
+//            }
+                        
+//            // Player One Display Name
+//            self.playerOneDisplayName = turnResult.newGameState.players.first!.displayName
             
-            // isPlayerTwoCurrentPlayer
-            if gameInfo.gameState.playStatus == .inProgress {
-                self.isPlayerTwoCurrentPlayer = gameInfo.players.last?.playerId == gameInfo.currentPlayer?.playerId ?? ""
-            } else {
-                self.isPlayerTwoCurrentPlayer = false
-            }
+//            // Player Two Display Name
+//            self.playerTwoDisplayName = turnResult.newGameState.players.count > 1 ? turnResult.newGameState.players.last!.displayName : ""
             
-            // Player One Display Name
-            self.playerOneDisplayName = gameInfo.players.first!.displayName
-            
-            // Player Two Display Name
-            self.playerTwoDisplayName = gameInfo.players.count > 1 ? gameInfo.players.last!.displayName : ""
-            
-            // Other Player Display Name
-            if gameInfo.players.count > 1 {
-                if self.localPlayerId == gameInfo.players.first!.playerId {
-                    self.otherPlayerName = self.playerTwoDisplayName
-                } else {
-                    self.otherPlayerName = self.playerOneDisplayName
-                }
-            } else {
-                self.otherPlayerName = ""
-            }
+//            // Other Player Display Name
+//            if turnResult.newGameState.players.count > 1 {
+//                if self.localPlayerId == turnResult.newGameState.players.first!.playerId {
+//                    self.otherPlayerName = self.playerTwoDisplayName
+//                } else {
+//                    self.otherPlayerName = self.playerOneDisplayName
+//                }
+//            } else {
+//                self.otherPlayerName = ""
+//            }
             
             // winningPlayerName and winningLocations
-            if gameInfo.gameState.playStatus == .endedInWin {
+            if turnResult.newGameState.playStatus == .endedInWin {
                 
-                let winnerName = gameInfo.players.first(where: { it in
-                    it.playerId == gameInfo.gameState.winningPlayerId
-                })?.displayName ?? ""
-                self.winningPlayerName = winnerName
+                self.winningPlayerName = turnResult.winningPlayer?.displayName ?? ""
                 
                 var locations: [Position] = []
-                for loc in gameInfo.gameState.winningLocations! {
+                for loc in turnResult.winningLocations! {
                     locations.append(Position(row: loc.row, column: loc.column))
                 }
                 self.winningLocations = locations
@@ -346,7 +355,7 @@ extension GameInfoViewModel {
                 self.winningPlayerName = nil
             }
             
-            self.gameResults = self.getGameResults(gameInfo: gameInfo, winningPlayerName: self.winningPlayerName ?? "")
+            self.gameResults = self.getGameResults(gameState: turnResult.newGameState, winningPlayerName: self.winningPlayerName ?? "")
         }
     }
 }
@@ -382,9 +391,6 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
         // TODO: JD: ask for a rematch
     }
 
-    func onPlayerAddedToSession() {
-    }
-    
     func onPlayerReady() {
         if self.localPlayerInitiatedGamingSession && self.isTwoPlayer {
             Task {
