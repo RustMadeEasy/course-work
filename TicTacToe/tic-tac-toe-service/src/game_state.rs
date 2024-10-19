@@ -161,7 +161,7 @@ impl GameState {
         // Determine how this move impacts the Game.
         let outcome = Self::determine_outcome_of_play(
             &game_board,
-            &current_player,
+            current_player,
             &current_player.game_piece,
             &other_player.game_piece,
         );

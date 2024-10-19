@@ -188,7 +188,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         debug!("GamesManager: create_new_two_player_game() called for Session ID: {}", session_id);
 
-        let mut session = match self.get_session_by_session_id(&session_id).await {
+        let mut session = match self.get_session_by_session_id(session_id).await {
             Some(session) => *session,
             None => {
                 return Err(GameError::SessionNotFound);
