@@ -40,17 +40,14 @@ pub(crate) struct TicTacToeGame {
     /// Unique ID of the Game
     pub(crate) id: String,
 
+    /// Holds the results of the latest turn taken.
+    pub(crate) latest_turn_result: Option<TurnResult>,
+
     /// The list of Game States from the very first turn until the latest turn
     pub(super) play_history: Vec<GameState>,
 
     /// The list of Players engaged in the Game
     pub(crate) players: Vec<PlayerInfo>,
-
-    /// If the Game has ended in a win, this contains the winning board positions.
-    pub(crate) winning_locations: Option<Vec<BoardPosition>>,
-
-    /// If the Game has ended in a win, this indicates the ID of the winning Player.
-    pub(crate) winning_player_id: Option<String>,
 }
 
 impl TicTacToeGame {
@@ -160,10 +157,9 @@ impl GameTrait for TicTacToeGame {
             current_player: None,
             game_mode,
             id: Uuid::new_v4().to_string(),
+            latest_turn_result: None,
             players: vec![player.clone(), other_player.clone()],
             play_history: vec![],
-            winning_locations: None,
-            winning_player_id: None,
         };
 
         game.begin();
@@ -215,6 +211,7 @@ impl GameTrait for TicTacToeGame {
 
         // Add this move to our Game Play History
         self.play_history.push(final_board_state.new_game_state.clone());
+        self.latest_turn_result = Some(final_board_state.clone());
 
         // Change Players
         self.current_player = Some(other_player);

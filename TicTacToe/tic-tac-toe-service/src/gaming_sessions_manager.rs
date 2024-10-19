@@ -443,14 +443,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             }
 
             let mut updated_game = game.clone();
-            let new_game_state = updated_game.take_turn(game_turn_info)?;
+
+            let turn_result = updated_game.take_turn(game_turn_info)?;
 
             // Update our Game instance.
             self.upsert_game(&updated_game).await;
 
             self.notify_observers_of_game_change(GamingSessionStateChanges::GameTurnTaken, &session, &updated_game).await;
 
-            Ok(new_game_state)
+            Ok(turn_result)
         } else {
             Err(GameError::GameNotFound)
         }

@@ -10,11 +10,11 @@ import OpenAPIClient
 
 /// The data set returned by the GameInfoService methods.
 struct GameInfoServiceResult {
+    var error: Error? = nil
     var gameInfo: GameInfo? = nil
     var newGameInfo: GameCreationResult? = nil
     var newGamingSessionInfo: GamingSessionCreationResult? = nil
     var turnResult: TurnResult? = nil
-    var error: Error? = nil
 }
 
 /// Enumerates the errors potentially returned by the GameInfoService methods.
@@ -54,7 +54,7 @@ class GameInfoService {
             
         } catch {
             print("createGamingSession() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
     
@@ -86,7 +86,7 @@ class GameInfoService {
             
         } catch {
             print("createSinglePlayerGame() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
 
@@ -117,7 +117,7 @@ class GameInfoService {
             
         } catch {
             print("createSinglePlayerGame() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
 
@@ -173,17 +173,17 @@ class GameInfoService {
         }
     }
     
-    /// Retrieves the specified Game info.
-    static func getGameInfo(gameId: String) async -> GameInfoServiceResult {
+    /// Retrieves the latest turn info from the specified Game.
+    static func getLatestTurn(gameId: String) async -> GameInfoServiceResult {
                 
         do {
             
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                TicTacToeAPI.getGameInfo(gameId: gameId) { gameInfo, error in
+                TicTacToeAPI.getLatestGameTurn(gameId: gameId) { turnResult, error in
                     if error == nil {
-                        if gameInfo != nil {
+                        if turnResult != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(gameInfo: gameInfo!) )
+                                continuation.resume(returning: GameInfoServiceResult(turnResult: turnResult) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
@@ -200,7 +200,7 @@ class GameInfoService {
             
         } catch {
             print("retrieveGameInfo() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
 
@@ -232,7 +232,7 @@ class GameInfoService {
             
         } catch {
             print("retrieveGameInfo() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
 
@@ -264,7 +264,7 @@ class GameInfoService {
             
         } catch {
             print("joinGame() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
 
@@ -288,7 +288,7 @@ class GameInfoService {
             
         } catch {
             print("joinGame() error: \(String(describing: error))")
-            return GameInfoServiceResult(gameInfo: nil, error: error)
+            return GameInfoServiceResult(error: error)
         }
     }
 

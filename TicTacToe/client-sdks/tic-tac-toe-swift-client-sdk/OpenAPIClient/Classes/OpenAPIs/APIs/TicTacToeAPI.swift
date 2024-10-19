@@ -305,8 +305,8 @@ open class TicTacToeAPI {
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func getGameInfo(gameId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameInfo?, _ error: Error?) -> Void)) -> RequestTask {
-        return getGameInfoWithRequestBuilder(gameId: gameId).execute(apiResponseQueue) { result in
+    open class func getLatestGameTurn(gameId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: TurnResult?, _ error: Error?) -> Void)) -> RequestTask {
+        return getLatestGameTurnWithRequestBuilder(gameId: gameId).execute(apiResponseQueue) { result in
             switch result {
             case let .success(response):
                 completion(response.body, nil)
@@ -321,9 +321,9 @@ open class TicTacToeAPI {
      - GET /v1/games/{game_id}
      - Retrieves details of the specified Game.
      - parameter gameId: (path) Game ID 
-     - returns: RequestBuilder<GameInfo> 
+     - returns: RequestBuilder<TurnResult> 
      */
-    open class func getGameInfoWithRequestBuilder(gameId: String) -> RequestBuilder<GameInfo> {
+    open class func getLatestGameTurnWithRequestBuilder(gameId: String) -> RequestBuilder<TurnResult> {
         var localVariablePath = "/v1/games/{game_id}"
         let gameIdPreEscape = "\(APIHelper.mapValueToPathItem(gameId))"
         let gameIdPostEscape = gameIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -339,7 +339,7 @@ open class TicTacToeAPI {
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
-        let localVariableRequestBuilder: RequestBuilder<GameInfo>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+        let localVariableRequestBuilder: RequestBuilder<TurnResult>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
 
         return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
     }

@@ -257,9 +257,9 @@ extension GameInfoViewModel {
     /// Retrieves new game state info from our Tic Tac Toe service.
     func refreshGameInfo() {
         Task {
-            let result = await GameInfoService.getGameInfo(gameId: self.gameId)
-            if let gameInfo = result.gameInfo {
-                self.update(turnResult: TurnResult(newGameState: gameInfo.gameState))
+            let result = await GameInfoService.getLatestTurn(gameId: self.gameId)
+            if let turnResult = result.turnResult {
+                self.update(turnResult: turnResult)
             }
         }
     }

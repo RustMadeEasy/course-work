@@ -10,7 +10,7 @@ Method | HTTP request | Description
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
-[**getGameInfo**](TicTacToeAPI.md#getgameinfo) | **GET** /v1/games/{game_id} | Retrieves details of the specified Game.
+[**getLatestGameTurn**](TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id} | Retrieves details of the specified Game.
 [**getSessionCurrentGames**](TicTacToeAPI.md#getsessioncurrentgames) | **GET** /v1/gaming-sessions/{session_id}/current-games | Retrieves the Games in a Gaming Session.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
 [**notePlayerReadiness**](TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Sets a Player as ready to Play.
@@ -323,9 +323,9 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **getGameInfo**
+# **getLatestGameTurn**
 ```swift
-    open class func getGameInfo(gameId: String, completion: @escaping (_ data: GameInfo?, _ error: Error?) -> Void)
+    open class func getLatestGameTurn(gameId: String, completion: @escaping (_ data: TurnResult?, _ error: Error?) -> Void)
 ```
 
 Retrieves details of the specified Game.
@@ -340,7 +340,7 @@ import OpenAPIClient
 let gameId = "gameId_example" // String | Game ID
 
 // Retrieves details of the specified Game.
-TicTacToeAPI.getGameInfo(gameId: gameId) { (response, error) in
+TicTacToeAPI.getLatestGameTurn(gameId: gameId) { (response, error) in
     guard error == nil else {
         print(error)
         return
@@ -360,7 +360,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**GameInfo**](GameInfo.md)
+[**TurnResult**](TurnResult.md)
 
 ### Authorization
 

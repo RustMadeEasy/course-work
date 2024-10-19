@@ -320,19 +320,19 @@ pub(crate) async fn get_game_history(
     path = "/v1/games/{game_id}",
     params(("game_id" = String, Path, description = "Game ID"),),
     responses(
-    (status = 200, description = "Game info retrieved successfully", body = GameInfo, content_type = "application/json"),
+    (status = 200, description = "Latest Game Turn info retrieved successfully", body = TurnResult, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed Game ID"),
     (status = 404, description = "Game not found"),
     (status = 500, description = "Internal server error")
 ,), )]
-#[get("/games/{game_id}")]
-pub(crate) async fn get_game_info(
+#[get("/games/{game_id}/turns/latest")]
+pub(crate) async fn get_latest_game_turn(
     game_id: web::Path<String>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GameInfo>> {
+) -> actix_web::Result<web::Json<TurnResult>> {
     //
 
-    debug!("HTTP GET to /games/{}", game_id);
+    debug!("HTTP GET to /games/{}/turns/latest", game_id);
 
     // *** Validate input params ***
     validate_id_string(&game_id)?;
@@ -343,7 +343,10 @@ pub(crate) async fn get_game_info(
         .get_game_by_id(game_id.as_str()).await
     {
         Ok(game) => {
-            Ok(web::Json(GameInfo::from(game)))
+            match game.latest_turn_result {
+                Some(result) => Ok(web::Json(result)),
+                None => Err(actix_web::error::ErrorInternalServerError(GameError::GameNotStarted)),
+            }
         }
         Err(error) => Err(actix_web::error::ErrorInternalServerError(error.to_string())),
     }

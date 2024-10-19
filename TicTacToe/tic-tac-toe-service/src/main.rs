@@ -16,7 +16,7 @@ use log::info;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api_gaming::{create_gaming_session, create_single_player_game, create_two_player_game, end_game, end_gaming_session, get_game_history, get_game_info, get_session_current_games, join_gaming_session, note_player_readiness, take_turn};
+use crate::api_gaming::{create_gaming_session, create_single_player_game, create_two_player_game, end_game, end_gaming_session, get_game_history, get_latest_game_turn, get_session_current_games, join_gaming_session, note_player_readiness, take_turn};
 use crate::api_health_and_docs::{api_docs, health, ApiDoc};
 use crate::gaming_sessions_manager::TicTacToeGamesManager;
 
@@ -66,7 +66,7 @@ async fn main() -> std::io::Result<()> {
                 .service(end_game)
                 .service(end_gaming_session)
                 .service(get_game_history)
-                .service(get_game_info)
+                .service(get_latest_game_turn)
                 .service(get_session_current_games)
                 .service(join_gaming_session)
                 .service(note_player_readiness)

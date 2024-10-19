@@ -47,7 +47,7 @@ use utoipa::OpenApi;
         end_game,
         end_gaming_session,
         get_game_history,
-        get_game_info,
+        get_latest_game_turn,
         get_session_current_games,
         join_gaming_session,
         note_player_readiness,
