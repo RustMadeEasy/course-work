@@ -317,7 +317,7 @@ pub(crate) async fn get_game_history(
 #[utoipa::path(
     get,
     tag = "TicTacToe",
-    path = "/v1/games/{game_id}",
+    path = "/v1/games/{game_id}/turns/latest",
     params(("game_id" = String, Path, description = "Game ID"),),
     responses(
     (status = 200, description = "Latest Game Turn info retrieved successfully", body = TurnResult, content_type = "application/json"),

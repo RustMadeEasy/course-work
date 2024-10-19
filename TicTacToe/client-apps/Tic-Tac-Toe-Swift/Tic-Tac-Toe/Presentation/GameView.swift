@@ -142,7 +142,7 @@ struct GameView: View {
                     Text(String(localized: "End Game"))
                 }
             }
-            .alert(String(localized: "Failed to join the game because Player One has already selected the name '\(gameInfoVM.localPlayerName)'. Please select a different Player name."), isPresented: $showNameConflictGameJoiningError ) {
+            .alert(String(localized: "Failed to join the game because Player One has already selected the name '\(gameInfoVM.localPlayer.displayName)'. Please select a different Player name."), isPresented: $showNameConflictGameJoiningError ) {
                 Button() {
                     showNameConflictGameJoiningError = false
                     self.presentation.wrappedValue.dismiss()
@@ -158,7 +158,7 @@ struct GameView: View {
                     okText
                 }
             }
-            .alert(String(localized: "It is currently time for '\(self.gameInfoVM.otherPlayerName)' to take their turn."), isPresented: $showWrongTurnError ) {
+            .alert(String(localized: "It is currently time for '\(self.gameInfoVM.otherPlayer.displayName)' to take their turn."), isPresented: $showWrongTurnError ) {
                 Button() {
                     showWrongTurnError = false
                 } label: {
@@ -249,11 +249,11 @@ struct GameView: View {
     var playersSection: some View {
      
         VStack {
-            let playerOne = String(localized: "Player One (X): \(gameInfoVM.playerOneDisplayName)")
+            let playerOne = String(localized: "Player One (X): \(gameInfoVM.getPlayerOne().displayName)")
             Text(playerOne)
                 .foregroundStyle(Color("AlternateColor").gradient)
                 .bold(gameInfoVM.isPlayerOneCurrentPlayer)
-            let playerTwo = String(localized: "Player Two (O): \(gameInfoVM.playerTwoDisplayName)")
+            let playerTwo = String(localized: "Player Two (O): \(gameInfoVM.getPlayerTwo().displayName)")
             Text(playerTwo)
                 .foregroundStyle(Color("AlternateColor").gradient)
                 .bold(gameInfoVM.isPlayerTwoCurrentPlayer)

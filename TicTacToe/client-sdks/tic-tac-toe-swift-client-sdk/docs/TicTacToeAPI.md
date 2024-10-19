@@ -10,7 +10,7 @@ Method | HTTP request | Description
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
-[**getLatestGameTurn**](TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id} | Retrieves details of the specified Game.
+[**getLatestGameTurn**](TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves details of the specified Game.
 [**getSessionCurrentGames**](TicTacToeAPI.md#getsessioncurrentgames) | **GET** /v1/gaming-sessions/{session_id}/current-games | Retrieves the Games in a Gaming Session.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
 [**notePlayerReadiness**](TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Sets a Player as ready to Play.

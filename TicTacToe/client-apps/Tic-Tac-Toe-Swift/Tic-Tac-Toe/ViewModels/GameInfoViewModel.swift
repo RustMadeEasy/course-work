@@ -55,23 +55,14 @@ class GameInfoViewModel: ObservableObject {
     @Published var localPlayerInitiatedGamingSession: Bool = false
     
     /// ID of the local Player, i.e. the Player using this app instance.
-    @Published private var localPlayerId: String = ""
+    @Published var localPlayer: PlayerInfo
+
+    /// Indicates whether the local Player is the one who takes their turn firstly.
+    @Published var playerOneId: String = ""
     
-    /// Name of the local Player, i.e. the Player using this app instance.
-    @Published var localPlayerName: String = ""
-    
-    /// ID of the other Player, i.e. the local Player's opponent.
-    @Published var otherPlayerId: String = ""
-    
-    /// Name of the other Player, i.e. the local Player's opponent.
-    @Published var otherPlayerName: String = ""
-    
-    /// Display name of Player One.
-    @Published var playerOneDisplayName: String = ""
-    
-    /// Display name of Player Two.
-    @Published var playerTwoDisplayName: String = ""
-    
+    /// ID of the local Player, i.e. the Player using this app instance.
+    @Published var otherPlayer: PlayerInfo
+
     /// If/when the Game has been won, winningPlayerName contains the name of the player who won the Game.
     @Published private var winningPlayerName: String?
     
@@ -80,9 +71,34 @@ class GameInfoViewModel: ObservableObject {
     
     init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {
         self.gameInfoReceiver = nil
-        self._localPlayerName = Published(initialValue: localPlayerName)
         self._invitationCode = Published(initialValue: invitationCode)
         self._isTwoPlayer = Published(initialValue: isTwoPlayer)
+        self.localPlayer = PlayerInfo.init(displayName: localPlayerName,
+                                           gamePiece: GamePiece.unselected,
+                                           isAutomated: false,
+                                           playerId: "")
+        self.otherPlayer = PlayerInfo(displayName: "",
+                                      gamePiece: GamePiece.unselected,
+                                      isAutomated: false,
+                                      playerId: "")
+    }
+    
+    /// Returns the first Player.
+    func getPlayerOne() -> PlayerInfo {
+        if self.playerOneId == self.localPlayer.playerId {
+            self.localPlayer
+        } else {
+            self.otherPlayer
+        }
+    }
+
+    /// Returns the second Player.
+    func getPlayerTwo() -> PlayerInfo {
+        if self.playerOneId != self.localPlayer.playerId {
+            self.localPlayer
+        } else {
+            self.otherPlayer
+        }
     }
 }
 
@@ -99,9 +115,6 @@ extension GameInfoViewModel {
         invitationCode = ""
         isPlayerOneCurrentPlayer = false
         isPlayerTwoCurrentPlayer = false
-        localPlayerId = ""
-        playerOneDisplayName = ""
-        playerTwoDisplayName = ""
         winningPlayerName = nil
         winningLocations = nil
     }
@@ -130,45 +143,78 @@ extension GameInfoViewModel {
     func createSinglePlayerGame() async -> Error? {
         
         // TODO: JD: allow the UI to set the AutomaticPlayerSkillLevel
-        let result = await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId, localPlayerName: self.localPlayerName)
+        let result = await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId, localPlayerName: self.localPlayer.displayName)
 
         if let newGameInfo = result.newGameInfo {
+            
             DispatchQueue.main.async {
+                
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
-                self.update(turnResult: TurnResult(newGameState: newGameInfo.gameInfo.gameState))
-                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+                                
+                self.localPlayer = newGameInfo.gameInfo.players.first(where: { it in
+                    it.playerId == self.localPlayer.playerId
+                })!
+                
+                self.otherPlayer = newGameInfo.gameInfo.players.first(where: { it in
+                    it.playerId != self.localPlayer.playerId
+                })!
+                
+                self._playerOneId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+                                
+                self._isPlayerOneCurrentPlayer = Published(wrappedValue: true)
+                self._isPlayerTwoCurrentPlayer = Published(wrappedValue: false)
+                self._isTwoPlayer = Published(wrappedValue: false)
+                
+                self.updateGameInfo(turnResult: TurnResult(newGameState: newGameInfo.gameInfo.gameState))
             }
         }
         
         return result.error
     }
-    
+
     func createTwoPlayerGame() async -> Error? {
         
-        let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId, localPlayerName: self.localPlayerName)
-                
+        let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId,
+                                                               localPlayerName: self.localPlayer.displayName)
+
         if let newGameInfo = result.newGameInfo {
+            
             DispatchQueue.main.async {
+            
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
-                self.update(turnResult: TurnResult(newGameState: newGameInfo.gameInfo.gameState))
-                self._localPlayerId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+                
+                self.localPlayer = newGameInfo.gameInfo.players.first(where: { it in
+                    it.playerId == self.localPlayer.playerId
+                })!
+                
+                self.otherPlayer = newGameInfo.gameInfo.players.first(where: { it in
+                    it.playerId != self.localPlayer.playerId
+                })!
+                
+                self._playerOneId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+                                
+                self._isPlayerOneCurrentPlayer = Published(wrappedValue: true)
+                self._isPlayerTwoCurrentPlayer = Published(wrappedValue: false)
+                self._isTwoPlayer = Published(wrappedValue: true)
+                
+                self.updateGameInfo(turnResult: TurnResult(newGameState: newGameInfo.gameInfo.gameState))
             }
         }
-        
+
         return result.error
     }
     
     /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
     func createGamingSession(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
         
-        let result = await GameInfoService.createGamingSession(sessionOwnerDisplayName: self.localPlayerName)
+        let result = await GameInfoService.createGamingSession(sessionOwnerDisplayName: self.localPlayer.displayName)
         
         if let newGamingSessionInfo = result.newGamingSessionInfo {
             DispatchQueue.main.async {
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
-                self.initializeGame(info: newGamingSessionInfo)
+                self.updateGamingSessionInfo(info: newGamingSessionInfo)
                 completion(true, nil)
             }
         } else {
@@ -183,7 +229,9 @@ extension GameInfoViewModel {
         
         // If this is the client that started the game, close it down on the server.
         if self.localPlayerInitiatedGamingSession {
-            result = await GameInfoService.endGame(gameId: self.gameId, playerId: self.localPlayerId, sessionId: self.gamingSessionId).error
+            result = await GameInfoService.endGame(gameId: self.gameId,
+                                                   playerId: self.localPlayer.playerId,
+                                                   sessionId: self.gamingSessionId).error
         }
         
         prepareForNewGame()
@@ -203,7 +251,7 @@ extension GameInfoViewModel {
         let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
         if let gameInfo = result.gameInfo {
             self._gameId = Published(initialValue: gameInfo.id)
-            self.update(turnResult: TurnResult(newGameState: gameInfo.gameState))
+            self.updateGameInfo(turnResult: TurnResult(newGameState: gameInfo.gameState))
         }
     }
     
@@ -213,7 +261,7 @@ extension GameInfoViewModel {
         case .endedInStalemate:
             return String(localized: "This game has ended in a stalemate.")
         case .endedInWin:
-            if self.localPlayerName == winningPlayerName {
+            if self.localPlayer.displayName == winningPlayerName {
                 return String(localized: "You won!")
             } else {
                 return String(localized: "\(winningPlayerName) won. Better luck next time.")
@@ -226,16 +274,16 @@ extension GameInfoViewModel {
     /// Joins a Gaming Session.
     func joinGamingSession(invitationCode: String) async -> Error? {        
         
-        let result = await GameInfoService.joinGamingSession(invitationCode: self.invitationCode, playerName: self.localPlayerName)
+        let result = await GameInfoService.joinGamingSession(invitationCode: self.invitationCode, playerName: self.localPlayer.displayName)
 
         if let newGamingSessionInfo = result.newGamingSessionInfo {
             
             DispatchQueue.main.async {
                 
-                self.initializeGame(info: newGamingSessionInfo)
+                self.updateGamingSessionInfo(info: newGamingSessionInfo)
 
                 Task {
-                    await GameInfoService.notePlayerReadiness(sessionId: self.gamingSessionId, playerId: self.localPlayerId)
+                    await GameInfoService.notePlayerReadiness(sessionId: self.gamingSessionId, playerId: self.localPlayer.playerId)
                 }
             }
         }
@@ -259,7 +307,7 @@ extension GameInfoViewModel {
         Task {
             let result = await GameInfoService.getLatestTurn(gameId: self.gameId)
             if let turnResult = result.turnResult {
-                self.update(turnResult: turnResult)
+                self.updateGameInfo(turnResult: turnResult)
             }
         }
     }
@@ -269,19 +317,19 @@ extension GameInfoViewModel {
         
         let result = await GameInfoService.takeTurn(gameId: self.gameId,
                                                     boardPosition: BoardPosition(column: pos.column, row: pos.row),
-                                                    localPlayerId: self.localPlayerId, sessionId: self.gamingSessionId)
+                                                    localPlayerId: self.localPlayer.playerId, sessionId: self.gamingSessionId)
         
         if let gameInfo = result.gameInfo {
             // Even though we update the Game Info periodically, let's take this
             //  opportunity to update it immediately.
-            self.update(turnResult: TurnResult(newGameState: gameInfo.gameState))
+            self.updateGameInfo(turnResult: TurnResult(newGameState: gameInfo.gameState))
         }
         
         return result.error
     }
     
     /// Performs the inital setup of the Game parameters.
-    private func initializeGame(info: GamingSessionCreationResult) {
+    private func updateGamingSessionInfo(info: GamingSessionCreationResult) {
         //
         
         DispatchQueue.main.async {
@@ -291,11 +339,7 @@ extension GameInfoViewModel {
             self._invitationCode = Published(wrappedValue: info.invitationCode)
 
             if self.localPlayerInitiatedGamingSession {
-                self._localPlayerId = Published(wrappedValue: info.initiatingPlayer.playerId)
-                self._localPlayerName = Published(wrappedValue: info.initiatingPlayer.displayName)
-            } else if let otherPlayer = info.otherPlayer {
-                self._localPlayerId = Published(wrappedValue: otherPlayer.playerId)
-                self._localPlayerName = Published(wrappedValue: otherPlayer.displayName)
+                self.localPlayer.playerId = info.initiatingPlayer.playerId
             }
 
             // Setup MQTT listener
@@ -304,7 +348,7 @@ extension GameInfoViewModel {
     }
 
     /// Updates this instance with the values of the passed in TurnResult.
-    private func update(turnResult: TurnResult) {
+    private func updateGameInfo(turnResult: TurnResult) {
         
         DispatchQueue.main.async {
             
@@ -313,38 +357,12 @@ extension GameInfoViewModel {
             self.gameEnded = turnResult.newGameState.playStatus == .endedInStalemate || turnResult.newGameState.playStatus == .endedInWin
             
             self.hasGameStarted = turnResult.newGameState.playStatus != .notStarted
-            
-//            // isPlayerOneCurrentPlayer
-//            
-//            if turnResult.newGameState.playStatus == .inProgress {
-//                isPlayerOneCurrentPlayer = turnResult.newGameState.idOfPlayerWhoMadeMove != self.id
-//            } else {
-//                self.isPlayerOneCurrentPlayer = false
-//                self.isPlayerTwoCurrentPlayer = false
-//            }
-                        
-//            // Player One Display Name
-//            self.playerOneDisplayName = turnResult.newGameState.players.first!.displayName
-            
-//            // Player Two Display Name
-//            self.playerTwoDisplayName = turnResult.newGameState.players.count > 1 ? turnResult.newGameState.players.last!.displayName : ""
-            
-//            // Other Player Display Name
-//            if turnResult.newGameState.players.count > 1 {
-//                if self.localPlayerId == turnResult.newGameState.players.first!.playerId {
-//                    self.otherPlayerName = self.playerTwoDisplayName
-//                } else {
-//                    self.otherPlayerName = self.playerOneDisplayName
-//                }
-//            } else {
-//                self.otherPlayerName = ""
-//            }
-            
+                                    
             // winningPlayerName and winningLocations
             if turnResult.newGameState.playStatus == .endedInWin {
                 
                 self.winningPlayerName = turnResult.winningPlayer?.displayName ?? ""
-                
+
                 var locations: [Position] = []
                 for loc in turnResult.winningLocations! {
                     locations.append(Position(row: loc.row, column: loc.column))
@@ -375,6 +393,7 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
         } else {
             refreshGameInfo()
         }
+        self.hasGameStarted = true
     }
     
     func onGameEndedInStalemate() {

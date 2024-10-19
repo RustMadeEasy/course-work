@@ -318,13 +318,13 @@ open class TicTacToeAPI {
 
     /**
      Retrieves details of the specified Game.
-     - GET /v1/games/{game_id}
+     - GET /v1/games/{game_id}/turns/latest
      - Retrieves details of the specified Game.
      - parameter gameId: (path) Game ID 
      - returns: RequestBuilder<TurnResult> 
      */
     open class func getLatestGameTurnWithRequestBuilder(gameId: String) -> RequestBuilder<TurnResult> {
-        var localVariablePath = "/v1/games/{game_id}"
+        var localVariablePath = "/v1/games/{game_id}/turns/latest"
         let gameIdPreEscape = "\(APIHelper.mapValueToPathItem(gameId))"
         let gameIdPostEscape = gameIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{game_id}", with: gameIdPostEscape, options: .literal, range: nil)
