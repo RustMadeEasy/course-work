@@ -311,6 +311,8 @@ pub mod responses {
 
     #[derive(Clone, Deserialize, Serialize, ToSchema)]
     pub struct TurnResult {
+        /// Player who has an open turn
+        pub(crate) current_player: Option<PlayerInfo>,
         /// The state of the Game after the turn has been taken.
         pub new_game_state: GameState,
         /// If the Game has ended in a win, this contains the winning board positions.

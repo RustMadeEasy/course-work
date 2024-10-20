@@ -168,6 +168,7 @@ impl GameState {
 
         // Return a new Game board state
         Ok(TurnResult {
+            current_player: Some(other_player.clone()), // switch Players
             new_game_state: Self {
                 created_date: Utc::now(),
                 id_of_player_who_made_move: current_player.player_id.clone(),

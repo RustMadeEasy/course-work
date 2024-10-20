@@ -3,6 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**currentPlayer** | [**PlayerInfo**](PlayerInfo.md) |  | [optional] 
 **newGameState** | [**GameState**](GameState.md) |  | 
 **winningLocations** | [BoardPosition] | If the Game has ended in a win, this contains the winning board positions. | [optional] 
 **winningPlayer** | [**PlayerInfo**](PlayerInfo.md) |  | [optional] 

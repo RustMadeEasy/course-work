@@ -12,18 +12,21 @@ import AnyCodable
 
 public struct TurnResult: Codable, JSONEncodable, Hashable {
 
+    public var currentPlayer: PlayerInfo?
     public var newGameState: GameState
     /** If the Game has ended in a win, this contains the winning board positions. */
     public var winningLocations: [BoardPosition]?
     public var winningPlayer: PlayerInfo?
 
-    public init(newGameState: GameState, winningLocations: [BoardPosition]? = nil, winningPlayer: PlayerInfo? = nil) {
+    public init(currentPlayer: PlayerInfo? = nil, newGameState: GameState, winningLocations: [BoardPosition]? = nil, winningPlayer: PlayerInfo? = nil) {
+        self.currentPlayer = currentPlayer
         self.newGameState = newGameState
         self.winningLocations = winningLocations
         self.winningPlayer = winningPlayer
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
+        case currentPlayer = "current_player"
         case newGameState = "new_game_state"
         case winningLocations = "winning_locations"
         case winningPlayer = "winning_player"
@@ -33,6 +36,7 @@ public struct TurnResult: Codable, JSONEncodable, Hashable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(currentPlayer, forKey: .currentPlayer)
         try container.encode(newGameState, forKey: .newGameState)
         try container.encodeIfPresent(winningLocations, forKey: .winningLocations)
         try container.encodeIfPresent(winningPlayer, forKey: .winningPlayer)

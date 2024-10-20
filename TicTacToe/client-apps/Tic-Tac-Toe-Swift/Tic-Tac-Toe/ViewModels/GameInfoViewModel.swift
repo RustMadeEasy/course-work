@@ -155,18 +155,16 @@ extension GameInfoViewModel {
                 self.localPlayer = newGameInfo.gameInfo.players.first(where: { it in
                     it.playerId == self.localPlayer.playerId
                 })!
-                
+
                 self.otherPlayer = newGameInfo.gameInfo.players.first(where: { it in
                     it.playerId != self.localPlayer.playerId
                 })!
                 
                 self._playerOneId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
-                                
-                self._isPlayerOneCurrentPlayer = Published(wrappedValue: true)
-                self._isPlayerTwoCurrentPlayer = Published(wrappedValue: false)
+                                                
                 self._isTwoPlayer = Published(wrappedValue: false)
                 
-                self.updateGameInfo(turnResult: TurnResult(newGameState: newGameInfo.gameInfo.gameState))
+                self.updateGameInfo(turnResult: TurnResult(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
             }
         }
         
@@ -320,8 +318,6 @@ extension GameInfoViewModel {
                                                     localPlayerId: self.localPlayer.playerId, sessionId: self.gamingSessionId)
         
         if let gameInfo = result.gameInfo {
-            // Even though we update the Game Info periodically, let's take this
-            //  opportunity to update it immediately.
             self.updateGameInfo(turnResult: TurnResult(newGameState: gameInfo.gameState))
         }
         
@@ -357,7 +353,10 @@ extension GameInfoViewModel {
             self.gameEnded = turnResult.newGameState.playStatus == .endedInStalemate || turnResult.newGameState.playStatus == .endedInWin
             
             self.hasGameStarted = turnResult.newGameState.playStatus != .notStarted
-                                    
+            
+            self._isPlayerOneCurrentPlayer = Published(wrappedValue: turnResult.currentPlayer?.playerId == self.playerOneId)
+            self._isPlayerTwoCurrentPlayer = Published(wrappedValue: turnResult.currentPlayer?.playerId != self.playerOneId)
+
             // winningPlayerName and winningLocations
             if turnResult.newGameState.playStatus == .endedInWin {
                 
