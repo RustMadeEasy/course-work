@@ -19,7 +19,7 @@ use crate::models::requests::{EndGameParams, EndGamingSessionParams, GameTurnInf
 use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult, TurnResult};
 use crate::models::PlayerInfo;
 use crate::tic_tac_toe_game::TicTacToeGame;
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 use log::debug;
 use validator::Validate;
 
@@ -114,7 +114,7 @@ pub(crate) async fn create_gaming_session(
             };
             Ok(web::Json(creation_result))
         }
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+        Err(error) => Err(error.into()),
     }
 }
 
@@ -148,7 +148,7 @@ pub(crate) async fn create_single_player_game(
     let new_game_params: NewSinglePlayerGameParams = new_game_params.0;
 
     let session = match manager.get_session_by_session_id(&session_id).await {
-        None => return Err(actix_web::error::ErrorInternalServerError(GameError::SessionNotFound)),
+        None => return Err(Error::from(GameError::SessionNotFound)),
         Some(session) => session,
     };
 
@@ -163,9 +163,7 @@ pub(crate) async fn create_single_player_game(
             };
             Ok(web::Json(new_game_info))
         }
-        Err(error) => {
-            Err(actix_web::error::ErrorInternalServerError(error.to_string()))
-        }
+        Err(error) => Err(error.into()),
     }
 }
 
@@ -193,7 +191,7 @@ pub(crate) async fn create_two_player_game(
     let mut manager = manager.lock().await;
 
     let session = match manager.get_session_by_session_id(&session_id).await {
-        None => return Err(actix_web::error::ErrorInternalServerError(GameError::SessionNotFound)),
+        None => return Err(Error::from(GameError::SessionNotFound)),
         Some(session) => session,
     };
 
@@ -208,7 +206,7 @@ pub(crate) async fn create_two_player_game(
             };
             Ok(web::Json(new_game_info))
         }
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+        Err(error) => Err(error.into()),
     }
 }
 
@@ -309,7 +307,7 @@ pub(crate) async fn get_game_history(
 
     match manager.lock().await.get_game_history(&game_id).await {
         Ok(history) => Ok(web::Json(history)),
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+        Err(error) => Err(error.into()),
     }
 }
 
@@ -345,10 +343,10 @@ pub(crate) async fn get_latest_game_turn(
         Ok(game) => {
             match game.latest_turn_result {
                 Some(result) => Ok(web::Json(result)),
-                None => Err(actix_web::error::ErrorInternalServerError(GameError::GameNotStarted)),
+                None => Err(Error::from(GameError::GameNotStarted)),
             }
         }
-        Err(error) => Err(actix_web::error::ErrorInternalServerError(error.to_string())),
+        Err(error) => Err(error.into()),
     }
 }
 
@@ -356,22 +354,22 @@ pub(crate) async fn get_latest_game_turn(
 #[utoipa::path(
     get,
     tag = "TicTacToe",
-    path = "/v1/gaming-sessions/{session_id}/current-games",
+    path = "/v1/gaming-sessions/{session_id}/current-game",
     params(("session_id" = String, Path, description = "Session ID"),),
     responses(
-    (status = 200, description = "Gaming Session Games retrieved successfully", body = Vec<GameInfo>, content_type = "application/json"),
+    (status = 200, description = "Gaming Session Game retrieved successfully", body = GameCreationResult, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed Session ID"),
     (status = 404, description = "Session not found"),
     (status = 500, description = "Internal server error")
 ,), )]
-#[get("/gaming-sessions/{session_id}/current-games")]
-pub(crate) async fn get_session_current_games(
+#[get("/gaming-sessions/{session_id}/current-game")]
+pub(crate) async fn get_session_current_game(
     session_id: web::Path<String>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<Vec<GameInfo>>> {
+) -> actix_web::Result<web::Json<GameCreationResult>> {
     //
 
-    debug!("HTTP GET to /gaming-sessions/{}/current-games", session_id);
+    debug!("HTTP GET to /gaming-sessions/{}/current-game", session_id);
 
     // *** Validate input params ***
     validate_id_string(&session_id)?;
@@ -379,13 +377,26 @@ pub(crate) async fn get_session_current_games(
     match manager
         .lock()
         .await
-        .get_games_in_session(session_id.as_str()).await
+        .get_game_in_session(session_id.as_str()).await
     {
-        Ok(games) => {
-            Ok(web::Json(games.into_iter().map(GameInfo::from).collect()))
+        Ok((session, game)) => {
+            match session.participants.iter().find(|it| it.player_id != session.session_owner.player_id) {
+                None => {
+                    Err(Error::from(GameError::SessionHasTooFewPlayers))
+                }
+                Some(other_player) => {
+                    let result = GameCreationResult {
+                        game_info: GameInfo::from(game),
+                        initiating_player: session.session_owner,
+                        other_player: other_player.clone(),
+                        session_id: session.session_id,
+                    };
+                    Ok(web::Json(result))
+                }
+            }
         }
         Err(error) => {
-            Err(actix_web::error::ErrorInternalServerError(error))
+            Err(Error::from(error))
         }
     }
 }
@@ -422,7 +433,7 @@ pub(crate) async fn join_gaming_session(
         Ok(result) => {
             Ok(web::Json(result))
         }
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+        Err(error) => Err(error.into()),
     }
 }
 
@@ -456,7 +467,7 @@ pub(crate) async fn note_player_readiness(
 
     match manager.note_player_readiness(&session_id, &player_id).await {
         Ok(_) => Ok(HttpResponse::Ok().finish()),
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+        Err(error) => Err(Error::from(error)),
     }
 }
 
@@ -496,7 +507,7 @@ pub(crate) async fn take_turn(
         .take_turn(&game_id, &game_turn_info).await
     {
         Ok(turn_info) => Ok(web::Json(turn_info)),
-        Err(error) => { Err(actix_web::error::ErrorInternalServerError(error.to_string())) }
+        Err(error) => Err(error.into()),
     }
 }
 

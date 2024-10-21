@@ -278,17 +278,18 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         }
     }
 
-    /// Retrieves the specified Session and Game pair.
-    pub(crate) async fn get_games_in_session(&self, session_id: impl Into<String>) -> Result<Vec<T>, GameError> {
+    /// Retrieves the Game being played in the specified Gaming Session.
+    pub(crate) async fn get_game_in_session(&self, session_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
         match self.get_session_by_session_id(&session_id.into()).await {
             None => Err(GameError::SessionNotFound),
             Some(session) => {
+                let session = (*session).clone();
                 match session.current_game {
                     None => {
                         Err(GameError::GameNotFound)
                     }
-                    Some(game) => {
-                        Ok(vec!(game))
+                    Some(ref game) => {
+                        Ok((session.clone(), game.clone()))
                     }
                 }
             }

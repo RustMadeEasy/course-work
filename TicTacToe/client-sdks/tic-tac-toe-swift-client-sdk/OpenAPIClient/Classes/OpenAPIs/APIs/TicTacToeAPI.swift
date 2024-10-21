@@ -352,8 +352,8 @@ open class TicTacToeAPI {
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    open class func getSessionCurrentGames(sessionId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: [GameInfo]?, _ error: Error?) -> Void)) -> RequestTask {
-        return getSessionCurrentGamesWithRequestBuilder(sessionId: sessionId).execute(apiResponseQueue) { result in
+    open class func getSessionCurrentGame(sessionId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: GameCreationResult?, _ error: Error?) -> Void)) -> RequestTask {
+        return getSessionCurrentGameWithRequestBuilder(sessionId: sessionId).execute(apiResponseQueue) { result in
             switch result {
             case let .success(response):
                 completion(response.body, nil)
@@ -365,13 +365,13 @@ open class TicTacToeAPI {
 
     /**
      Retrieves the Games in a Gaming Session.
-     - GET /v1/gaming-sessions/{session_id}/current-games
+     - GET /v1/gaming-sessions/{session_id}/current-game
      - Retrieves the Games in a Gaming Session.
      - parameter sessionId: (path) Session ID 
-     - returns: RequestBuilder<[GameInfo]> 
+     - returns: RequestBuilder<GameCreationResult> 
      */
-    open class func getSessionCurrentGamesWithRequestBuilder(sessionId: String) -> RequestBuilder<[GameInfo]> {
-        var localVariablePath = "/v1/gaming-sessions/{session_id}/current-games"
+    open class func getSessionCurrentGameWithRequestBuilder(sessionId: String) -> RequestBuilder<GameCreationResult> {
+        var localVariablePath = "/v1/gaming-sessions/{session_id}/current-game"
         let sessionIdPreEscape = "\(APIHelper.mapValueToPathItem(sessionId))"
         let sessionIdPostEscape = sessionIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{session_id}", with: sessionIdPostEscape, options: .literal, range: nil)
@@ -386,7 +386,7 @@ open class TicTacToeAPI {
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
-        let localVariableRequestBuilder: RequestBuilder<[GameInfo]>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+        let localVariableRequestBuilder: RequestBuilder<GameCreationResult>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
 
         return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
     }

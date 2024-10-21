@@ -11,7 +11,7 @@ Method | HTTP request | Description
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
 [**getLatestGameTurn**](TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves details of the specified Game.
-[**getSessionCurrentGames**](TicTacToeAPI.md#getsessioncurrentgames) | **GET** /v1/gaming-sessions/{session_id}/current-games | Retrieves the Games in a Gaming Session.
+[**getSessionCurrentGame**](TicTacToeAPI.md#getsessioncurrentgame) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Games in a Gaming Session.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
 [**notePlayerReadiness**](TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Sets a Player as ready to Play.
 [**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player.
@@ -373,9 +373,9 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **getSessionCurrentGames**
+# **getSessionCurrentGame**
 ```swift
-    open class func getSessionCurrentGames(sessionId: String, completion: @escaping (_ data: [GameInfo]?, _ error: Error?) -> Void)
+    open class func getSessionCurrentGame(sessionId: String, completion: @escaping (_ data: GameCreationResult?, _ error: Error?) -> Void)
 ```
 
 Retrieves the Games in a Gaming Session.
@@ -390,7 +390,7 @@ import OpenAPIClient
 let sessionId = "sessionId_example" // String | Session ID
 
 // Retrieves the Games in a Gaming Session.
-TicTacToeAPI.getSessionCurrentGames(sessionId: sessionId) { (response, error) in
+TicTacToeAPI.getSessionCurrentGame(sessionId: sessionId) { (response, error) in
     guard error == nil else {
         print(error)
         return
@@ -410,7 +410,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**[GameInfo]**](GameInfo.md)
+[**GameCreationResult**](GameCreationResult.md)
 
 ### Authorization
 

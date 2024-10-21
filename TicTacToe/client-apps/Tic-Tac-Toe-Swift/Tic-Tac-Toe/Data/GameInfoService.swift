@@ -12,8 +12,8 @@ import OpenAPIClient
 struct GameInfoServiceResult {
     var error: Error? = nil
     var gameInfo: GameInfo? = nil
-    var newGameInfo: GameCreationResult? = nil
-    var newGamingSessionInfo: GamingSessionCreationResult? = nil
+    var gameCreationResult: GameCreationResult? = nil
+    var gamingSessionCreationResult: GamingSessionCreationResult? = nil
     var turnResult: TurnResult? = nil
 }
 
@@ -37,7 +37,7 @@ class GameInfoService {
                     if error == nil {
                         if data != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(newGamingSessionInfo: data) )
+                                continuation.resume(returning: GameInfoServiceResult(gamingSessionCreationResult: data) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
@@ -69,7 +69,7 @@ class GameInfoService {
                     if error == nil {
                         if data != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(newGameInfo: data) )
+                                continuation.resume(returning: GameInfoServiceResult(gameCreationResult: data) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
@@ -100,7 +100,7 @@ class GameInfoService {
                     if error == nil {
                         if data != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(newGameInfo: data) )
+                                continuation.resume(returning: GameInfoServiceResult(gameCreationResult: data) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
@@ -211,11 +211,11 @@ class GameInfoService {
             
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
                 
-                TicTacToeAPI.getSessionCurrentGames(sessionId: sessionId) { games, error in
+                TicTacToeAPI.getSessionCurrentGame(sessionId: sessionId) { info, error in
                     if error == nil {
-                        if games != nil, !games!.isEmpty {
+                        if info != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(gameInfo: games!.first!) )
+                                continuation.resume(returning: GameInfoServiceResult(gameCreationResult: info) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
@@ -247,7 +247,7 @@ class GameInfoService {
                     if error == nil {
                         if data != nil {
                             DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(newGamingSessionInfo: data) )
+                                continuation.resume(returning: GameInfoServiceResult(gamingSessionCreationResult: data) )
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
@@ -276,7 +276,7 @@ class GameInfoService {
                 TicTacToeAPI.notePlayerReadiness(sessionId: sessionId, playerId: playerId) { data, error in
                     if error == nil {
                         DispatchQueue.main.async {
-                            continuation.resume(returning: GameInfoServiceResult(newGamingSessionInfo: nil) )
+                            continuation.resume(returning: GameInfoServiceResult(gamingSessionCreationResult: nil) )
                         }
                     } else {
                         print("joinGame() error: \(String(describing: error))")
