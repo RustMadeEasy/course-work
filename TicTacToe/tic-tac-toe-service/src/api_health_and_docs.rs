@@ -6,6 +6,7 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::api_gaming::*;
+use crate::api_gaming_session::*;
 use crate::game_board::BoardPosition;
 use crate::game_board::GamePiece;
 use crate::game_state::GameState;
