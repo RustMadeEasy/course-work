@@ -1,3 +1,10 @@
+// Tic-Tac-Toe Service
+//
+// Provides 2-client Game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::gaming_session::GamingSession;

@@ -1,3 +1,10 @@
+// Tic-Tac-Toe Service
+//
+// Provides 2-client Game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 #[cfg(test)]
 mod auto_player_tests {
     use crate::auto_player::AutomaticPlayer;

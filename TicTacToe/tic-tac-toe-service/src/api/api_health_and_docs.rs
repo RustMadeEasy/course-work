@@ -5,6 +5,13 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
+/**
+ * Defines and implements the public Health and Docs contracts for this service.
+ *
+ * © 2024 Rust Made Easy. All rights reserved.
+ * @author JoelDavisEngineering@Gmail.com
+ */
+
 use crate::api::api_gaming::*;
 use crate::api::api_gaming_session::*;
 use crate::gaming::game_board::BoardPosition;
@@ -31,12 +38,6 @@ use log::debug;
 use utoipa::openapi::ContactBuilder;
 use utoipa::OpenApi;
 
-/**
- * Defines and implements the public Health and Docs contracts for this service.
- *
- * © 2024 Rust Made Easy. All rights reserved.
- * @author JoelDavisEngineering@Gmail.com
- */
 
 /// Generates the OpenAPI3 docs.
 #[derive(utoipa::OpenApi)]

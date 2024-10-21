@@ -1,3 +1,17 @@
+// Tic-Tac-Toe Service
+//
+// Provides 2-client Game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
+/**
+ * Defines and implements the public Gaming Session contract for this service.
+ *
+ * © 2024 Rust Made Easy. All rights reserved.
+ * @author JoelDavisEngineering@Gmail.com
+ */
+
 use crate::api::api_gaming::validate_id_string;
 use crate::errors::GameError;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
@@ -7,6 +21,7 @@ use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreati
 use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 use log::debug;
 use validator::Validate;
+
 
 /// Creates a new Gaming Session. Returns GamingSessionCreationResult.
 #[utoipa::path(
