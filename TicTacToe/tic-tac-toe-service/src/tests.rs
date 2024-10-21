@@ -7,11 +7,11 @@
 
 #[cfg(test)]
 mod auto_player_tests {
-    use crate::auto_player::AutomaticPlayer;
-    use crate::game_board::{BoardPosition, GamePiece};
-    use crate::game_state::GameState;
+    use crate::gaming::auto_player::AutomaticPlayer;
+    use crate::gaming::game_board::{BoardPosition, GamePiece};
+    use crate::gaming::game_state::GameState;
+    use crate::gaming::tic_tac_toe_game::TicTacToeGame;
     use crate::models::PlayerInfo;
-    use crate::tic_tac_toe_game::TicTacToeGame;
     use uuid::Uuid;
 
     #[test]
@@ -95,12 +95,11 @@ mod auto_player_tests {
 
 #[cfg(test)]
 mod game_board_tests {
-    use uuid::Uuid;
-
-    use crate::game_board::{BoardPosition, GamePiece};
-    use crate::game_state::GameState;
+    use crate::gaming::game_board::{BoardPosition, GamePiece};
+    use crate::gaming::game_state::GameState;
+    use crate::gaming::play_status::PlayStatus;
     use crate::models::PlayerInfo;
-    use crate::play_status::PlayStatus;
+    use uuid::Uuid;
 
     #[test]
     fn test_in_progress_status() {
@@ -330,12 +329,12 @@ mod game_board_tests {
 mod game_play_tests {
     use uuid::Uuid;
 
-    use crate::game_board::{BoardPosition, GamePiece};
-    use crate::game_trait::GameTrait;
+    use crate::gaming::game_board::{BoardPosition, GamePiece};
+    use crate::gaming::game_trait::GameTrait;
+    use crate::gaming::play_status::PlayStatus;
+    use crate::gaming::tic_tac_toe_game::TicTacToeGame;
     use crate::models::requests::GameTurnInfo;
     use crate::models::{GameMode, PlayerInfo};
-    use crate::play_status::PlayStatus;
-    use crate::tic_tac_toe_game::TicTacToeGame;
 
     #[test]
     fn test_get_current_board_state() {
@@ -492,8 +491,8 @@ mod game_play_tests {
 
 #[cfg(test)]
 mod game_state_tests {
-    use crate::game_board::{BoardPosition, GamePiece};
-    use crate::game_state::GameState;
+    use crate::gaming::game_board::{BoardPosition, GamePiece};
+    use crate::gaming::game_state::GameState;
     use crate::models::PlayerInfo;
     use uuid::Uuid;
 

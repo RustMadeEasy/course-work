@@ -44,7 +44,7 @@ pub(crate) struct TicTacToeGame {
     pub(crate) latest_turn_result: Option<TurnResult>,
 
     /// The list of Game States from the very first turn until the latest turn
-    pub(super) play_history: Vec<GameState>,
+    pub(crate) play_history: Vec<GameState>,
 
     /// The list of Players engaged in the Game
     pub(crate) players: Vec<PlayerInfo>,
