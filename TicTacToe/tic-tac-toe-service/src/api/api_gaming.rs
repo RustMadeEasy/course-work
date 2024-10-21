@@ -13,12 +13,12 @@
  */
 
 use crate::errors::GameError;
-use crate::game_state::GameState;
-use crate::gaming_sessions_manager::GamingSessionsManager;
+use crate::gaming::game_state::GameState;
+use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
+use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::requests::{EndGameParams, GameTurnInfo, NewSinglePlayerGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo, TurnResult};
 use crate::models::PlayerInfo;
-use crate::tic_tac_toe_game::TicTacToeGame;
 use actix_web::{delete, get, post, web, Error, HttpResponse};
 use log::debug;
 use validator::Validate;

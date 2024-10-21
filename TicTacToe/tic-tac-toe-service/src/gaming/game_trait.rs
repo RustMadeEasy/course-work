@@ -6,7 +6,7 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::errors::GameError;
-use crate::game_state::GameState;
+use crate::gaming::game_state::GameState;
 use crate::models::requests::GameTurnInfo;
 use crate::models::responses::TurnResult;
 use crate::models::{GameMode, PlayerInfo};

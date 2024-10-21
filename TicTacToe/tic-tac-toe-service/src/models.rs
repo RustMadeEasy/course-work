@@ -13,7 +13,7 @@
  */
 
 use crate::errors::GameError;
-use crate::game_board::GamePiece;
+use crate::gaming::game_board::GamePiece;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -180,7 +180,7 @@ pub mod event_plane {
 }
 
 pub mod requests {
-    use crate::game_board::BoardPosition;
+    use crate::gaming::game_board::BoardPosition;
     use crate::models::AutomaticPlayerSkillLevel;
     use crate::models::INVITATION_CODE_LENGTH;
     use serde::{Deserialize, Serialize};
@@ -242,12 +242,12 @@ pub mod requests {
 }
 
 pub mod responses {
-    use crate::game_board::BoardPosition;
-    use crate::game_state::GameState;
-    use crate::game_trait::GameTrait;
+    use crate::gaming::game_board::BoardPosition;
+    use crate::gaming::game_state::GameState;
+    use crate::gaming::game_trait::GameTrait;
+    use crate::gaming::tic_tac_toe_game::TicTacToeGame;
     use crate::models::event_plane::EventPlaneConfig;
     use crate::models::PlayerInfo;
-    use crate::tic_tac_toe_game::TicTacToeGame;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 

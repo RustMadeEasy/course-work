@@ -5,9 +5,9 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::game_board::BoardPosition;
+use crate::gaming::game_board::BoardPosition;
+use crate::gaming::play_status::PlayStatus;
 use crate::models::PlayerInfo;
-use crate::play_status::PlayStatus;
 
 /// Models the outcome of a Game turn (play). See GameState::determine_outcome_of_play().
 pub struct PlayOutcome {

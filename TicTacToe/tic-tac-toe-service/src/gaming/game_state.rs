@@ -20,17 +20,18 @@ use crate::errors::GameError;
 use crate::errors::GameError::{
     BoardLocationAlreadyOccupied, InvalidBoardPosition, WrongPlayerTakingTurn,
 };
-use crate::game_board::{
-    BoardPosition, GameBoard, GamePiece, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1,
-    BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM,
-    BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP,
-    BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT,
-    BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS,
-};
+use crate::gaming::game_board::{BoardPosition, GameBoard, GamePiece, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1, BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM, BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP, BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT, BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
+use crate::gaming::play_outcome::PlayOutcome;
+use crate::gaming::play_status::PlayStatus;
+// use crate::game_board::{
+//     BoardPosition, GameBoard, GamePiece, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1,
+//     BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM,
+//     BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP,
+//     BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT,
+//     BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS,
+// };
 use crate::models::responses::TurnResult;
 use crate::models::PlayerInfo;
-use crate::play_outcome::PlayOutcome;
-use crate::play_status::PlayStatus;
 
 /// Models the state of a Game at a particular Move (turn).
 #[derive(Clone, Deserialize, Serialize, ToSchema)]

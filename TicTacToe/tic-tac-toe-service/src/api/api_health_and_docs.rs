@@ -5,11 +5,12 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::api_gaming::*;
-use crate::api_gaming_session::*;
-use crate::game_board::BoardPosition;
-use crate::game_board::GamePiece;
-use crate::game_state::GameState;
+use crate::api::api_gaming::*;
+use crate::api::api_gaming_session::*;
+use crate::gaming::game_board::BoardPosition;
+use crate::gaming::game_board::GamePiece;
+use crate::gaming::game_state::GameState;
+use crate::gaming::play_status::PlayStatus;
 use crate::models::event_plane::EventPlaneConfig;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::requests::EndGameParams;
@@ -25,7 +26,6 @@ use crate::models::responses::TurnResult;
 use crate::models::AutomaticPlayerSkillLevel;
 use crate::models::GameMode;
 use crate::models::PlayerInfo;
-use crate::play_status::PlayStatus;
 use actix_web::{get, web, HttpResponse};
 use log::debug;
 use utoipa::openapi::ContactBuilder;

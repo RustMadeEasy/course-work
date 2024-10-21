@@ -7,13 +7,13 @@
 
 use crate::errors::GameError;
 use crate::errors::GameError::BoardLocationAlreadyOccupied;
-use crate::game_board::{BoardPosition, GameBoard, GamePiece};
-use crate::game_state::GameState;
-use crate::game_trait::GameTrait;
+use crate::gaming::game_board::{BoardPosition, GameBoard, GamePiece};
+use crate::gaming::game_state::GameState;
+use crate::gaming::game_trait::GameTrait;
+use crate::gaming::play_status::PlayStatus;
 use crate::models::requests::GameTurnInfo;
 use crate::models::responses::TurnResult;
 use crate::models::{GameMode, PlayerInfo};
-use crate::play_status::PlayStatus;
 use chrono::{DateTime, Utc};
 use log::debug;
 use serde::Serialize;

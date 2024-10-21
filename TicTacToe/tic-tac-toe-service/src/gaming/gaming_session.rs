@@ -5,7 +5,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::game_trait::GameTrait;
+use crate::gaming::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneConfig;
 use crate::models::PlayerInfo;
 use log::debug;

@@ -1,9 +1,9 @@
-use crate::api_gaming::validate_id_string;
+use crate::api::api_gaming::validate_id_string;
 use crate::errors::GameError;
-use crate::gaming_sessions_manager::GamingSessionsManager;
+use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
+use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::requests::{EndGamingSessionParams, JoinSessionParams, NewGamingSessionParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
-use crate::tic_tac_toe_game::TicTacToeGame;
 use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 use log::debug;
 use validator::Validate;
@@ -177,7 +177,7 @@ pub(crate) async fn get_session_current_game(
     debug!("HTTP GET to /gaming-sessions/{}/current-game", session_id);
 
     // *** Validate input params ***
-    crate::api_gaming::validate_id_string(&session_id)?;
+    validate_id_string(&session_id)?;
 
     match manager
         .lock()

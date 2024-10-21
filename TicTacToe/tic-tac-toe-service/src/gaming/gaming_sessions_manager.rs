@@ -5,18 +5,18 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::auto_player::AutomaticPlayer;
 use crate::errors::GameError;
-use crate::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
-use crate::game_state::GameState;
-use crate::game_trait::GameTrait;
-use crate::game_updates_publisher::GameUpdatesPublisher;
-use crate::gaming_session::GamingSession;
+use crate::gaming::auto_player::AutomaticPlayer;
+use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
+use crate::gaming::game_state::GameState;
+use crate::gaming::game_trait::GameTrait;
+use crate::gaming::game_updates_publisher::GameUpdatesPublisher;
+use crate::gaming::gaming_session::GamingSession;
+use crate::gaming::play_status::PlayStatus;
+use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::requests::GameTurnInfo;
 use crate::models::responses::{GamingSessionCreationResult, TurnResult};
 use crate::models::{AutomaticPlayerSkillLevel, GameMode, PlayerInfo};
-use crate::play_status::PlayStatus;
-use crate::tic_tac_toe_game::TicTacToeGame;
 use chrono::Utc;
 use log::debug;
 use std::collections::HashMap;

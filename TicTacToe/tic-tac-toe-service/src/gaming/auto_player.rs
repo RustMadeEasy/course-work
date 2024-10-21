@@ -5,13 +5,13 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::game_board::{BoardPosition, GameBoard, GamePiece};
-use crate::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
-use crate::game_trait::GameTrait;
-use crate::gaming_session::GamingSession;
+use crate::gaming::game_board::{BoardPosition, GameBoard, GamePiece};
+use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
+use crate::gaming::game_trait::GameTrait;
+use crate::gaming::gaming_session::GamingSession;
+use crate::gaming::play_status::PlayStatus;
 use crate::models::requests::GameTurnInfo;
 use crate::models::{AutomaticPlayerSkillLevel, PlayerInfo};
-use crate::play_status::PlayStatus;
 use async_trait::async_trait;
 use log::{debug, error, info};
 use std::marker::PhantomData;

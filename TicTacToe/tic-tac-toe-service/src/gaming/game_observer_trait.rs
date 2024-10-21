@@ -5,8 +5,8 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::game_trait::GameTrait;
-use crate::gaming_session::GamingSession;
+use crate::gaming::game_trait::GameTrait;
+use crate::gaming::gaming_session::GamingSession;
 use async_trait::async_trait;
 
 /// Defines the behavior of a Gaming Session observer.
