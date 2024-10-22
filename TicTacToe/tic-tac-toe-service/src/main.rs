@@ -9,7 +9,7 @@ extern crate core;
 
 use std::net::Ipv4Addr;
 
-use crate::api::api_gaming::*;
+use crate::api::api_games::*;
 use crate::api::api_gaming_session::*;
 use crate::api::api_health_and_docs::*;
 use crate::gaming::gaming_sessions_manager::TicTacToeGamesManager;

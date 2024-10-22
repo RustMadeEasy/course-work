@@ -416,6 +416,7 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
     }
 
     func onPlayerReady() {
+        // All Players are ready in the Gaming Session. So, if this is a Two-Player Game that we have started, let's begin...
         if self.localPlayerInitiatedGamingSession && self.isTwoPlayer {
             Task {
                 await self.createTwoPlayerGame()

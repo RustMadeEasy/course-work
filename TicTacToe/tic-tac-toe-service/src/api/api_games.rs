@@ -24,59 +24,6 @@ use log::debug;
 use validator::Validate;
 
 
-/*
-
-    Single Player session:
-    
-        Player A
-            Creates a new Gaming Session
-            Subscribes to MQTT
-            Creates a new Single-Player Game
-            Plays
-            Ends Game
-            Ends Gaming Session
-
-
-    Two Player session:
-
-        Player A
-            Creates a new Session
-            Subscribes to MQTT
-            Manually invites Player B
-        
-        Player B
-            Joins the Session via the Invitation Code
-            Subscribes to MQTT
-            Indicates Readiness
-
-        Player A
-            Receives PlayerAddedToSession
-            Creates a new Two-Player Game
-
-        Player B
-            Receives GameStarted
-            Joins Game by Session ID
-     
-        Player A and Player B:
-            Play
-            Play
-            Play
-            
-        Either Player:
-            End Game
-            
-        Either Player:
-            Create a new Two-Player Game
-
-        Player A and Player B:
-            Play
-            Play
-            Play
-
-        Either Player:
-            Exit Gaming Session
- */
-
 /// Creates a new Game. Returns Game Creation Result.
 #[utoipa::path(
     post,

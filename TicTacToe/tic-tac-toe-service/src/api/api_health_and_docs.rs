@@ -12,7 +12,7 @@
  * @author JoelDavisEngineering@Gmail.com
  */
 
-use crate::api::api_gaming::*;
+use crate::api::api_games::*;
 use crate::api::api_gaming_session::*;
 use crate::gaming::game_board::BoardPosition;
 use crate::gaming::game_board::GamePiece;

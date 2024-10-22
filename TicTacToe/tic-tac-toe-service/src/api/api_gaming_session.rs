@@ -12,7 +12,7 @@
  * @author JoelDavisEngineering@Gmail.com
  */
 
-use crate::api::api_gaming::validate_id_string;
+use crate::api::api_games::validate_id_string;
 use crate::errors::GameError;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
