@@ -13,7 +13,7 @@
  */
 
 use crate::errors::GameError;
-use crate::gaming::game_board::GamePiece;
+use crate::gaming::game_piece::GamePiece;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -180,7 +180,7 @@ pub mod event_plane {
 }
 
 pub mod requests {
-    use crate::gaming::game_board::BoardPosition;
+    use crate::gaming::board_position::BoardPosition;
     use crate::models::AutomaticPlayerSkillLevel;
     use crate::models::INVITATION_CODE_LENGTH;
     use serde::{Deserialize, Serialize};
@@ -242,7 +242,7 @@ pub mod requests {
 }
 
 pub mod responses {
-    use crate::gaming::game_board::BoardPosition;
+    use crate::gaming::board_position::BoardPosition;
     use crate::gaming::game_state::GameState;
     use crate::gaming::game_trait::GameTrait;
     use crate::gaming::tic_tac_toe_game::TicTacToeGame;
@@ -250,6 +250,19 @@ pub mod responses {
     use crate::models::PlayerInfo;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
+
+    /// Models the results of a call to the Create Game endpoint.
+    #[derive(Deserialize, Serialize, ToSchema)]
+    pub struct GameCreationResult {
+        /// The initial Game state.
+        pub(crate) game_info: GameInfo,
+        /// The Player who initiated the Gaming Session.
+        pub(crate) initiating_player: PlayerInfo,
+        /// ID of the guest Player.
+        pub(crate) other_player: PlayerInfo,
+        /// ID of the Gaming Session.
+        pub(crate) session_id: String,
+    }
 
     /// Models the current view of a Game.
     #[derive(Deserialize, Serialize, ToSchema)]
@@ -293,19 +306,6 @@ pub mod responses {
         /// ID of the guest Player.
         pub(crate) other_player: Option<PlayerInfo>,
         /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
-        pub(crate) session_id: String,
-    }
-
-    /// Models the results of a call to the Create Game endpoint.
-    #[derive(Deserialize, Serialize, ToSchema)]
-    pub struct GameCreationResult {
-        /// The initial Game state.
-        pub(crate) game_info: GameInfo,
-        /// The Player who initiated the Gaming Session.
-        pub(crate) initiating_player: PlayerInfo,
-        /// ID of the guest Player.
-        pub(crate) other_player: PlayerInfo,
-        /// ID of the Gaming Session.
         pub(crate) session_id: String,
     }
 

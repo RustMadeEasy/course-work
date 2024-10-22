@@ -15,6 +15,7 @@ verification-code-gen = { path = "../../RustLibs/verification-code-gen" }
 
 # *** Outside dependencies ***
 actix-web = "4.5.1"
+async-trait = "0.1.83"
 chrono = { version = "0.4.37", features = ["serde"] }
 derive_more = { version = "1.0.0", features = ["full"] }
 env_logger = "0.11.2"
@@ -30,4 +31,3 @@ utoipa = { version = "4.0.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "7.1.0", features = ["actix-web"] }
 uuid = { version = "1.7.0", features = ["v4"] }
 validator = { version = "0.18.1", features = ["derive"] }
-async-trait = "0.1.83"

@@ -5,7 +5,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::gaming::game_board::BoardPosition;
+use crate::gaming::board_position::BoardPosition;
 use crate::gaming::play_status::PlayStatus;
 use crate::models::PlayerInfo;
 

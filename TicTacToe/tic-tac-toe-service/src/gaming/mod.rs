@@ -1,4 +1,4 @@
-pub(crate) mod auto_player;
+pub(crate) mod automatic_player;
 pub(crate) mod game_board;
 pub(crate) mod game_observer_trait;
 pub(crate) mod game_state;
@@ -9,3 +9,5 @@ pub(crate) mod play_outcome;
 pub(crate) mod play_status;
 pub(crate) mod tic_tac_toe_game;
 pub(crate) mod game_updates_publisher;
+pub(crate) mod board_position;
+pub(crate) mod game_piece;

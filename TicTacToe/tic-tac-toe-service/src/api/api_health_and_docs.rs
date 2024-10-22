@@ -14,8 +14,8 @@
 
 use crate::api::api_games::*;
 use crate::api::api_gaming_session::*;
-use crate::gaming::game_board::BoardPosition;
-use crate::gaming::game_board::GamePiece;
+use crate::gaming::board_position::BoardPosition;
+use crate::gaming::game_piece::GamePiece;
 use crate::gaming::game_state::GameState;
 use crate::gaming::play_status::PlayStatus;
 use crate::models::event_plane::EventPlaneConfig;

@@ -7,7 +7,9 @@
 
 use crate::errors::GameError;
 use crate::errors::GameError::BoardLocationAlreadyOccupied;
-use crate::gaming::game_board::{BoardPosition, GameBoard, GamePiece};
+use crate::gaming::board_position::BoardPosition;
+use crate::gaming::game_board::GameBoard;
+use crate::gaming::game_piece::GamePiece;
 use crate::gaming::game_state::GameState;
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::play_status::PlayStatus;

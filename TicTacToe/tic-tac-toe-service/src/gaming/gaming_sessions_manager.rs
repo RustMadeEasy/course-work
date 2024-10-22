@@ -6,7 +6,7 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::errors::GameError;
-use crate::gaming::auto_player::AutomaticPlayer;
+use crate::gaming::automatic_player::AutomaticPlayer;
 use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
 use crate::gaming::game_state::GameState;
 use crate::gaming::game_trait::GameTrait;

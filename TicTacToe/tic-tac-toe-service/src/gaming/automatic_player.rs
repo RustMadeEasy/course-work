@@ -5,8 +5,10 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::gaming::game_board::{BoardPosition, GameBoard, GamePiece};
+use crate::gaming::board_position::BoardPosition;
+use crate::gaming::game_board::GameBoard;
 use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
+use crate::gaming::game_piece::GamePiece;
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::gaming_session::GamingSession;
 use crate::gaming::play_status::PlayStatus;

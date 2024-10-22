@@ -7,9 +7,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
-use validator::Validate;
+use crate::gaming::game_piece::GamePiece;
 
 /* Tic-Tac-Toe is played on a 3-by-3 grid. */
 pub(crate) const MAX_BOARD_COLUMNS: usize = 3;
@@ -31,50 +29,3 @@ pub(crate) const BIN_THREE_ACROSS_VERTICAL_CENTER: i16 = 0b_010_010_010;
 pub(crate) const BIN_THREE_ACROSS_VERTICAL_RIGHT: i16 = 0b_001_001_001;
 pub(crate) const BIN_THREE_ACROSS_DIAGONAL_1: i16 = 0b_100_010_001;
 pub(crate) const BIN_THREE_ACROSS_DIAGONAL_2: i16 = 0b_001_010_100;
-
-/// Models a position on the Game board.
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema, Validate)]
-pub struct BoardPosition {
-    #[validate(range(min = 0, max = 2))]
-    pub(crate) row: usize,
-    #[validate(range(min = 0, max = 2))]
-    pub(crate) column: usize,
-}
-
-impl BoardPosition {
-    /// Creates a new BoardPosition instance.
-    pub(crate) fn new(row: usize, column: usize) -> Self {
-        Self { row, column }
-    }
-}
-
-/// Models a Game Piece with which the Tic-Tac-Toe Game is played.
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema)]
-pub enum GamePiece {
-    #[default]
-    Unselected,
-    X,
-    O,
-}
-
-impl GamePiece {
-    //
-
-    /// Selects the opposite game piece. If self is X, then O is returned. If self is O, X is 
-    /// returned. If self is Unselected, Unselected is returned.
-    pub(crate) fn opposite(&self) -> Self {
-        match self {
-            GamePiece::Unselected => GamePiece::Unselected,
-            GamePiece::X => GamePiece::O,
-            GamePiece::O => GamePiece::X,
-        }
-    }
-
-    /// Makes a random selection between the X and O game pieces.
-    pub fn random_choice() -> Self {
-        match rand::random::<bool>() {
-            true => Self::O,
-            false => Self::X,
-        }
-    }
-}
