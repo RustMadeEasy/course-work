@@ -232,12 +232,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         debug!("GamesManager: end_game() called for game: {:?}.", game_id);
 
-        // TODO: JD: only allow Players who are part of the Game's Gaming Session to end the Game.
-
-        match self.get_session_by_session_id(session_id).await {
+        let session = match self.get_session_by_session_id(session_id).await {
             Some(session) => session,
             None => return Err(GameError::SessionNotFound),
         };
+
+        // Only allow Players who are part of the Game's Gaming Session to end the Game.
+        if !session.participants.iter().any(|it| it.player_id == _player_id) {
+            return Err(GameError::PlayerNotFound);
+        }
 
         let game = self.get_game_by_id(game_id).await?;
 
@@ -256,12 +259,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         debug!("GamesManager: end_gaming_session() called for session: {:?}.", session_id);
 
-        // TODO: JD: only allow Players who are part of the session to end the session.
-
-        match self.get_session_by_invitation_code(session_id).await {
+        match self.get_session_by_session_id(session_id).await {
             None => Err(GameError::SessionNotFound),
             Some(session) => {
                 //
+
+                // Only allow Players who are part of the session to end the session.
+                if !session.participants.iter().any(|it| it.player_id == _player_id) {
+                    return Err(GameError::PlayerNotFound);
+                }
 
                 // Close down the session's game, if any
                 if let Some(ref game) = session.current_game {
