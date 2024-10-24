@@ -38,7 +38,7 @@ memory safety, meaning that all references point to valid memory. It does so wit
 instead, both memory safety errors and data races are prevented by the "borrow checker", which tracks the object
 lifetime of references at compile time."
 
-## API Documentation
+## Documentation
 
 ### Swagger UI
 
@@ -52,13 +52,10 @@ Here is a screenshot:
 
 ### Code-Level Documentation
 
-From the source root folder (tic-tac-toe-service) run the following command:
+From the source root folder (tic-tac-toe-service) run the following command to build and open the resulting JavaDoc
+style documentation:
 
-`cargo doc`
-
-Then open the resulting JavaDoc style documentation. For example, in macOS you can run the following command:
-
-`open ./target/doc/tic_tac_toe_service/index.html`
+`cargo doc && open ./target/doc/tic_tac_toe_service/index.html`
 
 Here is a screenshot:
 

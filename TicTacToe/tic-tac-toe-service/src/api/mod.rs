@@ -1,6 +1,7 @@
-pub mod api_games;
-pub mod api_gaming_session;
-pub mod api_health_and_docs;
+pub(crate) mod games;
+pub(crate) mod gaming_session;
+pub(crate) mod docs;
+pub(crate) mod health;
 
 /*  Single Player session:
     

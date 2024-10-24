@@ -10,10 +10,10 @@ use crate::gaming::play_status::PlayStatus;
 use crate::models::PlayerInfo;
 
 /// Models the outcome of a Game turn (play). See GameState::determine_outcome_of_play().
-pub struct PlayOutcome {
-    pub play_status: PlayStatus,
-    pub winning_player: Option<PlayerInfo>,
-    pub winning_position: Option<Vec<BoardPosition>>,
+pub(crate) struct PlayOutcome {
+    pub(crate) play_status: PlayStatus,
+    pub(crate) winning_player: Option<PlayerInfo>,
+    pub(crate) winning_position: Option<Vec<BoardPosition>>,
 }
 
 impl PlayOutcome {

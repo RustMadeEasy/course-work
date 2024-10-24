@@ -38,22 +38,22 @@ pub(crate) enum AutomaticPlayerSkillLevel {
 
 /// Specifies the type of Game - single player or two players.
 #[derive(Debug, Deserialize, PartialEq, Serialize, ToSchema, Clone)]
-pub enum GameMode {
+pub(crate) enum GameMode {
     SinglePlayer,
     TwoPlayers,
 }
 
 /// Models a Tic-Tac-Toe Game Player.
 #[derive(Clone, Debug, Default, Deserialize, Serialize, ToSchema, Validate)]
-pub struct PlayerInfo {
+pub(crate) struct PlayerInfo {
     /// Name of the Player.
-    pub display_name: String,
+    pub(crate) display_name: String,
     /// The Game Piece with which the Tic-Tac-Toe Game is played.
-    pub game_piece: GamePiece,
+    pub(crate) game_piece: GamePiece,
     /// Indicates that this Player's moves are automated, i.e., guided by this service.
-    pub is_automated: bool,
+    pub(crate) is_automated: bool,
     /// Unique ID of the Player.
-    pub player_id: String,
+    pub(crate) player_id: String,
 }
 
 impl PlayerInfo {
@@ -89,7 +89,7 @@ impl PlayerInfo {
     }
 }
 
-pub mod event_plane {
+pub(crate) mod event_plane {
     use serde::{Deserialize, Serialize};
     use strum::Display;
     use utoipa::ToSchema;
@@ -98,7 +98,7 @@ pub mod event_plane {
 
     /// Models the configuration required for clients to subscribe to real-time Game state updates.
     #[derive(Clone, Default, Deserialize, Serialize, ToSchema)]
-    pub struct EventPlaneConfig {
+    pub(crate) struct EventPlaneConfig {
         //
 
         /// Address of the real-time messaging broker.
@@ -136,7 +136,7 @@ pub mod event_plane {
     /// GameCreationResult model that is returned when creating a new Game or when adding a new
     /// Player to a Game.
     #[derive(Deserialize, Display, Serialize, ToSchema)]
-    pub enum EventPlaneTopicNames {
+    pub(crate) enum EventPlaneTopicNames {
         /// Called when the Game has been deleted from the platform.
         GameDeleted,
         /// Called when the Game has ended in a stalemate.
@@ -179,7 +179,7 @@ pub mod event_plane {
     }
 }
 
-pub mod requests {
+pub(crate) mod requests {
     use crate::gaming::board_position::BoardPosition;
     use crate::models::AutomaticPlayerSkillLevel;
     use crate::models::INVITATION_CODE_LENGTH;
@@ -194,54 +194,54 @@ pub mod requests {
 
     /// Models info needed to end a Game.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
-    pub struct EndGameParams {
+    pub(crate) struct EndGameParams {
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub player_id: String,
+        pub(crate) player_id: String,
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub session_id: String,
+        pub(crate) session_id: String,
     }
 
     /// Models info needed to end a Gaming Session.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
-    pub struct EndGamingSessionParams {
+    pub(crate) struct EndGamingSessionParams {
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub player_id: String,
+        pub(crate) player_id: String,
     }
 
     /// Models info needed to perform a Game turn.
     #[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
-    pub struct GameTurnInfo {
-        pub destination: BoardPosition,
+    pub(crate) struct GameTurnInfo {
+        pub(crate) destination: BoardPosition,
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub player_id: String,
+        pub(crate) player_id: String,
         #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
-        pub session_id: String,
+        pub(crate) session_id: String,
     }
 
     /// Models info needed to join a Gaming Session.
     #[derive(Debug, Deserialize, ToSchema, Validate)]
-    pub struct JoinSessionParams {
+    pub(crate) struct JoinSessionParams {
         #[validate(length(min = "INVITATION_CODE_LENGTH", max = "INVITATION_CODE_LENGTH"))]
-        pub game_invitation_code: String,
+        pub(crate) game_invitation_code: String,
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
-        pub player_display_name: String,
+        pub(crate) player_display_name: String,
     }
 
     /// Models info needed to start a new Gaming Session.
     #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
-    pub struct NewGamingSessionParams {
+    pub(crate) struct NewGamingSessionParams {
         #[validate(length(min = "NAME_LENGTH_MIN", max = "NAME_LENGTH_MAX"))]
-        pub session_owner_display_name: String,
+        pub(crate) session_owner_display_name: String,
     }
 
     /// Models info needed to start a new Single-Player Game.
     #[derive(Clone, Debug, Deserialize, ToSchema, Validate)]
-    pub struct NewSinglePlayerGameParams {
-        pub computer_skill_level: AutomaticPlayerSkillLevel,
+    pub(crate) struct NewSinglePlayerGameParams {
+        pub(crate) computer_skill_level: AutomaticPlayerSkillLevel,
     }
 }
 
-pub mod responses {
+pub(crate) mod responses {
     use crate::gaming::board_position::BoardPosition;
     use crate::gaming::game_state::GameState;
     use crate::gaming::game_trait::GameTrait;
@@ -253,7 +253,7 @@ pub mod responses {
 
     /// Models the results of a call to the Create Game endpoint.
     #[derive(Deserialize, Serialize, ToSchema)]
-    pub struct GameCreationResult {
+    pub(crate) struct GameCreationResult {
         /// The initial Game state.
         pub(crate) game_info: GameInfo,
         /// The Player who initiated the Gaming Session.
@@ -266,14 +266,14 @@ pub mod responses {
 
     /// Models the current view of a Game.
     #[derive(Deserialize, Serialize, ToSchema)]
-    pub struct GameInfo {
+    pub(crate) struct GameInfo {
         //
 
         /// Player who has an open turn
         pub(crate) current_player: Option<PlayerInfo>,
 
         /// The current state the Game
-        pub game_state: GameState,
+        pub(crate) game_state: GameState,
 
         /// Unique ID of the Game instance
         pub(crate) id: String,
@@ -296,7 +296,7 @@ pub mod responses {
 
     /// Models the results of a call to the Create Gaming Session endpoint.
     #[derive(Deserialize, Serialize, ToSchema)]
-    pub struct GamingSessionCreationResult {
+    pub(crate) struct GamingSessionCreationResult {
         /// Specifies the configuration required for clients to subscribe to real-time Game state updates.
         pub(crate) event_plane_config: EventPlaneConfig,
         /// The Player who initiated the Gaming Session.
@@ -310,14 +310,14 @@ pub mod responses {
     }
 
     #[derive(Clone, Deserialize, Serialize, ToSchema)]
-    pub struct TurnResult {
+    pub(crate) struct TurnResult {
         /// Player who has an open turn
         pub(crate) current_player: Option<PlayerInfo>,
         /// The state of the Game after the turn has been taken.
-        pub new_game_state: GameState,
+        pub(crate) new_game_state: GameState,
         /// If the Game has ended in a win, this contains the winning board positions.
-        pub winning_locations: Option<Vec<BoardPosition>>,
+        pub(crate) winning_locations: Option<Vec<BoardPosition>>,
         /// If the Game has ended in a win, this indicates the winning Player.
-        pub winning_player: Option<PlayerInfo>,
+        pub(crate) winning_player: Option<PlayerInfo>,
     }
 }

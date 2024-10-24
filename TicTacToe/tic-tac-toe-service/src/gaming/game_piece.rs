@@ -3,7 +3,7 @@ use utoipa::ToSchema;
 
 /// Models a Game Piece with which the Tic-Tac-Toe Game is played.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema)]
-pub enum GamePiece {
+pub(crate) enum GamePiece {
     #[default]
     Unselected,
     X,
@@ -24,7 +24,7 @@ impl GamePiece {
     }
 
     /// Makes a random selection between the X and O game pieces.
-    pub fn random_choice() -> Self {
+    pub(crate) fn random_choice() -> Self {
         match rand::random::<bool>() {
             true => Self::O,
             false => Self::X,

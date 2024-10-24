@@ -12,8 +12,8 @@
  * @author JoelDavisEngineering@Gmail.com
  */
 
-use crate::api::api_games::*;
-use crate::api::api_gaming_session::*;
+use crate::api::games::*;
+use crate::api::gaming_session::*;
 use crate::gaming::board_position::BoardPosition;
 use crate::gaming::game_piece::GamePiece;
 use crate::gaming::game_state::GameState;
@@ -33,13 +33,13 @@ use crate::models::responses::TurnResult;
 use crate::models::AutomaticPlayerSkillLevel;
 use crate::models::GameMode;
 use crate::models::PlayerInfo;
-use actix_web::{get, web, HttpResponse};
+use actix_web::get;
 use log::debug;
-use utoipa::openapi::ContactBuilder;
+use utoipa::openapi::{ContactBuilder, Tag};
 use utoipa::OpenApi;
 
 
-/// Generates the OpenAPI3 docs.
+/// Generates the OpenAPI3 documentation.
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(
@@ -88,7 +88,6 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
     debug!("HTTP GET to /api_docs");
 
     let mut doc = ApiDoc::openapi();
-    doc.info.title = "Tic-Tac-Toe Service".to_string();
     doc.info.contact = Some(
         ContactBuilder::new()
             .name(Some("Support"))
@@ -96,13 +95,8 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
             .email(Some("JoelDavisEngineering@Gmail.com"))
             .build(),
     );
+    doc.info.title = "Tic-Tac-Toe Service".to_string();
+    doc.tags = Some(vec!(Tag::new("Tic-Tac-Toe Service")));
     let json = doc.to_json()?.to_string();
     Ok(json)
-}
-
-/// Responds with the health of the Service.
-#[get("/health")]
-pub(crate) async fn health() -> HttpResponse {
-    debug!("HTTP GET to /health");
-    HttpResponse::Ok().json(web::Json("Up"))
 }

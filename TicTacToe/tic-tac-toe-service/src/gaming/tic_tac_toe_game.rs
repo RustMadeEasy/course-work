@@ -6,7 +6,6 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::errors::GameError;
-use crate::errors::GameError::BoardLocationAlreadyOccupied;
 use crate::gaming::board_position::BoardPosition;
 use crate::gaming::game_board::GameBoard;
 use crate::gaming::game_piece::GamePiece;
@@ -81,14 +80,6 @@ impl TicTacToeGame {
         self.players.push(other_player.clone());
 
         self.current_player = Some(starting_player);
-    }
-
-    /// Determines whether the specified board location is occupied by a Game piece.
-    fn is_location_occupied(game_board: &GameBoard, position: &BoardPosition) -> bool {
-        if !GameState::is_valid_board_position(position) {
-            return false;
-        }
-        game_board[position.row][position.column] != GamePiece::Unselected
     }
 }
 
@@ -182,8 +173,19 @@ impl GameTrait for TicTacToeGame {
             return Err(GameError::GameHasAlreadyEnded);
         }
 
+        // Make sure the Game has begun.
         if self.current_player.is_none() {
             return Err(GameError::GameNotStarted);
+        }
+
+        // Make sure the position is valid.
+        if !GameState::is_valid_board_position(&game_turn_info.destination) {
+            return Err(GameError::InvalidBoardPosition);
+        }
+
+        // Make sure that the target location is not already occupied.
+        if board_state.get_game_board()[game_turn_info.destination.row][game_turn_info.destination.column] != GamePiece::Unselected {
+            return Err(GameError::BoardLocationAlreadyOccupied);
         }
 
         // Get the Player - also validating that the correct IDs have been sent in.
@@ -194,14 +196,8 @@ impl GameTrait for TicTacToeGame {
             return Err(GameError::WrongPlayerTakingTurn);
         }
 
-        // Make sure that the target location is not already occupied.
-        if Self::is_location_occupied(&board_state.get_game_board(), &game_turn_info.destination) {
-            return Err(BoardLocationAlreadyOccupied);
-        }
-
         // Load the other Player.
-        let other_player =
-            PlayerInfo::get_other_player_info_by_id(&game_turn_info.player_id, &self.players)?;
+        let other_player = PlayerInfo::get_other_player_info_by_id(&game_turn_info.player_id, &self.players)?;
 
         // Take the turn and make a new Board State by adding the specified piece to the board of
         // the current Board State.

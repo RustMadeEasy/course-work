@@ -10,7 +10,7 @@ use utoipa::ToSchema;
 
 /// Lists valid Game play statuses.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema)]
-pub enum PlayStatus {
+pub(crate) enum PlayStatus {
     EndedInStalemate,
     EndedInWin,
     InProgress,

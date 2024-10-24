@@ -12,7 +12,7 @@ use derive_more::{Display, Error};
 
 /// Defines the errors used throughout the service.
 #[derive(Debug, Display, Error, PartialEq)]
-pub enum GameError {
+pub(crate) enum GameError {
     BoardLocationAlreadyOccupied,
     GameHasAlreadyEnded,
     GameNotStarted,

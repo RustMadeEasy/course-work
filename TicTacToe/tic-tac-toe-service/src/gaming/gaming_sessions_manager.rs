@@ -90,7 +90,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         Ok(session.clone())
     }
 
-    /// Notifies all Game Session listeners that the players are ready to being a Game.
+    /// Called to indicate that a Player is ready to Play. This is required as part of the handshaking 
+    /// during new Game setup.
     pub(crate) async fn note_player_readiness(&self, session_id: &str, _player_id: &str) -> Result<(), GameError> {
         //
 

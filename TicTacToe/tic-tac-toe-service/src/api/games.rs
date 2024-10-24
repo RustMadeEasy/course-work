@@ -153,8 +153,8 @@ pub(crate) async fn end_game(
     }
 }
 
-/// Retrieves the history of the Game States from the initial move (turn) to the latest
-/// Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
+/// Retrieves the history of Game States from the initial move (turn) to the latest Game State. 
+/// This can be used, for instance, to create an animated time-lapse of the Game play.
 #[utoipa::path(
     get,
     tag = "TicTacToe",
@@ -183,7 +183,7 @@ pub(crate) async fn get_game_history(
     }
 }
 
-/// Retrieves details of the specified Game.
+/// Retrieves the most recent Turn Result for the specified Game.
 #[utoipa::path(
     get,
     tag = "TicTacToe",
@@ -222,7 +222,7 @@ pub(crate) async fn get_latest_game_turn(
     }
 }
 
-/// Make a Game move (turn) for the specified Player.
+/// Make a Game move (turn) for the specified Player. Returns the Turn Result.
 #[utoipa::path(
     post,
     tag = "TicTacToe",

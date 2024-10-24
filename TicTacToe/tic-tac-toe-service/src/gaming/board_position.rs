@@ -6,7 +6,7 @@ use validator::Validate;
 
 /// Models a position on the Game board.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema, Validate)]
-pub struct BoardPosition {
+pub(crate) struct BoardPosition {
     #[validate(range(min = 0, max = 2))]
     pub(crate) row: usize,
     #[validate(range(min = 0, max = 2))]

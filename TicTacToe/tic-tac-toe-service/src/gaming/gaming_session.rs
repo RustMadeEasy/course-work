@@ -18,13 +18,17 @@ use verification_code_gen::verification_code_generator::VerificationCodeGenerato
 /// A GamingSession is the context under which Players communicate and play one or more Games.
 #[derive(Clone, Default, Deserialize, Serialize, ToSchema, Validate)]
 pub(crate) struct GamingSession<T: GameTrait + Clone + Send + Sync + 'static> {
+    /// The Game currently being played.
     pub(crate) current_game: Option<T>,
+    /// MQTT config info
     pub(crate) event_plane_config: EventPlaneConfig,
     /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
     pub(crate) session_id: String,
     /// Unique Code that is used to invite others to the Gaming Session.
     pub(crate) invitation_code: String,
+    /// List of Players in the Gaming Session.
     pub(crate) participants: Vec<PlayerInfo>,
+    /// The Player who created the Gaming Session.
     pub(crate) session_owner: PlayerInfo,
 }
 
@@ -42,17 +46,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSession<T> {
     }
 
     /// Creates a unique, 6-digit code for use as an Invitation.
-    ///
-    /// NOTE: We use a 6-digit Invitation Code instead of performing the handshaking
-    /// with the Gaming Session ID for two reasons:
-    ///     1) We don't want to expose the Session ID to clients.
-    ///     2) A 6-digit code is practical for end-users to utilize.
     fn generate_invitation_code() -> String {
         debug!("GamingSession: generate_invitation_code() called.");
         VerificationCodeGenerator::generate()
     }
 
-    /// Returns the configuration clients can use to subscribe to game change events.
+    /// Returns the configuration that clients can use to subscribe to game change events.
     pub(crate) fn get_event_plane_config(&self) -> EventPlaneConfig {
         self.event_plane_config.clone()
     }

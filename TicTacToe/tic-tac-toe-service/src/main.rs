@@ -9,9 +9,10 @@ extern crate core;
 
 use std::net::Ipv4Addr;
 
-use crate::api::api_games::*;
-use crate::api::api_gaming_session::*;
-use crate::api::api_health_and_docs::*;
+use crate::api::docs::*;
+use crate::api::games::*;
+use crate::api::gaming_session::*;
+use crate::api::health::get_health;
 use crate::gaming::gaming_sessions_manager::TicTacToeGamesManager;
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer};
@@ -23,7 +24,7 @@ use utoipa_swagger_ui::SwaggerUi;
 mod errors;
 mod models;
 mod tests;
-pub mod api;
+pub(crate) mod api;
 mod gaming;
 
 /// The HTTP port through which this service is accessed.
@@ -62,7 +63,7 @@ async fn main() -> std::io::Result<()> {
                 .service(take_turn)
                 // *** Health & Docs API ***
                 .service(api_docs)
-                .service(health)
+                .service(get_health)
                 .service(
                     // Open up access to SwaggerUI
                     SwaggerUi::new("/swagger-ui/{_:.*}").url("/v1/api-docs", ApiDoc::openapi()),
