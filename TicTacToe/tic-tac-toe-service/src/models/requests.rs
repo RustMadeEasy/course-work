@@ -1,5 +1,12 @@
-use crate::gaming::board_position::BoardPosition;
+// Tic-Tac-Toe Service
+//
+// Provides 2-client Game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 use crate::models::AutomaticPlayerSkillLevel;
+use crate::models::BoardPosition;
 use crate::models::INVITATION_CODE_LENGTH;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -28,7 +35,7 @@ pub struct EndGamingSessionParams {
 
 /// Models info needed to perform a Game turn.
 #[derive(Debug, Deserialize, Serialize, ToSchema, Validate)]
-pub struct GameTurnInfo {
+pub struct GameTurnParams {
     pub destination: BoardPosition,
     #[validate(length(min = "ID_LENGTH_MIN", max = "ID_LENGTH_MAX"))]
     pub player_id: String,

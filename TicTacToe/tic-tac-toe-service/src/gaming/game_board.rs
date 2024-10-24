@@ -7,7 +7,7 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::gaming::game_piece::GamePiece;
+use crate::models::GamePiece;
 
 /* Tic-Tac-Toe is played on a 3-by-3 grid. */
 pub(crate) const MAX_BOARD_COLUMNS: usize = 3;

@@ -9,78 +9,21 @@
  * Defines Game State related structs and enums.
  */
 
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use log::debug;
 
-
-use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
 use crate::errors::GameError;
 use crate::errors::GameError::{
     BoardLocationAlreadyOccupied, InvalidBoardPosition, WrongPlayerTakingTurn,
 };
-use crate::gaming::board_position::BoardPosition;
 use crate::gaming::game_board::{GameBoard, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1, BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM, BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP, BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT, BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
-use crate::gaming::game_piece::GamePiece;
 use crate::gaming::play_outcome::PlayOutcome;
-use crate::gaming::play_status::PlayStatus;
 use crate::models::responses::TurnResult;
-// use crate::game_board::{
-//     BoardPosition, GameBoard, GamePiece, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1,
-//     BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM,
-//     BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP,
-//     BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT,
-//     BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS,
-// };
+use crate::models::GamePiece;
+use crate::models::PlayStatus;
 use crate::models::PlayerInfo;
-
-/// Models the state of a Game at a particular Move (turn).
-#[derive(Clone, Deserialize, Serialize, ToSchema)]
-pub(crate) struct GameState {
-    //
-
-    /// The time at which this Game State was created. This is used for cleanup of abandoned Games.
-    #[serde(skip)]
-    pub(crate) created_date: DateTime<Utc>,
-
-    /// ID of the Player who made this Move.
-    id_of_player_who_made_move: String,
-
-    /// The board on which the Game is played.
-    pub(crate) game_board: [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS],
-
-    /// The current status of the Game.
-    pub(crate) play_status: PlayStatus,
-}
-
-// Initialization
-impl GameState {
-    //
-
-    /// Creates a new GameState instance.
-    pub(crate) fn new() -> Self {
-        Self {
-            created_date: Utc::now(),
-            id_of_player_who_made_move: "".to_string(),
-            game_board: Default::default(),
-            play_status: PlayStatus::NotStarted,
-        }
-    }
-
-    /// Creates an initial GameState instance using a Player and a PlayStatus.
-    pub(crate) fn new_with_initial_play_status(
-        current_player_id: &str,
-        play_status: &PlayStatus,
-    ) -> Self {
-        Self {
-            created_date: Utc::now(),
-            id_of_player_who_made_move: current_player_id.to_string(),
-            game_board: Default::default(),
-            play_status: play_status.clone(),
-        }
-    }
-}
+use crate::models::{BoardPosition, GameState};
 
 // Property accessors.
 impl GameState {

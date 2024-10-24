@@ -8,14 +8,14 @@
 use crate::errors::GameError;
 use crate::gaming::automatic_player::AutomaticPlayer;
 use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
-use crate::gaming::game_state::GameState;
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::game_updates_publisher::GameUpdatesPublisher;
 use crate::gaming::gaming_session::GamingSession;
-use crate::gaming::play_status::PlayStatus;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
-use crate::models::requests::GameTurnInfo;
+use crate::models::requests::GameTurnParams;
 use crate::models::responses::{GamingSessionCreationResult, TurnResult};
+use crate::models::GameState;
+use crate::models::PlayStatus;
 use crate::models::{AutomaticPlayerSkillLevel, GameMode, PlayerInfo};
 use chrono::Utc;
 use log::debug;
@@ -422,7 +422,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     pub(crate) async fn take_turn(
         &mut self,
         game_id: &str,
-        game_turn_info: &GameTurnInfo,
+        game_turn_info: &GameTurnParams,
     ) -> Result<TurnResult, GameError> {
         //
 

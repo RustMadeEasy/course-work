@@ -5,14 +5,14 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::gaming::board_position::BoardPosition;
 use crate::gaming::game_board::GameBoard;
 use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
-use crate::gaming::game_piece::GamePiece;
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::gaming_session::GamingSession;
-use crate::gaming::play_status::PlayStatus;
-use crate::models::requests::GameTurnInfo;
+use crate::models::requests::GameTurnParams;
+use crate::models::BoardPosition;
+use crate::models::GamePiece;
+use crate::models::PlayStatus;
 use crate::models::{AutomaticPlayerSkillLevel, PlayerInfo};
 use async_trait::async_trait;
 use log::{debug, error, info};
@@ -127,7 +127,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
                 let url = format!("http://127.0.0.1:50020/v1/games/{}/turns", game_id);
                 let client = reqwest::Client::new();
 
-                let game_turn_info = GameTurnInfo {
+                let game_turn_info = GameTurnParams {
                     destination: new_board_position,
                     player_id,
                     session_id,

@@ -13,11 +13,11 @@
  */
 
 use crate::errors::GameError;
-use crate::gaming::game_state::GameState;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
-use crate::models::requests::{EndGameParams, GameTurnInfo, NewSinglePlayerGameParams, ID_LENGTH_MAX};
+use crate::models::requests::{EndGameParams, GameTurnParams, NewSinglePlayerGameParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResult, GameInfo, TurnResult};
+use crate::models::GameState;
 use crate::models::PlayerInfo;
 use actix_web::{delete, get, post, web, Error, HttpResponse};
 use log::debug;
@@ -238,7 +238,7 @@ pub(crate) async fn get_latest_game_turn(
 #[post("/games/{game_id}/turns")]
 pub(crate) async fn take_turn(
     game_id: web::Path<String>,
-    game_turn_info: web::Json<GameTurnInfo>,
+    game_turn_info: web::Json<GameTurnParams>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
 ) -> actix_web::Result<web::Json<TurnResult>> {
     //

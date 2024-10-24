@@ -14,15 +14,24 @@
 
 use crate::api::games::*;
 use crate::api::gaming_session::*;
-use crate::gaming::board_position::BoardPosition;
-use crate::gaming::game_piece::GamePiece;
-use crate::gaming::game_state::GameState;
-use crate::gaming::play_status::PlayStatus;
-use crate::models::event_plane::*;
-use crate::models::requests::*;
-use crate::models::responses::*;
+use crate::models::event_plane::EventPlaneConfig;
+use crate::models::event_plane::EventPlaneTopicNames;
+use crate::models::requests::EndGameParams;
+use crate::models::requests::EndGamingSessionParams;
+use crate::models::requests::GameTurnParams;
+use crate::models::requests::JoinSessionParams;
+use crate::models::requests::NewGamingSessionParams;
+use crate::models::requests::NewSinglePlayerGameParams;
+use crate::models::responses::GameCreationResult;
+use crate::models::responses::GameInfo;
+use crate::models::responses::GamingSessionCreationResult;
+use crate::models::responses::TurnResult;
 use crate::models::AutomaticPlayerSkillLevel;
+use crate::models::BoardPosition;
 use crate::models::GameMode;
+use crate::models::GamePiece;
+use crate::models::GameState;
+use crate::models::PlayStatus;
 use crate::models::PlayerInfo;
 use actix_web::get;
 use log::debug;
@@ -58,7 +67,7 @@ use utoipa::OpenApi;
         GameMode,
         GamePiece,
         GameState,
-        GameTurnInfo,
+        GameTurnParams,
         GamingSessionCreationResult,
         JoinSessionParams,
         NewGamingSessionParams,

@@ -6,12 +6,12 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::errors::GameError;
-use crate::gaming::game_piece::GamePiece;
-use crate::gaming::game_state::GameState;
 use crate::gaming::game_trait::GameTrait;
-use crate::gaming::play_status::PlayStatus;
-use crate::models::requests::GameTurnInfo;
+use crate::models::requests::GameTurnParams;
 use crate::models::responses::TurnResult;
+use crate::models::GamePiece;
+use crate::models::GameState;
+use crate::models::PlayStatus;
 use crate::models::{GameMode, PlayerInfo};
 use chrono::{DateTime, Utc};
 use log::debug;
@@ -159,7 +159,7 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Make a Game move for the specified Player.
-    fn take_turn(&mut self, game_turn_info: &GameTurnInfo) -> Result<TurnResult, GameError> {
+    fn take_turn(&mut self, game_turn_info: &GameTurnParams) -> Result<TurnResult, GameError> {
         //
 
         debug!("TicTacToeGame: taking game turn. Params: {:?}", game_turn_info);

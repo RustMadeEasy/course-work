@@ -8,10 +8,10 @@
 #[cfg(test)]
 mod auto_player_tests {
     use crate::gaming::automatic_player::AutomaticPlayer;
-    use crate::gaming::board_position::BoardPosition;
-    use crate::gaming::game_piece::GamePiece;
-    use crate::gaming::game_state::GameState;
     use crate::gaming::tic_tac_toe_game::TicTacToeGame;
+    use crate::models::BoardPosition;
+    use crate::models::GamePiece;
+    use crate::models::GameState;
     use crate::models::PlayerInfo;
     use uuid::Uuid;
 
@@ -96,10 +96,10 @@ mod auto_player_tests {
 
 #[cfg(test)]
 mod game_board_tests {
-    use crate::gaming::board_position::BoardPosition;
-    use crate::gaming::game_piece::GamePiece;
-    use crate::gaming::game_state::GameState;
-    use crate::gaming::play_status::PlayStatus;
+    use crate::models::BoardPosition;
+    use crate::models::GamePiece;
+    use crate::models::GameState;
+    use crate::models::PlayStatus;
     use crate::models::PlayerInfo;
     use uuid::Uuid;
 
@@ -329,12 +329,12 @@ mod game_board_tests {
 
 #[cfg(test)]
 mod game_play_tests {
-    use crate::gaming::board_position::BoardPosition;
-    use crate::gaming::game_piece::GamePiece;
     use crate::gaming::game_trait::GameTrait;
-    use crate::gaming::play_status::PlayStatus;
     use crate::gaming::tic_tac_toe_game::TicTacToeGame;
-    use crate::models::requests::GameTurnInfo;
+    use crate::models::requests::GameTurnParams;
+    use crate::models::BoardPosition;
+    use crate::models::GamePiece;
+    use crate::models::PlayStatus;
     use crate::models::{GameMode, PlayerInfo};
     use uuid::Uuid;
 
@@ -353,7 +353,7 @@ mod game_play_tests {
         game.current_player = Some(player_one.clone());
 
         // Let Player One take their turn
-        let turn_info = GameTurnInfo {
+        let turn_info = GameTurnParams {
             destination: BoardPosition::new(0, 0),
             player_id: player_one.player_id.clone(),
             session_id: "".to_string(),
@@ -366,7 +366,7 @@ mod game_play_tests {
         assert_eq!(game_state.get_id_of_player_who_made_move(), player_one.player_id);
 
         // Let Player Two take their turn
-        let turn_info = GameTurnInfo {
+        let turn_info = GameTurnParams {
             destination: BoardPosition::new(0, 1),
             player_id: player_two.player_id.clone(),
             session_id: "".to_string(),
@@ -402,7 +402,7 @@ mod game_play_tests {
         assert_eq!(game.play_history.len(), 0);
 
         // Let Player One take their turn
-        let turn_info = GameTurnInfo {
+        let turn_info = GameTurnParams {
             destination: BoardPosition::new(0, 0),
             player_id: player_one.player_id.clone(),
             session_id: "".to_string(),
@@ -418,7 +418,7 @@ mod game_play_tests {
         assert_eq!(game.play_history.len(), 1);
 
         // Let Player Two take their turn
-        let turn_info = GameTurnInfo {
+        let turn_info = GameTurnParams {
             destination: BoardPosition::new(0, 1),
             player_id: player_two.player_id.clone(),
             session_id: "".to_string(),
@@ -450,7 +450,7 @@ mod game_play_tests {
         let first_player_game_piece = game.current_player.clone().unwrap().game_piece;
 
         // Let Player One take their turn
-        let turn_info = GameTurnInfo {
+        let turn_info = GameTurnParams {
             destination: first_destination.clone(),
             player_id: game.current_player.clone().unwrap().player_id,
             session_id: "".to_string(),
@@ -471,7 +471,7 @@ mod game_play_tests {
         let second_player_game_piece = game.current_player.clone().unwrap().game_piece;
 
         // Let Player Two take their turn.
-        let turn_info = GameTurnInfo {
+        let turn_info = GameTurnParams {
             destination: second_destination.clone(),
             player_id: game.current_player.clone().unwrap().player_id,
             session_id: "".to_string(),
@@ -493,9 +493,9 @@ mod game_play_tests {
 
 #[cfg(test)]
 mod game_state_tests {
-    use crate::gaming::board_position::BoardPosition;
-    use crate::gaming::game_piece::GamePiece;
-    use crate::gaming::game_state::GameState;
+    use crate::models::BoardPosition;
+    use crate::models::GamePiece;
+    use crate::models::GameState;
     use crate::models::PlayerInfo;
     use uuid::Uuid;
 

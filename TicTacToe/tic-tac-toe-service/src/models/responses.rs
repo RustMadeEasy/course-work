@@ -1,8 +1,15 @@
-use crate::gaming::board_position::BoardPosition;
-use crate::gaming::game_state::GameState;
+// Tic-Tac-Toe Service
+//
+// Provides 2-client Game-play of Tic-Tac-Toe.
+//
+// © 2024 Rust Made Easy. All rights reserved.
+// @author JoelDavisEngineering@Gmail.com
+
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::event_plane::EventPlaneConfig;
+use crate::models::BoardPosition;
+use crate::models::GameState;
 use crate::models::PlayerInfo;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
