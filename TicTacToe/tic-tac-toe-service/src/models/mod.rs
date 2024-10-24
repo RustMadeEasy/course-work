@@ -41,59 +41,6 @@ pub enum AutomaticPlayerSkillLevel {
     Master,
 }
 
-/// Specifies the type of Game - single player or two players.
-#[derive(Debug, Deserialize, PartialEq, Serialize, ToSchema, Clone)]
-pub enum GameMode {
-    SinglePlayer,
-    TwoPlayers,
-}
-
-/// Models a Tic-Tac-Toe Game Player.
-#[derive(Clone, Debug, Default, Deserialize, Serialize, ToSchema, Validate)]
-pub struct PlayerInfo {
-    /// Name of the Player.
-    pub display_name: String,
-    /// The Game Piece with which the Tic-Tac-Toe Game is played.
-    pub game_piece: GamePiece,
-    /// Indicates that this Player's moves are automated, i.e., guided by this service.
-    pub is_automated: bool,
-    /// Unique ID of the Player.
-    pub player_id: String,
-}
-
-impl PlayerInfo {
-    //
-
-    /// Returns the Player other than the specified Player.
-    pub fn get_other_player_info_by_id(
-        player_id: impl Into<String>,
-        players: &[PlayerInfo],
-    ) -> Result<PlayerInfo, GameError> {
-        //
-
-        if players.len() < 2 {
-            return Err(GameError::PlayerNotFound);
-        }
-
-        let player_id = player_id.into();
-        match players.iter().find(|it| it.player_id != player_id) {
-            None => Err(GameError::PlayerNotFound),
-            Some(player) => Ok(player.clone()),
-        }
-    }
-
-    /// Creates a new PlayerInfo instance.
-    pub fn new(display_name: impl Into<String>,
-               is_automated: bool) -> Self {
-        Self {
-            display_name: display_name.into(),
-            game_piece: GamePiece::Unselected,
-            is_automated,
-            player_id: Uuid::new_v4().to_string(),
-        }
-    }
-}
-
 /// Models a position on the Game board.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, ToSchema, Validate)]
 pub(crate) struct BoardPosition {
@@ -108,6 +55,13 @@ impl BoardPosition {
     pub(crate) fn new(row: usize, column: usize) -> Self {
         Self { row, column }
     }
+}
+
+/// Specifies the type of Game - single player or two players.
+#[derive(Debug, Deserialize, PartialEq, Serialize, ToSchema, Clone)]
+pub enum GameMode {
+    SinglePlayer,
+    TwoPlayers,
 }
 
 /// Models a Game Piece with which the Tic-Tac-Toe Game is played.
@@ -184,6 +138,52 @@ impl GameState {
             id_of_player_who_made_move: current_player_id.to_string(),
             game_board: Default::default(),
             play_status: play_status.clone(),
+        }
+    }
+}
+
+/// Models a Tic-Tac-Toe Game Player.
+#[derive(Clone, Debug, Default, Deserialize, Serialize, ToSchema, Validate)]
+pub struct PlayerInfo {
+    /// Name of the Player.
+    pub display_name: String,
+    /// The Game Piece with which the Tic-Tac-Toe Game is played.
+    pub game_piece: GamePiece,
+    /// Indicates that this Player's moves are automated, i.e., guided by this service.
+    pub is_automated: bool,
+    /// Unique ID of the Player.
+    pub player_id: String,
+}
+
+impl PlayerInfo {
+    //
+
+    /// Returns the Player other than the specified Player.
+    pub fn get_other_player_info_by_id(
+        player_id: impl Into<String>,
+        players: &[PlayerInfo],
+    ) -> Result<PlayerInfo, GameError> {
+        //
+
+        if players.len() < 2 {
+            return Err(GameError::PlayerNotFound);
+        }
+
+        let player_id = player_id.into();
+        match players.iter().find(|it| it.player_id != player_id) {
+            None => Err(GameError::PlayerNotFound),
+            Some(player) => Ok(player.clone()),
+        }
+    }
+
+    /// Creates a new PlayerInfo instance.
+    pub fn new(display_name: impl Into<String>,
+               is_automated: bool) -> Self {
+        Self {
+            display_name: display_name.into(),
+            game_piece: GamePiece::Unselected,
+            is_automated,
+            player_id: Uuid::new_v4().to_string(),
         }
     }
 }
