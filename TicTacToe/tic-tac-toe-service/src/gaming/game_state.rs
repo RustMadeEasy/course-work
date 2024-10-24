@@ -25,6 +25,7 @@ use crate::gaming::game_board::{GameBoard, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAG
 use crate::gaming::game_piece::GamePiece;
 use crate::gaming::play_outcome::PlayOutcome;
 use crate::gaming::play_status::PlayStatus;
+use crate::models::responses::TurnResult;
 // use crate::game_board::{
 //     BoardPosition, GameBoard, GamePiece, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1,
 //     BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM,
@@ -32,7 +33,6 @@ use crate::gaming::play_status::PlayStatus;
 //     BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT,
 //     BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS,
 // };
-use crate::models::responses::TurnResult;
 use crate::models::PlayerInfo;
 
 /// Models the state of a Game at a particular Move (turn).

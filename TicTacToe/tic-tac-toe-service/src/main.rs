@@ -22,10 +22,10 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod errors;
-mod models;
 mod tests;
 pub(crate) mod api;
 mod gaming;
+mod models;
 
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;
