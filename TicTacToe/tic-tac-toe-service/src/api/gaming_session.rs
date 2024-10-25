@@ -17,7 +17,7 @@ use crate::errors::GameError;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::requests::{EndGamingSessionParams, JoinSessionParams, NewGamingSessionParams, ID_LENGTH_MAX};
-use crate::models::responses::{GameCreationResult, GameInfo, GamingSessionCreationResult};
+use crate::models::responses::{GameCreationResponse, GameInfoResponse, GamingSessionCreationResponse};
 use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 use log::debug;
 use validator::Validate;
@@ -37,7 +37,7 @@ use validator::Validate;
 pub(crate) async fn create_gaming_session(
     params: web::Json<NewGamingSessionParams>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
+) -> actix_web::Result<web::Json<GamingSessionCreationResponse>> {
     //
 
     debug!("HTTP POST to /gaming-sessions. Params: {:?}", params);
@@ -51,7 +51,7 @@ pub(crate) async fn create_gaming_session(
 
     match manager.create_new_session(&params.session_owner_display_name).await {
         Ok(session) => {
-            let creation_result = GamingSessionCreationResult {
+            let creation_result = GamingSessionCreationResponse {
                 event_plane_config: session.event_plane_config,
                 initiating_player: session.session_owner,
                 invitation_code: session.invitation_code,
@@ -116,7 +116,7 @@ pub(crate) async fn end_gaming_session(
 pub(crate) async fn get_session_current_game(
     session_id: web::Path<String>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GameCreationResult>> {
+) -> actix_web::Result<web::Json<GameCreationResponse>> {
     //
 
     debug!("HTTP GET to /gaming-sessions/{}/current-game", session_id);
@@ -135,8 +135,8 @@ pub(crate) async fn get_session_current_game(
                     Err(Error::from(GameError::SessionHasTooFewPlayers))
                 }
                 Some(other_player) => {
-                    let result = GameCreationResult {
-                        game_info: GameInfo::from(game),
+                    let result = GameCreationResponse {
+                        game_info: GameInfoResponse::from(game),
                         initiating_player: session.session_owner,
                         other_player: other_player.clone(),
                         session_id: session.session_id,
@@ -166,7 +166,7 @@ pub(crate) async fn get_session_current_game(
 pub(crate) async fn join_gaming_session(
     params: web::Json<JoinSessionParams>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GamingSessionCreationResult>> {
+) -> actix_web::Result<web::Json<GamingSessionCreationResponse>> {
     //
 
     debug!("HTTP POST to /gaming-sessions/players. Params: {:?}", params);

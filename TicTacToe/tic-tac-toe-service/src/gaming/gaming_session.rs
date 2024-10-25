@@ -7,7 +7,7 @@
 
 use crate::gaming::game_trait::GameTrait;
 use crate::models::event_plane::EventPlaneConfig;
-use crate::models::PlayerInfo;
+use crate::models::player_info::PlayerInfo;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;

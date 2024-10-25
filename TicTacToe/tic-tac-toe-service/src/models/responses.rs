@@ -7,79 +7,79 @@
 
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
+use crate::models::board_position::BoardPosition;
 use crate::models::event_plane::EventPlaneConfig;
-use crate::models::BoardPosition;
-use crate::models::GameState;
-use crate::models::PlayerInfo;
+use crate::models::game_state::GameState;
+use crate::models::player_info::PlayerInfo;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-/// Models the results of a call to the Create Game endpoint.
+/// Models the results of a call to one of the Game creation endpoints
 #[derive(Deserialize, Serialize, ToSchema)]
-pub struct GameCreationResult {
-    /// The initial Game state.
-    pub game_info: GameInfo,
-    /// The Player who initiated the Gaming Session.
+pub struct GameCreationResponse {
+    /// The initial Game state
+    pub game_info: GameInfoResponse,
+    /// The Player who initiated the Gaming Session
     pub initiating_player: PlayerInfo,
-    /// ID of the guest Player.
+    /// ID of the additional Player
     pub other_player: PlayerInfo,
-    /// ID of the Gaming Session.
+    /// ID of the Gaming Session
     pub session_id: String,
 }
 
-/// Models the current view of a Game.
+/// Models the current view of a Game
 #[derive(Deserialize, Serialize, ToSchema)]
-pub struct GameInfo {
+pub struct GameInfoResponse {
     //
 
     /// Player who has an open turn
     pub current_player: Option<PlayerInfo>,
 
+    /// Unique ID of the Game instance
+    pub game_id: String,
+
     /// The current state the Game
     pub game_state: GameState,
-
-    /// Unique ID of the Game instance
-    pub id: String,
 
     /// List of Players
     pub players: Vec<PlayerInfo>,
 }
 
-impl From<TicTacToeGame> for GameInfo {
-    fn from(game: TicTacToeGame) -> GameInfo {
+impl From<TicTacToeGame> for GameInfoResponse {
+    fn from(game: TicTacToeGame) -> GameInfoResponse {
         let game_state = game.get_current_game_state();
-        GameInfo {
+        GameInfoResponse {
             current_player: game.current_player,
             game_state,
-            id: game.id.clone(),
+            game_id: game.id.clone(),
             players: game.players,
         }
     }
 }
 
-/// Models the results of a call to the Create Gaming Session endpoint.
+/// Models the results of a call to the Create Gaming Session endpoint
 #[derive(Deserialize, Serialize, ToSchema)]
-pub struct GamingSessionCreationResult {
-    /// Specifies the configuration required for clients to subscribe to real-time Game state updates.
+pub struct GamingSessionCreationResponse {
+    /// Specifies the configuration required for clients to subscribe to real-time Game state updates
     pub event_plane_config: EventPlaneConfig,
-    /// The Player who initiated the Gaming Session.
+    /// The Player who initiated the Gaming Session
     pub initiating_player: PlayerInfo,
-    /// Unique Code that is used to invite others to the Gaming Session.
+    /// Unique Code that is used to invite other participants to the Gaming Session
     pub invitation_code: String,
-    /// ID of the guest Player.
+    /// ID of the additional Player
     pub other_player: Option<PlayerInfo>,
     /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
     pub session_id: String,
 }
 
 #[derive(Clone, Deserialize, Serialize, ToSchema)]
-pub struct TurnResult {
-    /// Player who has an open turn
+pub struct TurnResponse {
+    /// Player who will take the next turn
     pub current_player: Option<PlayerInfo>,
-    /// The state of the Game after the turn has been taken.
+    /// The state of the Game after the turn has been taken
     pub new_game_state: GameState,
-    /// If the Game has ended in a win, this contains the winning board positions.
+    /// If the Game has ended in a win, this contains the winning board positions
     pub winning_locations: Option<Vec<BoardPosition>>,
-    /// If the Game has ended in a win, this indicates the winning Player.
+    /// If the Game has ended in a win, this indicates the winning Player
     pub winning_player: Option<PlayerInfo>,
 }

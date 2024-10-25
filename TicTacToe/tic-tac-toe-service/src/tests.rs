@@ -9,10 +9,10 @@
 mod auto_player_tests {
     use crate::gaming::automatic_player::AutomaticPlayer;
     use crate::gaming::tic_tac_toe_game::TicTacToeGame;
-    use crate::models::BoardPosition;
-    use crate::models::GamePiece;
-    use crate::models::GameState;
-    use crate::models::PlayerInfo;
+    use crate::models::board_position::BoardPosition;
+    use crate::models::game_piece::GamePiece;
+    use crate::models::game_state::GameState;
+    use crate::models::player_info::PlayerInfo;
     use uuid::Uuid;
 
     #[test]
@@ -96,11 +96,11 @@ mod auto_player_tests {
 
 #[cfg(test)]
 mod game_board_tests {
-    use crate::models::BoardPosition;
-    use crate::models::GamePiece;
-    use crate::models::GameState;
-    use crate::models::PlayStatus;
-    use crate::models::PlayerInfo;
+    use crate::models::board_position::BoardPosition;
+    use crate::models::game_piece::GamePiece;
+    use crate::models::game_state::GameState;
+    use crate::models::play_status::PlayStatus;
+    use crate::models::player_info::PlayerInfo;
     use uuid::Uuid;
 
     #[test]
@@ -331,11 +331,12 @@ mod game_board_tests {
 mod game_play_tests {
     use crate::gaming::game_trait::GameTrait;
     use crate::gaming::tic_tac_toe_game::TicTacToeGame;
+    use crate::models::board_position::BoardPosition;
+    use crate::models::game_mode::GameMode;
+    use crate::models::game_piece::GamePiece;
+    use crate::models::play_status::PlayStatus;
+    use crate::models::player_info::PlayerInfo;
     use crate::models::requests::GameTurnParams;
-    use crate::models::BoardPosition;
-    use crate::models::GamePiece;
-    use crate::models::PlayStatus;
-    use crate::models::{GameMode, PlayerInfo};
     use uuid::Uuid;
 
     #[test]
@@ -493,10 +494,10 @@ mod game_play_tests {
 
 #[cfg(test)]
 mod game_state_tests {
-    use crate::models::BoardPosition;
-    use crate::models::GamePiece;
-    use crate::models::GameState;
-    use crate::models::PlayerInfo;
+    use crate::models::board_position::BoardPosition;
+    use crate::models::game_piece::GamePiece;
+    use crate::models::game_state::GameState;
+    use crate::models::player_info::PlayerInfo;
     use uuid::Uuid;
 
     #[test]

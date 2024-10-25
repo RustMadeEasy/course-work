@@ -7,12 +7,13 @@
 
 use crate::errors::GameError;
 use crate::gaming::game_trait::GameTrait;
+use crate::models::game_mode::GameMode;
+use crate::models::game_piece::GamePiece;
+use crate::models::game_state::GameState;
+use crate::models::play_status::PlayStatus;
+use crate::models::player_info::PlayerInfo;
 use crate::models::requests::GameTurnParams;
-use crate::models::responses::TurnResult;
-use crate::models::GamePiece;
-use crate::models::GameState;
-use crate::models::PlayStatus;
-use crate::models::{GameMode, PlayerInfo};
+use crate::models::responses::TurnResponse;
 use chrono::{DateTime, Utc};
 use log::debug;
 use serde::Serialize;
@@ -40,7 +41,7 @@ pub(crate) struct TicTacToeGame {
     pub(crate) id: String,
 
     /// Holds the results of the latest turn taken.
-    pub(crate) latest_turn_result: Option<TurnResult>,
+    pub(crate) latest_turn_result: Option<TurnResponse>,
 
     /// The list of Game States from the very first turn until the latest turn
     pub(crate) play_history: Vec<GameState>,
@@ -159,7 +160,7 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Make a Game move for the specified Player.
-    fn take_turn(&mut self, game_turn_info: &GameTurnParams) -> Result<TurnResult, GameError> {
+    fn take_turn(&mut self, game_turn_info: &GameTurnParams) -> Result<TurnResponse, GameError> {
         //
 
         debug!("TicTacToeGame: taking game turn. Params: {:?}", game_turn_info);
@@ -195,7 +196,7 @@ impl GameTrait for TicTacToeGame {
         }
 
         // Load the other Player.
-        let other_player = PlayerInfo::get_other_player_info_by_id(&game_turn_info.player_id, &self.players)?;
+        let other_player = PlayerInfo::get_other_player_info(&game_turn_info.player_id, &self.players)?;
 
         // Take the turn and make a new Board State by adding the specified piece to the board of
         // the current Board State.

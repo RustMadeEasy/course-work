@@ -17,13 +17,15 @@ use crate::errors::GameError;
 use crate::errors::GameError::{
     BoardLocationAlreadyOccupied, InvalidBoardPosition, WrongPlayerTakingTurn,
 };
+use crate::gaming::game_board;
 use crate::gaming::game_board::{GameBoard, BIN_FULL_BOARD, BIN_THREE_ACROSS_DIAGONAL_1, BIN_THREE_ACROSS_DIAGONAL_2, BIN_THREE_ACROSS_HORIZONTAL_BOTTOM, BIN_THREE_ACROSS_HORIZONTAL_MIDDLE, BIN_THREE_ACROSS_HORIZONTAL_TOP, BIN_THREE_ACROSS_VERTICAL_CENTER, BIN_THREE_ACROSS_VERTICAL_LEFT, BIN_THREE_ACROSS_VERTICAL_RIGHT, MAX_BOARD_COLUMNS, MAX_BOARD_ROWS};
 use crate::gaming::play_outcome::PlayOutcome;
-use crate::models::responses::TurnResult;
-use crate::models::GamePiece;
-use crate::models::PlayStatus;
-use crate::models::PlayerInfo;
-use crate::models::{BoardPosition, GameState};
+use crate::models::board_position::BoardPosition;
+use crate::models::game_piece::GamePiece;
+use crate::models::game_state::GameState;
+use crate::models::play_status::PlayStatus;
+use crate::models::player_info::PlayerInfo;
+use crate::models::responses::TurnResponse;
 
 // Property accessors.
 impl GameState {
@@ -65,7 +67,7 @@ impl GameState {
         position: &BoardPosition,
         current_player: &PlayerInfo,
         other_player: &PlayerInfo,
-    ) -> Result<TurnResult, GameError> {
+    ) -> Result<TurnResponse, GameError> {
         //
 
         debug!("place_game_piece position: {:?}", position);
@@ -113,7 +115,7 @@ impl GameState {
         );
 
         // Return a new Game board state
-        Ok(TurnResult {
+        Ok(TurnResponse {
             current_player: Some(other_player.clone()), // switch Players
             new_game_state: Self {
                 created_date: Utc::now(),
@@ -131,40 +133,6 @@ impl GameState {
 impl GameState {
     //
 
-    /// Generates binary representations of piece placements on a Game Board.
-    ///
-    /// Returns a tuple whose first element is the binary representation of placements for
-    /// Game_piece_one and the second element is the binary representation of placements for
-    /// Game_piece_two.
-    pub(crate) fn binary_representation_for_piece_placement(
-        grid: &GameBoard,
-        game_piece_one: &GamePiece,
-        game_piece_two: &GamePiece,
-    ) -> (i16, i16) {
-        //
-
-        if grid.is_empty() {
-            return (0, 0);
-        }
-
-        let mut position: i16 = 0b_100_000_000;
-        let mut binary_representation_one: i16 = 0;
-        let mut binary_representation_two: i16 = 0;
-
-        for row in grid {
-            for game_piece in row {
-                if game_piece == game_piece_one {
-                    binary_representation_one |= position;
-                } else if game_piece == game_piece_two {
-                    binary_representation_two |= position;
-                }
-                position >>= 1;
-            }
-        }
-
-        (binary_representation_one, binary_representation_two)
-    }
-
     /// Determines the status of the GameBoard relative to a particular Game Piece. Returns the
     /// status and, if the Game has been won, returns the board positions that indicate the winning
     /// move.
@@ -180,7 +148,7 @@ impl GameState {
 
         debug!("determine_outcome_of_play called for game board: {:?}", game_board);
 
-        let as_binary = Self::binary_representation_for_piece_placement(
+        let as_binary = game_board::binary_representation_for_piece_placement(
             game_board,
             current_player_game_piece,
             other_player_game_piece,

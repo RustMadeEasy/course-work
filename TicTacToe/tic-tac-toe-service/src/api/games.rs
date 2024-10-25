@@ -15,10 +15,10 @@
 use crate::errors::GameError;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
+use crate::models::game_state::GameState;
+use crate::models::player_info::PlayerInfo;
 use crate::models::requests::{EndGameParams, GameTurnParams, NewSinglePlayerGameParams, ID_LENGTH_MAX};
-use crate::models::responses::{GameCreationResult, GameInfo, TurnResult};
-use crate::models::GameState;
-use crate::models::PlayerInfo;
+use crate::models::responses::{GameCreationResponse, GameInfoResponse, TurnResponse};
 use actix_web::{delete, get, post, web, Error, HttpResponse};
 use log::debug;
 use validator::Validate;
@@ -39,7 +39,7 @@ pub(crate) async fn create_single_player_game(
     new_game_params: web::Json<NewSinglePlayerGameParams>,
     session_id: web::Path<String>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GameCreationResult>> {
+) -> actix_web::Result<web::Json<GameCreationResponse>> {
     //
 
     debug!("HTTP POST to /gaming-sessions/{}/games. Params: {:?}", session_id, new_game_params);
@@ -60,9 +60,9 @@ pub(crate) async fn create_single_player_game(
 
     match manager.create_new_single_player_game(session.session_id.as_str(), &new_game_params.computer_skill_level).await {
         Ok(game) => {
-            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &game.players)?;
-            let new_game_info = GameCreationResult {
-                game_info: GameInfo::from(game.clone()),
+            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &game.players)?;
+            let new_game_info = GameCreationResponse {
+                game_info: GameInfoResponse::from(game.clone()),
                 initiating_player: session.session_owner,
                 other_player,
                 session_id: session.session_id.clone(),
@@ -86,7 +86,7 @@ pub(crate) async fn create_single_player_game(
 pub(crate) async fn create_two_player_game(
     session_id: web::Path<String>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<GameCreationResult>> {
+) -> actix_web::Result<web::Json<GameCreationResponse>> {
     //
 
     debug!("HTTP POST to /gaming-session/two-player-games. Session-Id: {:?}", session_id);
@@ -103,9 +103,9 @@ pub(crate) async fn create_two_player_game(
 
     match manager.create_new_two_player_game(&session_id).await {
         Ok(result) => {
-            let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &session.participants)?;
-            let new_game_info = GameCreationResult {
-                game_info: GameInfo::from(result.0.clone()),
+            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants)?;
+            let new_game_info = GameCreationResponse {
+                game_info: GameInfoResponse::from(result.0.clone()),
                 initiating_player: session.session_owner,
                 other_player,
                 session_id: session_id.clone(),
@@ -199,7 +199,7 @@ pub(crate) async fn get_game_history(
 pub(crate) async fn get_latest_game_turn(
     game_id: web::Path<String>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<TurnResult>> {
+) -> actix_web::Result<web::Json<TurnResponse>> {
     //
 
     debug!("HTTP GET to /games/{}/turns/latest", game_id);
@@ -240,7 +240,7 @@ pub(crate) async fn take_turn(
     game_id: web::Path<String>,
     game_turn_info: web::Json<GameTurnParams>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> actix_web::Result<web::Json<TurnResult>> {
+) -> actix_web::Result<web::Json<TurnResponse>> {
     //
 
     debug!("HTTP POST to /games/{}/turns", game_id);

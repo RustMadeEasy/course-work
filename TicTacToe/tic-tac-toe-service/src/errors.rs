@@ -20,6 +20,7 @@ pub(crate) enum GameError {
     InvalidBoardPosition,
     InvitationCodeNotFound,
     InvalidSession,
+    NameAlreadyInUseInGamingSession,
     PlayerPieceNotSelected,
     PlayerNotFound,
     SessionHasTooFewPlayers,
@@ -33,11 +34,12 @@ impl ResponseError for GameError {
     /// Converts each error variant into an HTTP status code.
     fn status_code(&self) -> StatusCode {
         match *self {
-            GameError::SessionHasTooFewPlayers
-            | GameError::GameNotStarted
+            GameError::GameNotStarted
             | GameError::InvalidBoardPosition
             | GameError::InvalidSession
-            | GameError::PlayerPieceNotSelected => StatusCode::BAD_REQUEST,
+            | GameError::NameAlreadyInUseInGamingSession
+            | GameError::PlayerPieceNotSelected
+            | GameError::SessionHasTooFewPlayers => StatusCode::BAD_REQUEST,
 
             GameError::GameHasAlreadyEnded => StatusCode::NOT_ACCEPTABLE,
 

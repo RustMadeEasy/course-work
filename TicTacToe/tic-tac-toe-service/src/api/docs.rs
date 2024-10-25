@@ -14,25 +14,25 @@
 
 use crate::api::games::*;
 use crate::api::gaming_session::*;
+use crate::models::automatic_player_skill_level::AutomaticPlayerSkillLevel;
+use crate::models::board_position::BoardPosition;
 use crate::models::event_plane::EventPlaneConfig;
 use crate::models::event_plane::EventPlaneTopicNames;
+use crate::models::game_mode::GameMode;
+use crate::models::game_piece::GamePiece;
+use crate::models::game_state::GameState;
+use crate::models::play_status::PlayStatus;
+use crate::models::player_info::PlayerInfo;
 use crate::models::requests::EndGameParams;
 use crate::models::requests::EndGamingSessionParams;
 use crate::models::requests::GameTurnParams;
 use crate::models::requests::JoinSessionParams;
 use crate::models::requests::NewGamingSessionParams;
 use crate::models::requests::NewSinglePlayerGameParams;
-use crate::models::responses::GameCreationResult;
-use crate::models::responses::GameInfo;
-use crate::models::responses::GamingSessionCreationResult;
-use crate::models::responses::TurnResult;
-use crate::models::AutomaticPlayerSkillLevel;
-use crate::models::BoardPosition;
-use crate::models::GameMode;
-use crate::models::GamePiece;
-use crate::models::GameState;
-use crate::models::PlayStatus;
-use crate::models::PlayerInfo;
+use crate::models::responses::GameCreationResponse;
+use crate::models::responses::GameInfoResponse;
+use crate::models::responses::GamingSessionCreationResponse;
+use crate::models::responses::TurnResponse;
 use actix_web::get;
 use log::debug;
 use utoipa::openapi::{ContactBuilder, Tag};
@@ -62,19 +62,19 @@ use utoipa::OpenApi;
         EndGamingSessionParams,
         EventPlaneConfig,
         EventPlaneTopicNames,
-        GameCreationResult,
-        GameInfo,
+        GameCreationResponse,
+        GameInfoResponse,
         GameMode,
         GamePiece,
         GameState,
         GameTurnParams,
-        GamingSessionCreationResult,
+        GamingSessionCreationResponse,
         JoinSessionParams,
         NewGamingSessionParams,
         NewSinglePlayerGameParams,
         PlayerInfo,
         PlayStatus,
-        TurnResult,
+        TurnResponse,
     ))
 )]
 pub(crate) struct ApiDoc;

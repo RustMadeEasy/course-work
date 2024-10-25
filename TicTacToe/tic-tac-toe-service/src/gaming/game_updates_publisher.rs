@@ -9,7 +9,7 @@ use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessi
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::gaming_session::GamingSession;
 use crate::models::event_plane::EventPlaneTopicNames;
-use crate::models::PlayStatus;
+use crate::models::play_status::PlayStatus;
 use async_trait::async_trait;
 use log::debug;
 use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};

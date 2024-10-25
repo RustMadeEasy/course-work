@@ -12,11 +12,13 @@ use crate::gaming::game_trait::GameTrait;
 use crate::gaming::game_updates_publisher::GameUpdatesPublisher;
 use crate::gaming::gaming_session::GamingSession;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
+use crate::models::automatic_player_skill_level::AutomaticPlayerSkillLevel;
+use crate::models::game_mode::GameMode;
+use crate::models::game_state::GameState;
+use crate::models::play_status::PlayStatus;
+use crate::models::player_info::PlayerInfo;
 use crate::models::requests::GameTurnParams;
-use crate::models::responses::{GamingSessionCreationResult, TurnResult};
-use crate::models::GameState;
-use crate::models::PlayStatus;
-use crate::models::{AutomaticPlayerSkillLevel, GameMode, PlayerInfo};
+use crate::models::responses::{GamingSessionCreationResponse, TurnResponse};
 use chrono::Utc;
 use log::debug;
 use std::collections::HashMap;
@@ -52,7 +54,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     /// Adds a Player to the Gaming Session.
     pub(crate) async fn add_player_to_session(&mut self,
                                               game_invitation_code: &str,
-                                              player_display_name: &str) -> Result<GamingSessionCreationResult, GameError> {
+                                              player_display_name: &str) -> Result<GamingSessionCreationResponse, GameError> {
         //
 
         debug!("GamesManager: add_player_to_session() called.");
@@ -62,13 +64,19 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             Some(session) => session,
         };
 
+        let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants)?;
+
+        // Make sure the name is not already used by the other Player.
+        if player_display_name.to_lowercase().trim() == other_player.display_name.to_lowercase().trim() {
+            return Err(GameError::NameAlreadyInUseInGamingSession);
+        }
+
+        // Create and add the new Player.
         let new_player = PlayerInfo::new(player_display_name, false);
         session.add_participant(&new_player);
         self.upsert_session(&session).await;
 
-        let other_player = PlayerInfo::get_other_player_info_by_id(session.session_owner.player_id.clone(), &session.participants)?;
-
-        Ok(GamingSessionCreationResult {
+        Ok(GamingSessionCreationResponse {
             event_plane_config: session.event_plane_config,
             initiating_player: session.session_owner,
             invitation_code: session.invitation_code,
@@ -351,12 +359,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             loop {
                 //
 
-                debug!("GamesManager: Cleanup thread: Waking.");
+                debug!("GamesManager: Cleanup task: Waking.");
 
                 let mut expired_sessions: Vec<GamingSession<T>> = vec!();
                 let mut gaming_sessions = sessions.lock().await;
 
-                // Remove any Game that is abandoned or has not been updated in a long time.
+                // Note any Game that is abandoned or has ended.
                 let now = Utc::now().timestamp_millis();
                 for session in gaming_sessions.values().clone() {
                     if let Some(game) = session.current_game.clone() {
@@ -364,13 +372,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
                             None => {}
                             Some(time_last_move) => {
                                 let game_age = now - time_last_move.timestamp_millis();
-                                if game_age < ttl {
-                                    // Keep this Game.
-                                    // expired_sessions.insert(game.get_id(), game.clone());
-                                } else {
-                                    if !game.get_current_game_state().has_ended() {
-                                        // TODO: JD: properly end each abandoned game
-                                    }
+                                if game_age > ttl || game.get_current_game_state().has_ended() {
                                     expired_sessions.push(*session.clone());
                                 }
                             }
@@ -384,9 +386,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
                 }
 
                 if !expired_sessions.is_empty() {
-                    debug!("GamesManager: Cleanup thread: Complete. Removed {} expired games. Going back to sleep.", expired_sessions.len());
+                    debug!("GamesManager: Cleanup task: Complete. Removed {} expired games. Going back to sleep.", expired_sessions.len());
                 } else {
-                    debug!("GamesManager: Cleanup thread: Complete. Going back to sleep.");
+                    debug!("GamesManager: Cleanup task: Complete. Going back to sleep.");
                 }
 
                 drop(gaming_sessions);
@@ -423,7 +425,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         &mut self,
         game_id: &str,
         game_turn_info: &GameTurnParams,
-    ) -> Result<TurnResult, GameError> {
+    ) -> Result<TurnResponse, GameError> {
         //
 
         debug!("GamesManager: take_turn() called for game: {:?}.", game_id);

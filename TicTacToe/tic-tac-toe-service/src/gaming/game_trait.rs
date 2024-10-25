@@ -6,10 +6,11 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::errors::GameError;
+use crate::models::game_mode::GameMode;
+use crate::models::game_state::GameState;
+use crate::models::player_info::PlayerInfo;
 use crate::models::requests::GameTurnParams;
-use crate::models::responses::TurnResult;
-use crate::models::GameState;
-use crate::models::{GameMode, PlayerInfo};
+use crate::models::responses::TurnResponse;
 use chrono::{DateTime, Utc};
 
 /// Defines the general behavior of a Game.
@@ -44,5 +45,5 @@ pub(crate) trait GameTrait: Sized {
            session_id: &str) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.
-    fn take_turn(&mut self, game_turn_info: &GameTurnParams) -> Result<TurnResult, GameError>;
+    fn take_turn(&mut self, game_turn_info: &GameTurnParams) -> Result<TurnResponse, GameError>;
 }

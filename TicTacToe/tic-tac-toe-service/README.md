@@ -2,12 +2,12 @@
 
 ## Description
 
-Provides 2-client Tic-Tac-Toe game play. This includes game setup, invitation, turn-taking, and realtime notifications
-of game state changes.
+Provides 2-client Tic-Tac-Toe game play. This includes game session management, game setup, invitation, turn-taking,
+and realtime notifications of game state changes.
 
-_NOTE: This sample code is part of the RustMadeEasy.com, Intro to Rust course and is not meant for
-production use. For example, the end-points are not secured and the game state is not persisted in a centralized
-fashion.
+_NOTE: This sample code is part of the RustMadeEasy.com, Intro to Rust course and is not meant for production use.
+For example, the end-points are not secured and the game state is not persisted in a centralized fashion.
+
 Lack of central persistence means that only a single instance can be run (preventing resilience and
 scalability). Future courses will enhance the service so that it goes from sample-quality code to being highly secure
 and scalable._
@@ -17,9 +17,8 @@ and scalable._
 ### Performance
 
 Services written in Rust typically have 1/10th the deployment size and 1/10th the memory footprint of comparable
-services
-written, for example, in SpringBoot. Rust services also, generally, spin up quicker, have a lower request latency, and
-can process more requests per second.
+services written, for example, in SpringBoot. Rust services also, generally, spin up quicker, have a lower request
+latency, and can process more requests per second.
 
 These attributes can be leveraged to achieve greater platform performance and/or to substantially lower operating costs.
 
