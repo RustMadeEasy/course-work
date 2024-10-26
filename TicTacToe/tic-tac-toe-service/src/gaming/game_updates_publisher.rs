@@ -5,9 +5,10 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::gaming_session::GamingSession;
+use crate::gaming::gaming_session_observer_trait::GamingSessionObserverTrait;
+use crate::gaming::gaming_session_state_changes::GamingSessionStateChanges;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::play_status::PlayStatus;
 use async_trait::async_trait;
@@ -72,10 +73,10 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
                     return; // Early return. Nothing to publish.
                 }
             }
-            GamingSessionStateChanges::PlayerReady => {
-                EventPlaneTopicNames::PlayerReady.build(topic_prefix)
+            GamingSessionStateChanges::AllPlayersReady => {
+                EventPlaneTopicNames::AllPlayersReady.build(topic_prefix)
             }
-            GamingSessionStateChanges::SessionDeleted => {
+            GamingSessionStateChanges::GamingSessionDeleted => {
                 EventPlaneTopicNames::SessionDeleted.build(topic_prefix)
             }
         };

@@ -13,11 +13,13 @@ use crate::api::docs::*;
 use crate::api::games::*;
 use crate::api::gaming_session::*;
 use crate::api::health::get_health;
-use crate::gaming::gaming_sessions_manager::TicTacToeGamesManager;
+use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
+use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer};
 use chrono::{Datelike, Utc};
 use log::info;
+use tokio::sync::Mutex;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -30,6 +32,7 @@ mod models;
 /// The HTTP port through which this service is accessed.
 const PORT: u16 = 50020;
 
+/// This is the entry point for the Service
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     //
@@ -44,7 +47,7 @@ async fn main() -> std::io::Result<()> {
 
     // This is our global Games Manager instance. Below, we add the Game Manager to the Actix app
     // data storage so that it is accessible to service methods.
-    let manager = Data::new(tokio::sync::Mutex::new(TicTacToeGamesManager::new()));
+    let manager = Data::new(Mutex::new(GamingSessionsManager::<TicTacToeGame>::new()));
 
     HttpServer::new(move || {
         App::new().app_data(manager.clone()).service(

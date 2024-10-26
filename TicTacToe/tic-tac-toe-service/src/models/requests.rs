@@ -7,15 +7,22 @@
 
 use crate::models::automatic_player_skill_level::AutomaticPlayerSkillLevel;
 use crate::models::board_position::BoardPosition;
-use crate::models::INVITATION_CODE_LENGTH;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use validator::Validate;
 
-pub const ID_LENGTH_MAX: u64 = 36;
-const ID_LENGTH_MIN: u64 = 1;
+/// Maximum length of an ID
+pub(crate) const ID_LENGTH_MAX: u64 = 36;
+/// Minimum length of an ID
+pub(crate) const ID_LENGTH_MIN: u64 = 32;
+
+/// Maximum length of a name
 const NAME_LENGTH_MAX: u64 = 40;
+/// Minimum length of a name
 const NAME_LENGTH_MIN: u64 = 1;
+
+/// The length of the Game Invitation Code
+const INVITATION_CODE_LENGTH: u64 = 6;
 
 /// Models info needed to end a Game
 #[derive(Debug, Deserialize, ToSchema, Validate)]

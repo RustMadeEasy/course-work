@@ -74,7 +74,7 @@ impl GameState {
 
         // If the Game Pieces have not been chosen, then the Game has not started.
         if current_player.game_piece == GamePiece::Unselected || other_player.game_piece == GamePiece::Unselected {
-            return Err(GameError::PlayerPieceNotSelected);
+            return Err(GameError::PlayerGamePieceNotSelected);
         }
 
         // *** Verify that a valid board location is being specified ***

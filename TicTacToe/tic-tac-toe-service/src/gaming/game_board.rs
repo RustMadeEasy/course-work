@@ -13,7 +13,7 @@ use crate::models::game_piece::GamePiece;
 pub(crate) const MAX_BOARD_COLUMNS: usize = 3;
 pub(crate) const MAX_BOARD_ROWS: usize = 3;
 
-/// Specifies the locations of the Game pieces in Row/Column grid format.
+/// Specifies the locations of the Game Pieces in Row/Column grid format.
 pub(crate) type GameBoard = [[GamePiece; MAX_BOARD_ROWS]; MAX_BOARD_COLUMNS];
 
 // Binary representation of a completely full Tic-Tac-Toe board.
@@ -33,8 +33,8 @@ pub(crate) const BIN_THREE_ACROSS_DIAGONAL_2: i16 = 0b_001_010_100;
 /// Generates a binary representation of piece placements on a Game Board.
 ///
 /// Returns a tuple whose first element is the binary representation of placements for
-/// Game_piece_one and the second element is the binary representation of placements for
-/// Game_piece_two.
+/// game_piece_one and the second element is the binary representation of placements for
+/// game_piece_two.
 pub(crate) fn binary_representation_for_piece_placement(
     grid: &GameBoard,
     game_piece_one: &GamePiece,

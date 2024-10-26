@@ -7,11 +7,11 @@
 
 use crate::errors::GameError;
 use crate::gaming::automatic_player::AutomaticPlayer;
-use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::game_updates_publisher::GameUpdatesPublisher;
 use crate::gaming::gaming_session::GamingSession;
-use crate::gaming::tic_tac_toe_game::TicTacToeGame;
+use crate::gaming::gaming_session_observer_trait::GamingSessionObserverTrait;
+use crate::gaming::gaming_session_state_changes::GamingSessionStateChanges;
 use crate::models::automatic_player_skill_level::AutomaticPlayerSkillLevel;
 use crate::models::game_mode::GameMode;
 use crate::models::game_state::GameState;
@@ -25,13 +25,16 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-pub(crate) type TicTacToeGamesManager = GamingSessionsManager<TicTacToeGame>;
+/// The length of time after which to consider an inactive Game as abandoned 
+const ABANDONED_GAME_TTL_MS: i64 = (SECONDS_IN_AN_HOUR * 1000) as i64;
+/// The interval on which to run the background Game cleanup task
+const CLEANUP_INTERVAL: Duration = Duration::from_secs(SECONDS_IN_AN_HOUR / 2);
+/// The number of seconds in an hour
+const SECONDS_IN_AN_HOUR: u64 = 60 * 60;
 
-const ABANDONED_SESSION_TTL_MS: i64 = (SECOND_IN_AN_HOUR * 1000) as i64;
-const CLEANUP_INTERVAL: Duration = Duration::from_secs(SECOND_IN_AN_HOUR / 2);
-const SECOND_IN_AN_HOUR: u64 = 60 * 60;
-
+/// The MQTT broker address
 const MQTT_BROKER_ADDRESS: &str = "test.mosquitto.org";
+/// The MQTT port 
 const MQTT_PORT: u16 = 1883;
 
 /// Manages all the Game Sessions.
@@ -41,8 +44,6 @@ const MQTT_PORT: u16 = 1883;
 /// NOTE: Production-grade code would persist the gaming info to a mem cache or database so that
 /// multiple instances of the service can be run.
 pub(crate) struct GamingSessionsManager<T: GameTrait + Clone + Send + Sync + 'static> {
-    //
-
     observers: Vec<Box<dyn GamingSessionObserverTrait<T> + Send>>,
     sessions: Arc<tokio::sync::Mutex<HashMap<String, Box<GamingSession<T>>>>>,
 }
@@ -106,11 +107,11 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         debug!("GamesManager: note_player_readiness() called.");
 
         let session = match self.get_session_by_session_id(session_id).await {
-            None => return Err(GameError::SessionNotFound),
+            None => return Err(GameError::GamingSessionNotFound),
             Some(session) => session,
         };
 
-        self.notify_observers_of_session_change(GamingSessionStateChanges::PlayerReady, &session).await;
+        self.notify_observers_of_session_change(GamingSessionStateChanges::AllPlayersReady, &session).await;
 
         Ok(())
     }
@@ -161,12 +162,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         debug!("GamesManager: create_new_single_player_game() called. Session ID: {:?}, Skill Level: {:?}", session_id, computer_skill_level);
 
         let mut session = match self.get_session_by_session_id(session_id).await {
-            None => return Err(GameError::SessionNotFound),
+            None => return Err(GameError::GamingSessionNotFound),
             Some(session) => session,
         };
 
         let human_player = match session.participants.first() {
-            None => return Err(GameError::InvalidSession),
+            None => return Err(GameError::PlayerNotFound),
             Some(player) => player,
         };
 
@@ -200,12 +201,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         let mut session = match self.get_session_by_session_id(session_id).await {
             Some(session) => *session,
             None => {
-                return Err(GameError::SessionNotFound);
+                return Err(GameError::GamingSessionNotFound);
             }
         };
 
         if session.participants.len() < 2 {
-            return Err(GameError::SessionHasTooFewPlayers);
+            return Err(GameError::GamingSessionHasTooFewPlayers);
         }
 
         let game = T::new(GameMode::TwoPlayers,
@@ -243,7 +244,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         let session = match self.get_session_by_session_id(session_id).await {
             Some(session) => session,
-            None => return Err(GameError::SessionNotFound),
+            None => return Err(GameError::GamingSessionNotFound),
         };
 
         // Only allow Players who are part of the Game's Gaming Session to end the Game.
@@ -269,7 +270,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         debug!("GamesManager: end_gaming_session() called for session: {:?}.", session_id);
 
         match self.get_session_by_session_id(session_id).await {
-            None => Err(GameError::SessionNotFound),
+            None => Err(GameError::GamingSessionNotFound),
             Some(session) => {
                 //
 
@@ -286,7 +287,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
                 // Remove the Session
                 self.sessions.lock().await.remove(session_id);
 
-                self.notify_observers_of_session_change(GamingSessionStateChanges::SessionDeleted, &session).await;
+                self.notify_observers_of_session_change(GamingSessionStateChanges::GamingSessionDeleted, &session).await;
 
                 Ok(())
             }
@@ -296,7 +297,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     /// Retrieves the Game being played in the specified Gaming Session.
     pub(crate) async fn get_game_in_session(&self, session_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
         match self.get_session_by_session_id(&session_id.into()).await {
-            None => Err(GameError::SessionNotFound),
+            None => Err(GameError::GamingSessionNotFound),
             Some(session) => {
                 let session = (*session).clone();
                 match session.current_game {
@@ -415,7 +416,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         let publisher = Box::new(GameUpdatesPublisher::new(MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT));
         instance.observers.push(publisher.clone());
 
-        Self::auto_cleanup(instance.sessions.clone(), ABANDONED_SESSION_TTL_MS, CLEANUP_INTERVAL);
+        Self::auto_cleanup(instance.sessions.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
 
         instance
     }
@@ -432,7 +433,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         let session = match self.get_session_by_session_id(game_turn_info.session_id.as_str()).await {
             Some(session) => session,
-            None => { return Err(GameError::SessionNotFound); }
+            None => { return Err(GameError::GamingSessionNotFound); }
         };
 
         if let Some(ref game) = session.current_game {

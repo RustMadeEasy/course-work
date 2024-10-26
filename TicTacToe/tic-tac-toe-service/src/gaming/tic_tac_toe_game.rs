@@ -63,8 +63,8 @@ impl TicTacToeGame {
         let mut other_player = self.players.last().unwrap().clone();
 
         // Randomly assign the game piece for each player
-        player.game_piece = GamePiece::random_choice();
-        other_player.game_piece = player.game_piece.opposite();
+        player.game_piece = GamePiece::new_with_random_choice();
+        other_player.game_piece = GamePiece::new_as_opposite(&player.game_piece);
 
         // By convention, whoever has X starts first.
         let starting_player = if player.game_piece == GamePiece::X {

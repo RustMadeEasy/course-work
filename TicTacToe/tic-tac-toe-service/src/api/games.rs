@@ -17,7 +17,7 @@ use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::game_state::GameState;
 use crate::models::player_info::PlayerInfo;
-use crate::models::requests::{EndGameParams, GameTurnParams, NewSinglePlayerGameParams, ID_LENGTH_MAX};
+use crate::models::requests::{EndGameParams, GameTurnParams, NewSinglePlayerGameParams, ID_LENGTH_MAX, ID_LENGTH_MIN};
 use crate::models::responses::{GameCreationResponse, GameInfoResponse, TurnResponse};
 use actix_web::{delete, get, post, web, Error, HttpResponse};
 use log::debug;
@@ -30,7 +30,7 @@ use validator::Validate;
     tag = "TicTacToe",
     path = "/v1/gaming-sessions/{session_id}/games",
     responses(
-    (status = 200, description = "Single-Player Game created successfully", body = GameCreationResult, content_type = "application/json"),
+    (status = 200, description = "Single-Player Game created successfully", body = GameCreationResponse, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed NewSinglePlayerGameParams"),
     (status = 500, description = "Internal server error")
 ,), )]
@@ -54,7 +54,7 @@ pub(crate) async fn create_single_player_game(
     let new_game_params: NewSinglePlayerGameParams = new_game_params.0;
 
     let session = match manager.get_session_by_session_id(&session_id).await {
-        None => return Err(Error::from(GameError::SessionNotFound)),
+        None => return Err(Error::from(GameError::GamingSessionNotFound)),
         Some(session) => session,
     };
 
@@ -79,7 +79,7 @@ pub(crate) async fn create_single_player_game(
     tag = "TicTacToe",
     path = "/v1/gaming-session/{session_id}/two-player-games",
     responses(
-    (status = 200, description = "Two-Player Game created successfully", body = GameCreationResult, content_type = "application/json"),
+    (status = 200, description = "Two-Player Game created successfully", body = GameCreationResponse, content_type = "application/json"),
     (status = 500, description = "Internal server error")
 ,), )]
 #[post("/gaming-session/{session_id}/two-player-games")]
@@ -97,7 +97,7 @@ pub(crate) async fn create_two_player_game(
     let mut manager = manager.lock().await;
 
     let session = match manager.get_session_by_session_id(&session_id).await {
-        None => return Err(Error::from(GameError::SessionNotFound)),
+        None => return Err(Error::from(GameError::GamingSessionNotFound)),
         Some(session) => session,
     };
 
@@ -190,7 +190,7 @@ pub(crate) async fn get_game_history(
     path = "/v1/games/{game_id}/turns/latest",
     params(("game_id" = String, Path, description = "Game ID"),),
     responses(
-    (status = 200, description = "Latest Game Turn info retrieved successfully", body = TurnResult, content_type = "application/json"),
+    (status = 200, description = "Latest Game Turn info retrieved successfully", body = TurnResponse, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed Game ID"),
     (status = 404, description = "Game not found"),
     (status = 500, description = "Internal server error")
@@ -228,7 +228,7 @@ pub(crate) async fn get_latest_game_turn(
     tag = "TicTacToe",
     path = "/v1/games/{game_id}/turns",
     responses(
-    (status = 200, description = "Game turn added successfully", body = TurnResult, content_type = "application/json"),
+    (status = 200, description = "Game turn added successfully", body = TurnResponse, content_type = "application/json"),
     (status = 400, description = "Bad Request - Malformed Game ID, Invalid Board Position"),
     (status = 404, description = "Not Found - Game Not Found"),
     (status = 405, description = "Method Not Allowed - Wrong Player Taking Turn"),
@@ -266,7 +266,9 @@ pub(crate) async fn take_turn(
 pub(crate) fn validate_id_string(id: &str) -> actix_web::Result<()> {
     if id.is_empty() {
         Err(actix_web::error::ErrorBadRequest("ID is empty"))
-    } else if id.len() as u64 > ID_LENGTH_MAX {
+    } else if (id.len() as u64) < ID_LENGTH_MIN {
+        Err(actix_web::error::ErrorBadRequest("ID length is smaller than the minimum length allowed"))
+    } else if (id.len() as u64) > ID_LENGTH_MAX {
         Err(actix_web::error::ErrorBadRequest("ID exceeds maximum length"))
     } else {
         Ok(())

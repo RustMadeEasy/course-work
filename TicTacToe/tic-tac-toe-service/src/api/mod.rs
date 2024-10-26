@@ -12,25 +12,18 @@ pub(crate) mod health;
 
 /*  Single Player session:
     
-        Player A:    
+        Player:    
             Create a Gaming Session
             Subscribe to MQTT
             Create a Single-Player Game
 
-        Player B:
-            Join Gaming Session via invitation code
-            Subscribe to MQTT
-            On Game Started MQTT notification: Get Session Current Game
-
-        Player A and Player B:
+        Player and Automatic Player:
             Take Turn
             Take Turn
             Take Turn
 
-        Either Player:
+        Player:
             End Game
-
-        Either Player:
             Exit Gaming Session
 */
 
@@ -39,22 +32,24 @@ pub(crate) mod health;
         Player A:
             Create a Gaming Session
             Subscribe to MQTT
+            Create Two Player Game
             
         Player B:
             Join Gaming Session via invitation code
             Subscribe to MQTT
+            Call Get Session Current Game
             Post Player Readiness
 
         Player A:
-            On PlayerReady MQTT notification: Create Two Player Game
-            
-        Player B:
-            On GameStarted MQTT notification: Call Get Session Current Game
-     
+            On Player Readiness Event: Call Get Session Current Game
+
         Player A and Player B:
             Take Turn
+            On Turn Taken Event: Get latest game state
             Take Turn
+            On Turn Taken Event: Get latest game state
             Take Turn
+            On Turn Taken Event: Get latest game state
             
         Either Player:
             End Game

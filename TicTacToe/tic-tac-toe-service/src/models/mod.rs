@@ -15,5 +15,3 @@ pub(crate) mod game_piece;
 pub(crate) mod game_state;
 pub(crate) mod player_info;
 pub(crate) mod play_status;
-
-const INVITATION_CODE_LENGTH: u64 = 6;

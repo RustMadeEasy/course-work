@@ -29,7 +29,7 @@ use validator::Validate;
     tag = "TicTacToe",
     path = "/v1/gaming-sessions",
     responses(
-    (status = 200, description = "Gaming Session created successfully", body = GamingSessionCreationResult, content_type = "application/json"),
+    (status = 200, description = "Gaming Session created successfully", body = GamingSessionCreationResponse, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed NewGamingSessionParams"),
     (status = 500, description = "Internal server error")
 ,), )]
@@ -107,7 +107,7 @@ pub(crate) async fn end_gaming_session(
     path = "/v1/gaming-sessions/{session_id}/current-game",
     params(("session_id" = String, Path, description = "Session ID"),),
     responses(
-    (status = 200, description = "Gaming Session Game retrieved successfully", body = GameCreationResult, content_type = "application/json"),
+    (status = 200, description = "Gaming Session Game retrieved successfully", body = GameCreationResponse, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed Session ID"),
     (status = 404, description = "Session not found"),
     (status = 500, description = "Internal server error")
@@ -132,7 +132,7 @@ pub(crate) async fn get_session_current_game(
         Ok((session, game)) => {
             match session.participants.iter().find(|it| it.player_id != session.session_owner.player_id) {
                 None => {
-                    Err(Error::from(GameError::SessionHasTooFewPlayers))
+                    Err(Error::from(GameError::GamingSessionHasTooFewPlayers))
                 }
                 Some(other_player) => {
                     let result = GameCreationResponse {
@@ -157,7 +157,7 @@ pub(crate) async fn get_session_current_game(
     tag = "TicTacToe",
     path = "/v1/gaming-sessions/players",
     responses(
-    (status = 200, description = "Player added to the Gaming Session", body = GamingSessionCreationResult, content_type = "application/json"),
+    (status = 200, description = "Player added to the Gaming Session", body = GamingSessionCreationResponse, content_type = "application/json"),
     (status = 400, description = "Bad request - Malformed JoinSessionParams"),
     (status = 404, description = "No Game found for the specified Invitation"),
     (status = 500, description = "Internal server error")

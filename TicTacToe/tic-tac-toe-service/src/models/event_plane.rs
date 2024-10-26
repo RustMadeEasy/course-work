@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use strum::Display;
 use utoipa::ToSchema;
 
+/// Domain to use for the base of the topic prefix
 const DOMAIN_NAME: &str = "RustMadeEasy.com";
 
 /// Models the configuration required for clients to subscribe to real-time Game state updates.
@@ -52,19 +53,17 @@ impl EventPlaneConfig {
 /// Player to a Game.
 #[derive(Deserialize, Display, Serialize, ToSchema)]
 pub enum EventPlaneTopicNames {
-    /// Called when the Game has been deleted from the platform.
+    /// Published when all Players are ready to begin the Game.
+    AllPlayersReady,
+    /// Published when the Game has been deleted from the platform.
     GameDeleted,
-    /// Called when the Game has ended in a stalemate.
+    /// Published when the Game has ended in a stalemate.
     GameEndedInStalemate,
-    /// Called when the Game has ended in a win.
+    /// Published when the Game has ended in a win.
     GameEndedInWin,
     /// Published when the Game has started.
     GameStarted,
-    /// Published when a new Player has been added to the Gaming Session.
-    PlayerAddedToSession,
-    /// Published when a new Player is ready to begin the Game.
-    PlayerReady,
-    /// Called when the Gaming Session has been deleted from the platform.
+    /// Published when the Gaming Session has been deleted from the platform.
     SessionDeleted,
     /// Published when a Player has taken a new turn.
     TurnTaken,
@@ -80,8 +79,7 @@ impl EventPlaneTopicNames {
             EventPlaneTopicNames::GameEndedInStalemate => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInStalemate),
             EventPlaneTopicNames::GameEndedInWin => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInWin),
             EventPlaneTopicNames::GameStarted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameStarted),
-            EventPlaneTopicNames::PlayerAddedToSession => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerAddedToSession),
-            EventPlaneTopicNames::PlayerReady => format!("{topic_prefix}/{}", EventPlaneTopicNames::PlayerReady),
+            EventPlaneTopicNames::AllPlayersReady => format!("{topic_prefix}/{}", EventPlaneTopicNames::AllPlayersReady),
             EventPlaneTopicNames::TurnTaken => format!("{topic_prefix}/{}", EventPlaneTopicNames::TurnTaken),
             EventPlaneTopicNames::SessionDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::SessionDeleted),
         }

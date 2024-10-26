@@ -14,7 +14,7 @@ pub enum AutomaticPlayerSkillLevel {
     /// Performs random moves.
     #[default]
     Beginner,
-    /// Takes best tactical move.
+    /// Takes best tactical moves.
     Intermediate,
     /// Takes the best strategic moves, looking several moves into the future.
     Expert,

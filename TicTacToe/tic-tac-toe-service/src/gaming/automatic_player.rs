@@ -6,9 +6,10 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::gaming::game_board::GameBoard;
-use crate::gaming::game_observer_trait::{GamingSessionObserverTrait, GamingSessionStateChanges};
 use crate::gaming::game_trait::GameTrait;
 use crate::gaming::gaming_session::GamingSession;
+use crate::gaming::gaming_session_observer_trait::GamingSessionObserverTrait;
+use crate::gaming::gaming_session_state_changes::GamingSessionStateChanges;
 use crate::models::automatic_player_skill_level::AutomaticPlayerSkillLevel;
 use crate::models::board_position::BoardPosition;
 use crate::models::game_piece::GamePiece;
@@ -22,8 +23,11 @@ use tokio::time::{sleep, Duration};
 
 // To help make the auto-player feel more human, we deliberate on the move for anywhere
 // between MIN_DELIBERATION_TIME and MAX_DELIBERATION_TIME seconds.
-static MAX_DELIBERATION_TIME: f32 = 3_f32;
-static MIN_DELIBERATION_TIME: usize = 1;
+
+/// Maximum automatic turn deliberation time in seconds
+static MAX_DELIBERATION_TIME_SECS: f32 = 3_f32;
+/// Minimum automatic turn deliberation time in seconds
+static MIN_DELIBERATION_TIME_SECS: usize = 1;
 
 /// AutomaticPlayer can play a game of Tic-Tac-Toe at various skill levels.
 pub(crate) struct AutomaticPlayer<T: GameTrait + Clone + Send + Sync> {
@@ -120,7 +124,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
             tokio::spawn(async move {
 
                 // Make the service feel more human by deliberating on the move for some time...
-                let deliberation_time_in_secs = (rand::random::<f32>() * MAX_DELIBERATION_TIME).floor() as usize + MIN_DELIBERATION_TIME;
+                let deliberation_time_in_secs = (rand::random::<f32>() * MAX_DELIBERATION_TIME_SECS).floor() as usize + MIN_DELIBERATION_TIME_SECS;
                 sleep(Duration::from_secs(deliberation_time_in_secs as u64)).await;
 
                 // *** Now, control the service via the API in the same way client apps do. ***
@@ -208,7 +212,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
                         _ => {}
                     }
                 }
-                GamingSessionStateChanges::GameDeleted | GamingSessionStateChanges::PlayerReady | GamingSessionStateChanges::SessionDeleted => {}
+                GamingSessionStateChanges::GameDeleted | GamingSessionStateChanges::AllPlayersReady | GamingSessionStateChanges::GamingSessionDeleted => {}
             }
         }
     }

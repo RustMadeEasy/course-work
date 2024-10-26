@@ -17,25 +17,25 @@ use chrono::{DateTime, Utc};
 pub(crate) trait GameTrait: Sized {
     //
 
-    /// Returns the current state of the Game Board.
+    /// Property accessor for the current state of the Game.
     fn get_current_game_state(&self) -> GameState;
 
     /// Returns the Player who can currently make a Game move.
     fn get_current_player(&self) -> Option<PlayerInfo>;
 
-    /// Returns the Game Mode.
+    /// Property accessor for the Game Mode.
     fn get_game_mode(&self) -> GameMode;
 
-    /// Returns the Game ID.
+    /// Property accessor for the Game ID.
     fn get_id(&self) -> String;
 
-    /// Returns the Game Play History.
+    /// Property accessor for the Game Play History.
     fn get_play_history(&self) -> Vec<GameState>;
 
-    /// Returns the specified Player.
+    /// Property accessor for the specified Player.
     fn get_player_info_by_id(&self, player_id: impl Into<String>) -> Result<PlayerInfo, GameError>;
 
-    /// Returns the date/time of the Game's latest move.
+    /// Property accessor for the date/time of the Game's latest move.
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
 
     /// Creates a new Game instance.
