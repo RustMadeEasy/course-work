@@ -187,11 +187,11 @@ class GameInfoService {
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
-                            print("retrieveGameInfo() error: \(String(describing: error))")
+                            print("getLatestTurn() error: \(String(describing: error))")
                             continuation.resume(returning: GameInfoServiceResult(error: error))
                         }
                     } else {
-                        print("retrieveGameInfo() error: \(String(describing: error))")
+                        print("getLatestTurn() error: \(String(describing: error))")
                         continuation.resume(returning: GameInfoServiceResult(error: error))
                     }
                 }
@@ -199,7 +199,7 @@ class GameInfoService {
             return result
             
         } catch {
-            print("retrieveGameInfo() error: \(String(describing: error))")
+            print("getLatestTurn() error: \(String(describing: error))")
             return GameInfoServiceResult(error: error)
         }
     }
@@ -212,7 +212,7 @@ class GameInfoService {
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
                 TicTacToeAPI.joinCurrentGame(sessionId: sessionId, playerId: localPlayerId) { data, error in
                     if error == nil {
-                        continuation.resume(returning: GameInfoServiceResult())
+                        continuation.resume(returning: GameInfoServiceResult(gameCreationResult: data))
                     } else {
                         print("joinCurrentGame() error: \(String(describing: error))")
                         continuation.resume(returning: GameInfoServiceResult(error: error))
@@ -242,11 +242,11 @@ class GameInfoService {
                             }
                         } else {
                             let error = GameInfoManagerError.emptyData;
-                            print("joinGame() error: \(String(describing: error))")
+                            print("joinGamingSession() error: \(String(describing: error))")
                             continuation.resume(returning: GameInfoServiceResult(error: error))
                         }
                     } else {
-                        print("joinGame() error: \(String(describing: error))")
+                        print("joinGamingSession() error: \(String(describing: error))")
                         continuation.resume(returning: GameInfoServiceResult(error: error))
                     }
                 }
@@ -254,31 +254,7 @@ class GameInfoService {
             return result
             
         } catch {
-            print("joinGame() error: \(String(describing: error))")
-            return GameInfoServiceResult(error: error)
-        }
-    }
-
-    static func notePlayerReadiness(sessionId: String, playerId: String) async -> GameInfoServiceResult {
-        
-        do {
-            
-            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                TicTacToeAPI.notePlayerReadiness(sessionId: sessionId, playerId: playerId) { data, error in
-                    if error == nil {
-                        DispatchQueue.main.async {
-                            continuation.resume(returning: GameInfoServiceResult(gamingSessionCreationResult: nil) )
-                        }
-                    } else {
-                        print("joinGame() error: \(String(describing: error))")
-                        continuation.resume(returning: GameInfoServiceResult(error: error))
-                    }
-                }
-            }
-            return result
-            
-        } catch {
-            print("joinGame() error: \(String(describing: error))")
+            print("joinGamingSession() error: \(String(describing: error))")
             return GameInfoServiceResult(error: error)
         }
     }

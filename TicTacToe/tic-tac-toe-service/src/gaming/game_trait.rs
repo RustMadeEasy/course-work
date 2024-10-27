@@ -45,10 +45,7 @@ pub(crate) trait GameTrait: Sized {
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
 
     /// Creates a new Game instance.
-    fn new(game_mode: GameMode,
-           initial_player: &PlayerInfo,
-           other_player: Option<PlayerInfo>,
-           session_id: &str) -> Result<Self, GameError>;
+    fn new(game_mode: GameMode, session_id: &str) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.
     fn take_turn(&mut self, game_turn_info: &GameTurnParams) -> Result<TurnResponse, GameError>;

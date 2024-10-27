@@ -5,7 +5,6 @@
 // © 2024 Rust Made Easy. All rights reserved.
 // @author JoelDavisEngineering@Gmail.com
 
-use crate::errors::GameError;
 use crate::models::game_piece::GamePiece;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -28,22 +27,13 @@ pub struct PlayerInfo {
 impl PlayerInfo {
     //
 
-    /// Returns a Player from the list that is other than the specified Player.
+    /// Returns a Player from the list that is other than the specified Player - if any.
     pub fn get_other_player_info(
         player_id: impl Into<String>,
         players: &[PlayerInfo],
-    ) -> Result<PlayerInfo, GameError> {
-        //
-
-        if players.len() < 2 {
-            return Err(GameError::PlayerNotFound);
-        }
-
+    ) -> Option<PlayerInfo> {
         let player_id = player_id.into();
-        match players.iter().find(|it| it.player_id != player_id) {
-            None => Err(GameError::PlayerNotFound),
-            Some(player) => Ok(player.clone()),
-        }
+        players.iter().find(|it| it.player_id != player_id).cloned()
     }
 
     /// Creates a new PlayerInfo instance.

@@ -91,10 +91,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             Some(session) => session,
         };
 
-        let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants)?;
-
         // Make sure the name is not already used by the other Player.
-        if player_display_name.to_lowercase().trim() == other_player.display_name.to_lowercase().trim() {
+        if session.participants.iter().any(|p| p.display_name.to_lowercase() == player_display_name.to_lowercase()) {
             return Err(GameError::NameAlreadyInUseInGamingSession);
         }
 
@@ -107,7 +105,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             event_plane_config: session.event_plane_config,
             initiating_player: session.session_owner,
             invitation_code: session.invitation_code,
-            other_player: Some(other_player),
+            other_player: Some(new_player),
             session_id: session.session_id,
         })
     }
@@ -232,20 +230,17 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             Some(session) => session,
         };
 
-        let human_player = match session.participants.first() {
-            None => return Err(GameError::PlayerNotFound),
-            Some(player) => player,
-        };
-
         let computer_player = PlayerInfo::new(AutomaticPlayer::<T>::get_name().as_str(), true);
 
-        let game = T::new(GameMode::SinglePlayer, human_player, Some(computer_player.clone()), &session.session_id)?;
+        let mut game = T::new(GameMode::SinglePlayer, &session.session_id)?;
 
         // Create an AutomaticPlayer to play against Player One.
         let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), &computer_player, computer_skill_level);
 
         // Make sure the AutomaticPlayer can follow the Game.
         self.observers.push(Box::new(auto_player));
+
+        game.add_player(&computer_player)?;
 
         self.upsert_game(&game).await;
 
@@ -272,12 +267,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             }
         };
 
-        let session_owner = session.session_owner.clone();
-        let other_player = session.participants.iter().find(|it| it.player_id != session_owner.player_id).cloned();
-        let game = T::new(GameMode::TwoPlayers,
-                          &session_owner,
-                          other_player,
-                          &session.session_id)?;
+        let game = T::new(GameMode::TwoPlayers, &session.session_id)?;
 
         self.upsert_game(&game).await;
 
@@ -389,7 +379,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     #[named]
-    pub(crate) async fn join_current_game(&mut self, session_id: &str, player_id: &str) -> Result<(), GameError> {
+    pub(crate) async fn join_current_game(&mut self, session_id: &str, player_id: &str) -> Result<(T, Vec<PlayerInfo>), GameError> {
         //
 
         debug!("{} called", function_name!());
@@ -418,7 +408,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             self.notify_observers_of_session_change(GamingSessionStateChanges::AllPlayersReady, &session).await;
         }
 
-        Ok(())
+        Ok((game.clone(), session.participants))
     }
 
     async fn remove_game(&mut self, game_id: &str) -> bool {

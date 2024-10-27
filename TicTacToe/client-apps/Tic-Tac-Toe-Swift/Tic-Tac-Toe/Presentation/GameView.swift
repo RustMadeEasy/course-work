@@ -180,15 +180,21 @@ struct GameView: View {
         self.gameInfoVM.localPlayerInitiatedGamingSession = true
         self.gameInfoVM.isTwoPlayer = false
         
-        await self.gameInfoVM.createGamingSession { succeeded, error in
+        await self.gameInfoVM.createGamingSession { succeeded, _ in
             if succeeded {
                 Task {
-                    if await self.gameInfoVM.createSinglePlayerGame() != nil {
-                        showGameCreationError = true
+                    await self.gameInfoVM.createSinglePlayerGame { succeeded2, _ in
+                        if !succeeded2 {
+                            DispatchQueue.main.async {
+                                self.showGameCreationError = true
+                            }
+                        }
                     }
                 }
             } else {
-                showGameCreationError = true
+                DispatchQueue.main.async {
+                    self.showGameCreationError = true
+                }
             }
         }
     }
@@ -196,31 +202,48 @@ struct GameView: View {
     private func createTwoPlayerGame() async {
         
         self.gameInfoVM.localPlayerInitiatedGamingSession = true
-        self.gameInfoVM.isTwoPlayer = true
+        self.gameInfoVM.isTwoPlayer = true    
 
-        await self.gameInfoVM.createGamingSession { succeeded, error in
+        await self.gameInfoVM.createGamingSession { succeeded, _ in
             if succeeded {
                 Task {
-                    if await self.gameInfoVM.createTwoPlayerGame() == nil {
-                        if await self.gameInfoVM.joinCurrentGame() == nil {
+                    await self.gameInfoVM.createTwoPlayerGame { succeeded2, _ in
+                        if succeeded2 {
+                            Task {
+                                await self.gameInfoVM.joinCurrentGame { succeeded3, _ in
+                                    if !succeeded3 {
+                                        DispatchQueue.main.async {
+                                            self.showGameCreationError = true
+                                        }
+                                    }
+                                }
+                            }
                         } else {
-                            showGameCreationError = true
+                            DispatchQueue.main.async {
+                                self.showGameCreationError = true
+                            }
                         }
-                    } else {
-                        showGameCreationError = true
                     }
                 }
             } else {
-                showGameCreationError = true
+                DispatchQueue.main.async {
+                    self.showGameCreationError = true
+                }
             }
         }
     }
         
     /// Joins an existing Gaming Session.
     private func joinGamingSession() async {
-        if await self.gameInfoVM.joinGamingSession(invitationCode: self.gameInfoVM.invitationCode) == nil {
-        } else {
-            showGameCreationError = true
+        
+        let _ = await self.gameInfoVM.joinGamingSession(invitationCode: self.gameInfoVM.invitationCode)
+
+        await self.gameInfoVM.joinCurrentGame { succeeded, error in
+            if !succeeded {
+                DispatchQueue.main.async {
+                    self.showGameCreationError = true
+                }
+            }
         }
     }
         

@@ -14,7 +14,6 @@ Method | HTTP request | Description
 [**getSessionCurrentGame**](TicTacToeAPI.md#getsessioncurrentgame) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Gaming Session&#39;s current Game.
 [**joinCurrentGame**](TicTacToeAPI.md#joincurrentgame) | **PUT** /v1/gaming-sessions/{session_id}/current_game/players/{player_id} | Adds a Player to the Session&#39;s Current Game.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
-[**notePlayerReadiness**](TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Called to indicate that a Player is ready to Play. This is required as part of the handshaking during new Game setup.
 [**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player. Returns the Turn Result.
 
 
@@ -410,7 +409,7 @@ No authorization required
 
 # **joinCurrentGame**
 ```swift
-    open class func joinCurrentGame(sessionId: String, playerId: String, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
+    open class func joinCurrentGame(sessionId: String, playerId: String, completion: @escaping (_ data: GameCreationResponse?, _ error: Error?) -> Void)
 ```
 
 Adds a Player to the Session's Current Game.
@@ -445,7 +444,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-Void (empty response body)
+[**GameCreationResponse**](GameCreationResponse.md)
 
 ### Authorization
 
@@ -454,7 +453,7 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -503,56 +502,6 @@ No authorization required
 
  - **Content-Type**: application/json
  - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **notePlayerReadiness**
-```swift
-    open class func notePlayerReadiness(sessionId: String, playerId: String, completion: @escaping (_ data: Void?, _ error: Error?) -> Void)
-```
-
-Called to indicate that a Player is ready to Play. This is required as part of the handshaking during new Game setup.
-
-### Example
-```swift
-// The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
-import OpenAPIClient
-
-let sessionId = "sessionId_example" // String | 
-let playerId = "playerId_example" // String | 
-
-// Called to indicate that a Player is ready to Play. This is required as part of the handshaking during new Game setup.
-TicTacToeAPI.notePlayerReadiness(sessionId: sessionId, playerId: playerId) { (response, error) in
-    guard error == nil else {
-        print(error)
-        return
-    }
-
-    if (response) {
-        dump(response)
-    }
-}
-```
-
-### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **sessionId** | **String** |  | 
- **playerId** | **String** |  | 
-
-### Return type
-
-Void (empty response body)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

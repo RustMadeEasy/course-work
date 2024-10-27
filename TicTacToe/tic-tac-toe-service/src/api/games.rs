@@ -19,7 +19,7 @@ use crate::models::game_state::GameState;
 use crate::models::player_info::PlayerInfo;
 use crate::models::requests::{EndGameParams, GameTurnParams, NewSinglePlayerGameParams, ID_LENGTH_MAX, ID_LENGTH_MIN};
 use crate::models::responses::{GameCreationResponse, GameInfoResponse, TurnResponse};
-use actix_web::{delete, get, post, put, web, Error, HttpResponse, ResponseError};
+use actix_web::{delete, get, post, put, web, Error, HttpResponse};
 use log::debug;
 use validator::Validate;
 
@@ -60,11 +60,11 @@ pub(crate) async fn create_single_player_game(
 
     match manager.create_new_single_player_game(session.session_id.as_str(), &new_game_params.computer_skill_level).await {
         Ok(game) => {
-            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &game.players)?;
+            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &game.players);
             let new_game_info = GameCreationResponse {
                 game_info: GameInfoResponse::from(game.clone()),
                 initiating_player: session.session_owner,
-                other_player: Some(other_player),
+                other_player,
                 session_id: session.session_id.clone(),
             };
             Ok(web::Json(new_game_info))
@@ -104,10 +104,7 @@ pub(crate) async fn create_two_player_game(
     match manager.create_new_two_player_game(&session_id).await {
         Ok(result) => {
             // Add the other Player if they are already part of the Gaming Session.
-            let other_player = match PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants) {
-                Ok(other_player) => Some(other_player),
-                Err(_) => None,
-            };
+            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants);
             let new_game_info = GameCreationResponse {
                 game_info: GameInfoResponse::from(result.0.clone()),
                 initiating_player: session.session_owner,
@@ -232,7 +229,7 @@ pub(crate) async fn get_latest_game_turn(
     tag = "TicTacToe",
     path = "/v1/gaming-sessions/{session_id}/current_game/players/{player_id}",
     responses(
-    (status = 200, description = "Player joined Game successfully"),
+    (status = 200, description = "Player joined Game successfully", body = GameCreationResponse, content_type = "application/json"),
     (status = 404, description = "Game not found"),
     (status = 404, description = "Player not found"),
     (status = 404, description = "Session not found"),
@@ -242,7 +239,7 @@ pub(crate) async fn get_latest_game_turn(
 pub(crate) async fn join_current_game(
     session_and_player: web::Path<(String, String)>,
     manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> HttpResponse {
+) -> actix_web::Result<web::Json<GameCreationResponse>> {
     //
 
     // *** Validate input params ***
@@ -261,9 +258,24 @@ pub(crate) async fn join_current_game(
 
     let mut manager = manager.lock().await;
 
+    let session = match manager.get_session_by_id(&session_and_player.0).await {
+        None => return Err(Error::from(GameError::GamingSessionNotFound)),
+        Some(session) => session,
+    };
+
     match manager.join_current_game(&session_and_player.0, &session_and_player.1).await {
-        Ok(()) => HttpResponse::Ok().finish(),
-        Err(error) => error.error_response(),
+        Ok(result) => {
+            // Add the other Player if they are already part of the Gaming Session.
+            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants);
+            let new_game_info = GameCreationResponse {
+                game_info: GameInfoResponse::from(result.0.clone()),
+                initiating_player: session.session_owner,
+                other_player,
+                session_id: session.session_id,
+            };
+            Ok(web::Json(new_game_info))
+        }
+        Err(error) => Err(error.into()),
     }
 }
 

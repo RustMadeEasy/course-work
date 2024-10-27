@@ -349,7 +349,9 @@ mod game_play_tests {
         player_one.game_piece = GamePiece::O;
         player_two.game_piece = GamePiece::X;
 
-        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, Some(player_two.clone()), Uuid::new_v4().to_string().as_str()).unwrap();
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, Uuid::new_v4().to_string().as_str()).unwrap();
+        let _ = game.add_player(&player_one);
+        let _ = game.add_player(&player_two);
 
         game.current_player = Some(player_one.clone());
 
@@ -395,7 +397,9 @@ mod game_play_tests {
         player_one.game_piece = GamePiece::O;
         player_two.game_piece = GamePiece::X;
 
-        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, Some(player_two.clone()), Uuid::new_v4().to_string().as_str()).unwrap();
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, Uuid::new_v4().to_string().as_str()).unwrap();
+        let _ = game.add_player(&player_one);
+        let _ = game.add_player(&player_two);
 
         game.current_player = Some(player_one.clone());
 
@@ -440,11 +444,13 @@ mod game_play_tests {
         //
 
         // Start a new Game
-        let mut game = TicTacToeGame::new(GameMode::TwoPlayers,
-                                          &PlayerInfo::new(Uuid::new_v4(), false),
-                                          Some(PlayerInfo::new(Uuid::new_v4(), false)),
-                                          Uuid::new_v4().to_string().as_str()).unwrap();
+        let player_one = PlayerInfo::new(Uuid::new_v4(), false);
+        let player_two = PlayerInfo::new(Uuid::new_v4(), false);
 
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, Uuid::new_v4().to_string().as_str()).unwrap();
+        let _ = game.add_player(&player_one);
+        let _ = game.add_player(&player_two);
+        
         let first_destination = BoardPosition::new(0, 0);
         let second_destination = BoardPosition::new(1, 1);
 

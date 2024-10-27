@@ -140,7 +140,7 @@ extension GameInfoViewModel {
 
 extension GameInfoViewModel {
     
-    func createSinglePlayerGame() async -> Error? {
+    func createSinglePlayerGame(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
         
         // TODO: JD: allow the UI to set the AutomaticPlayerSkillLevel
         let result = await GameInfoService.createSinglePlayerGame(computerSkillLevel: AutomaticPlayerSkillLevel.intermediate, sessionId: self.gamingSessionId, localPlayerName: self.localPlayer.displayName)
@@ -151,19 +151,21 @@ extension GameInfoViewModel {
                 
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.gameId)
-                          
+                
                 self.setupPlayers(newGameInfo: newGameInfo)
-                                                
+                
                 self._isTwoPlayer = Published(wrappedValue: false)
                 
                 self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
+                
+                completion(true, nil)
             }
+        } else {
+            completion(false, result.error)
         }
-        
-        return result.error
     }
     
-    func createTwoPlayerGame() async -> Error? {
+    func createTwoPlayerGame(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
         
         let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId,
                                                                localPlayerName: self.localPlayer.displayName)
@@ -175,15 +177,11 @@ extension GameInfoViewModel {
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.gameId)
                 
-                self.setupPlayers(newGameInfo: newGameInfo)
-
-                self._isTwoPlayer = Published(wrappedValue: true)
-                
-                self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
+                completion(true, nil)
             }
+        } else {
+            completion(false, result.error)
         }
-
-        return result.error
     }
     
     /// Creates and starts a new Gaming Session.
@@ -243,24 +241,26 @@ extension GameInfoViewModel {
     }
     
     /// Joins a Game.
-    func joinCurrentGame() async -> Error? {
+    func joinCurrentGame(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
         
         let result = await GameInfoService.joinCurrentGame(sessionId: self.gamingSessionId, localPlayerId: self.localPlayer.playerId)
 
-        if let newGamingSessionInfo = result.gamingSessionCreationResult {
+        if let newGameInfo = result.gameCreationResult {
             
             DispatchQueue.main.async {
                 
-                self.updateGamingSessionInfo(info: newGamingSessionInfo)
-
+                self.setupPlayers(newGameInfo: newGameInfo)
+                
+                self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
+                
                 Task {
-                    let _ = await GameInfoService.notePlayerReadiness(sessionId: self.gamingSessionId, playerId: self.localPlayer.playerId)
                     self.onGameStarted()
+                    completion(true, nil)
                 }
             }
+        } else {
+            completion(false, result.error)
         }
-        
-        return result.error
     }
     
     /// Joins a Gaming Session.
@@ -275,7 +275,6 @@ extension GameInfoViewModel {
                 self.updateGamingSessionInfo(info: newGamingSessionInfo)
 
                 Task {
-                    let _ = await GameInfoService.notePlayerReadiness(sessionId: self.gamingSessionId, playerId: self.localPlayer.playerId)
                     self.onGameStarted()
                 }
             }

@@ -37,7 +37,6 @@ Class | Method | HTTP request | Description
 *TicTacToeAPI* | [**getSessionCurrentGame**](docs/TicTacToeAPI.md#getsessioncurrentgame) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Gaming Session&#39;s current Game.
 *TicTacToeAPI* | [**joinCurrentGame**](docs/TicTacToeAPI.md#joincurrentgame) | **PUT** /v1/gaming-sessions/{session_id}/current_game/players/{player_id} | Adds a Player to the Session&#39;s Current Game.
 *TicTacToeAPI* | [**joinGamingSession**](docs/TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
-*TicTacToeAPI* | [**notePlayerReadiness**](docs/TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Called to indicate that a Player is ready to Play. This is required as part of the handshaking during new Game setup.
 *TicTacToeAPI* | [**takeTurn**](docs/TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player. Returns the Turn Result.
 
 

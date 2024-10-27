@@ -161,23 +161,19 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Creates a new Game instance. Note that the begin() function must be called before game play can commence.
-    fn new(game_mode: GameMode, player: &PlayerInfo, other_player: Option<PlayerInfo>, session_id: &str) -> Result<Self, GameError> {
+    fn new(game_mode: GameMode, session_id: &str) -> Result<Self, GameError> {
         //
 
-        debug!("TicTacToeGame::new() Creating new game. Session ID: {:?} with Player: {:?}", session_id, player);
+        debug!("TicTacToeGame::new() Creating new game. Session ID: {:?}.", session_id);
 
-        let mut game = Self {
+        let game = Self {
             current_player: None,
             game_mode,
             id: Uuid::new_v4().to_string(),
             latest_turn_result: None,
-            players: vec![player.clone()],
+            players: vec![],
             play_history: vec![],
         };
-
-        if let Some(other_player) = other_player {
-            game.add_player(&other_player)?;
-        }
 
         Ok(game)
     }
@@ -219,7 +215,10 @@ impl GameTrait for TicTacToeGame {
         }
 
         // Load the other Player.
-        let other_player = PlayerInfo::get_other_player_info(&game_turn_info.player_id, &self.players)?;
+        let other_player = match PlayerInfo::get_other_player_info(&game_turn_info.player_id, &self.players) {
+            Some(other_player) => other_player,
+            None => return Err(GameError::PlayerNotFound),
+        };
 
         // Take the turn and make a new Board State by adding the specified piece to the board of
         // the current Board State.
