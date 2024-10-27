@@ -19,7 +19,7 @@ use crate::models::game_state::GameState;
 use crate::models::player_info::PlayerInfo;
 use crate::models::requests::{EndGameParams, GameTurnParams, NewSinglePlayerGameParams, ID_LENGTH_MAX, ID_LENGTH_MIN};
 use crate::models::responses::{GameCreationResponse, GameInfoResponse, TurnResponse};
-use actix_web::{delete, get, post, web, Error, HttpResponse};
+use actix_web::{delete, get, post, put, web, Error, HttpResponse, ResponseError};
 use log::debug;
 use validator::Validate;
 
@@ -42,18 +42,18 @@ pub(crate) async fn create_single_player_game(
 ) -> actix_web::Result<web::Json<GameCreationResponse>> {
     //
 
-    debug!("HTTP POST to /gaming-sessions/{}/games. Params: {:?}", session_id, new_game_params);
-
     // *** Validate input params ***
     if let Err(e) = new_game_params.validate() {
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
 
+    debug!("HTTP POST to /gaming-sessions/{}/games. Params: {:?}", session_id, new_game_params);
+
     let mut manager = manager.lock().await;
 
     let new_game_params: NewSinglePlayerGameParams = new_game_params.0;
 
-    let session = match manager.get_session_by_session_id(&session_id).await {
+    let session = match manager.get_session_by_id(&session_id).await {
         None => return Err(Error::from(GameError::GamingSessionNotFound)),
         Some(session) => session,
     };
@@ -64,7 +64,7 @@ pub(crate) async fn create_single_player_game(
             let new_game_info = GameCreationResponse {
                 game_info: GameInfoResponse::from(game.clone()),
                 initiating_player: session.session_owner,
-                other_player,
+                other_player: Some(other_player),
                 session_id: session.session_id.clone(),
             };
             Ok(web::Json(new_game_info))
@@ -89,21 +89,25 @@ pub(crate) async fn create_two_player_game(
 ) -> actix_web::Result<web::Json<GameCreationResponse>> {
     //
 
-    debug!("HTTP POST to /gaming-session/two-player-games. Session-Id: {:?}", session_id);
-
     // *** Validate input params ***
     validate_id_string(&session_id)?;
 
+    debug!("HTTP POST to /gaming-session/two-player-games. Session-Id: {:?}", session_id);
+
     let mut manager = manager.lock().await;
 
-    let session = match manager.get_session_by_session_id(&session_id).await {
+    let session = match manager.get_session_by_id(&session_id).await {
         None => return Err(Error::from(GameError::GamingSessionNotFound)),
         Some(session) => session,
     };
 
     match manager.create_new_two_player_game(&session_id).await {
         Ok(result) => {
-            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants)?;
+            // Add the other Player if they are already part of the Gaming Session.
+            let other_player = match PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants) {
+                Ok(other_player) => Some(other_player),
+                Err(_) => None,
+            };
             let new_game_info = GameCreationResponse {
                 game_info: GameInfoResponse::from(result.0.clone()),
                 initiating_player: session.session_owner,
@@ -135,8 +139,6 @@ pub(crate) async fn end_game(
 ) -> HttpResponse {
     //
 
-    debug!("HTTP DELETE to /games/{}", game_id);
-
     // *** Validate input params ***
     if let Err(e) = end_game_params.validate() {
         return actix_web::error::ErrorBadRequest(e.to_string()).into();
@@ -146,6 +148,8 @@ pub(crate) async fn end_game(
     } else if game_id.len() as u64 > ID_LENGTH_MAX {
         return HttpResponse::BadRequest().body("Game ID exceeds maximum length");
     }
+
+    debug!("HTTP DELETE to /games/{}", game_id);
 
     match manager.lock().await.end_game(&game_id, end_game_params.player_id.as_str(), end_game_params.session_id.as_str()).await {
         Ok(_) => HttpResponse::Ok().finish(),
@@ -172,10 +176,10 @@ pub(crate) async fn get_game_history(
 ) -> actix_web::Result<web::Json<Vec<GameState>>> {
     //
 
-    debug!("HTTP GET to /games/{}/turns", game_id);
-
     // *** Validate input params ***
     validate_id_string(&game_id)?;
+
+    debug!("HTTP GET to /games/{}/turns", game_id);
 
     match manager.lock().await.get_game_history(&game_id).await {
         Ok(history) => Ok(web::Json(history)),
@@ -202,10 +206,10 @@ pub(crate) async fn get_latest_game_turn(
 ) -> actix_web::Result<web::Json<TurnResponse>> {
     //
 
-    debug!("HTTP GET to /games/{}/turns/latest", game_id);
-
     // *** Validate input params ***
     validate_id_string(&game_id)?;
+
+    debug!("HTTP GET to /games/{}/turns/latest", game_id);
 
     match manager
         .lock()
@@ -219,6 +223,47 @@ pub(crate) async fn get_latest_game_turn(
             }
         }
         Err(error) => Err(error.into()),
+    }
+}
+
+/// Adds a Player to the Session's Current Game.
+#[utoipa::path(
+    put,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions/{session_id}/current_game/players/{player_id}",
+    responses(
+    (status = 200, description = "Player joined Game successfully"),
+    (status = 404, description = "Game not found"),
+    (status = 404, description = "Player not found"),
+    (status = 404, description = "Session not found"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[put("/gaming-sessions/{session_id}/current_game/players/{player_id}")]
+pub(crate) async fn join_current_game(
+    session_and_player: web::Path<(String, String)>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+) -> HttpResponse {
+    //
+
+    // *** Validate input params ***
+    match validate_id_string(&session_and_player.0) {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(error) => error.into(),
+    };
+    match validate_id_string(&session_and_player.1) {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(error) => error.into(),
+    };
+
+    debug!("HTTP PUT to /gaming-sessions/{}/current_game/players/{}.",
+        session_and_player.0,
+        session_and_player.1);
+
+    let mut manager = manager.lock().await;
+
+    match manager.join_current_game(&session_and_player.0, &session_and_player.1).await {
+        Ok(()) => HttpResponse::Ok().finish(),
+        Err(error) => error.error_response(),
     }
 }
 
@@ -243,10 +288,10 @@ pub(crate) async fn take_turn(
 ) -> actix_web::Result<web::Json<TurnResponse>> {
     //
 
-    debug!("HTTP POST to /games/{}/turns", game_id);
-
     // *** Validate input params ***
     validate_id_string(&game_id)?;
+
+    debug!("HTTP POST to /games/{}/turns", game_id);
 
     if let Err(e) = game_turn_info.validate() {
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));

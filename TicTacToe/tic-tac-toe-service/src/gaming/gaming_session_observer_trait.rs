@@ -16,7 +16,7 @@ pub(crate) trait GamingSessionObserverTrait<T: GameTrait + Clone + Send + Sync +
     //
 
     /// Called when the specified Gaming Session has been updated
-    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<&T>);
+    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<T>);
 
     /// Property accessor for the Observer's unique ID
     fn unique_id(&self) -> String;

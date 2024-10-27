@@ -15,14 +15,14 @@ use derive_more::{Display, Error};
 pub(crate) enum GameError {
     /// The specified board location is already occupied by another Game Piece
     BoardLocationAlreadyOccupied,
+    /// The Game already has the maximum number of Players
+    GameHasMaximumNumberOfPlayers,
     /// The operation cannot be applied because the Game is an ended state
     GameHasAlreadyEnded,
     /// The operation cannot be applied because the Game has not begun
     GameNotStarted,
     /// The specified Game does not exist
     GameNotFound,
-    /// An operation, e.g. Two Player game creation, failed because the Gaming Session does not have enough Players 
-    GamingSessionHasTooFewPlayers,
     /// The specified Gaming Session does not exist
     GamingSessionNotFound,
     /// The specified board position is not a valid position on a Tic-Tac-Toe game board
@@ -48,12 +48,12 @@ impl ResponseError for GameError {
             GameError::GameNotStarted
             | GameError::InvalidBoardPosition
             | GameError::NameAlreadyInUseInGamingSession
-            | GameError::PlayerGamePieceNotSelected
-            | GameError::GamingSessionHasTooFewPlayers => StatusCode::BAD_REQUEST,
+            | GameError::PlayerGamePieceNotSelected => StatusCode::BAD_REQUEST,
 
             GameError::GameHasAlreadyEnded => StatusCode::NOT_ACCEPTABLE,
 
-            GameError::WrongPlayerTakingTurn => StatusCode::METHOD_NOT_ALLOWED,
+            GameError::GameHasMaximumNumberOfPlayers
+            | GameError::WrongPlayerTakingTurn => StatusCode::METHOD_NOT_ALLOWED,
 
             GameError::BoardLocationAlreadyOccupied => StatusCode::CONFLICT,
 

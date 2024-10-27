@@ -349,7 +349,7 @@ mod game_play_tests {
         player_one.game_piece = GamePiece::O;
         player_two.game_piece = GamePiece::X;
 
-        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, &player_two, Uuid::new_v4().to_string().as_str()).unwrap();
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, Some(player_two.clone()), Uuid::new_v4().to_string().as_str()).unwrap();
 
         game.current_player = Some(player_one.clone());
 
@@ -395,7 +395,7 @@ mod game_play_tests {
         player_one.game_piece = GamePiece::O;
         player_two.game_piece = GamePiece::X;
 
-        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, &player_two, Uuid::new_v4().to_string().as_str()).unwrap();
+        let mut game = TicTacToeGame::new(GameMode::TwoPlayers, &player_one, Some(player_two.clone()), Uuid::new_v4().to_string().as_str()).unwrap();
 
         game.current_player = Some(player_one.clone());
 
@@ -442,7 +442,7 @@ mod game_play_tests {
         // Start a new Game
         let mut game = TicTacToeGame::new(GameMode::TwoPlayers,
                                           &PlayerInfo::new(Uuid::new_v4(), false),
-                                          &PlayerInfo::new(Uuid::new_v4(), false),
+                                          Some(PlayerInfo::new(Uuid::new_v4(), false)),
                                           Uuid::new_v4().to_string().as_str()).unwrap();
 
         let first_destination = BoardPosition::new(0, 0);
@@ -494,6 +494,7 @@ mod game_play_tests {
 
 #[cfg(test)]
 mod game_state_tests {
+    use crate::gaming::game_board;
     use crate::models::board_position::BoardPosition;
     use crate::models::game_piece::GamePiece;
     use crate::models::game_state::GameState;
@@ -516,7 +517,10 @@ mod game_state_tests {
         let board_state = GameState::new()
             .place_game_piece(&BoardPosition::new(0, 0), &player_one, &player_two)
             .unwrap();
-        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.new_game_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        let binary_representation = game_board::binary_representation_for_piece_placement(
+            &board_state.new_game_state.game_board,
+            &player_one.game_piece,
+            &player_two.game_piece);
         assert_eq!(binary_representation.0, 0b_100_000_000);
 
         /*
@@ -545,7 +549,10 @@ mod game_state_tests {
             .new_game_state.place_game_piece(&BoardPosition::new(2, 2), &player_one, &player_two)
             .unwrap();
 
-        let binary_representation = GameState::binary_representation_for_piece_placement(&board_state.new_game_state.game_board, &player_one.game_piece, &player_two.game_piece);
+        let binary_representation = game_board::binary_representation_for_piece_placement(
+            &board_state.new_game_state.game_board,
+            &player_one.game_piece,
+            &player_two.game_piece);
         assert_eq!(binary_representation.0, 0b_101_010_001);
         assert_eq!(binary_representation.1, 0b_000_001_110);
     }

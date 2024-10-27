@@ -19,8 +19,11 @@ pub(crate) mod health;
 
         Player and Automatic Player:
             Take Turn
+            On Turn Taken Event: Get latest game state
             Take Turn
+            On Turn Taken Event: Get latest game state
             Take Turn
+            On Turn Taken Event: Get latest game state
 
         Player:
             End Game
@@ -33,12 +36,13 @@ pub(crate) mod health;
             Create a Gaming Session
             Subscribe to MQTT
             Create Two Player Game
+            Join Current Game
+            Manually send Invitation Code to Player B
             
         Player B:
-            Join Gaming Session via invitation code
+            Join Gaming Session via Invitation Code
             Subscribe to MQTT
-            Call Get Session Current Game
-            Post Player Readiness
+            Join Current Game
 
         Player A:
             On Player Readiness Event: Call Get Session Current Game

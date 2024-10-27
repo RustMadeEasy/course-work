@@ -46,7 +46,7 @@ impl GameUpdatesPublisher {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T> for GameUpdatesPublisher {
     //
 
-    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<&T>) {
+    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<T>) {
         //
 
         debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);

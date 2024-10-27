@@ -10,9 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models info needed to start a new Single-Player Game. */
+/** Models info needed to start a new Single-Player Game */
 public struct NewSinglePlayerGameParams: Codable, JSONEncodable, Hashable {
 
+    /** The skill level at which the Automatic Player is to play the Game */
     public var computerSkillLevel: AutomaticPlayerSkillLevel
 
     public init(computerSkillLevel: AutomaticPlayerSkillLevel) {

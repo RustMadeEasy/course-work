@@ -10,6 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
+/** The skill level at which the Automatic Player is to play. */
 public enum AutomaticPlayerSkillLevel: String, Codable, CaseIterable {
     case beginner = "Beginner"
     case intermediate = "Intermediate"

@@ -10,9 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models info needed to end a Gaming Session. */
+/** Models info needed to end a Gaming Session */
 public struct EndGamingSessionParams: Codable, JSONEncodable, Hashable {
 
+    /** ID of one of the Players in the Gaming Session */
     public var playerId: String
 
     public init(playerId: String) {

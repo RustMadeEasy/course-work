@@ -32,12 +32,13 @@ Class | Method | HTTP request | Description
 *TicTacToeAPI* | [**createTwoPlayerGame**](docs/TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/{session_id}/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
 *TicTacToeAPI* | [**endGame**](docs/TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 *TicTacToeAPI* | [**endGamingSession**](docs/TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
-*TicTacToeAPI* | [**getGameHistory**](docs/TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of the Game States from the initial move (turn) to the latest
-*TicTacToeAPI* | [**getLatestGameTurn**](docs/TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves details of the specified Game.
-*TicTacToeAPI* | [**getSessionCurrentGame**](docs/TicTacToeAPI.md#getsessioncurrentgame) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Games in a Gaming Session.
+*TicTacToeAPI* | [**getGameHistory**](docs/TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of Game States from the initial move (turn) to the latest Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
+*TicTacToeAPI* | [**getLatestGameTurn**](docs/TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves the most recent Turn Result for the specified Game.
+*TicTacToeAPI* | [**getSessionCurrentGame**](docs/TicTacToeAPI.md#getsessioncurrentgame) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Gaming Session&#39;s current Game.
+*TicTacToeAPI* | [**joinCurrentGame**](docs/TicTacToeAPI.md#joincurrentgame) | **PUT** /v1/gaming-sessions/{session_id}/current_game/players/{player_id} | Adds a Player to the Session&#39;s Current Game.
 *TicTacToeAPI* | [**joinGamingSession**](docs/TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
-*TicTacToeAPI* | [**notePlayerReadiness**](docs/TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Sets a Player as ready to Play.
-*TicTacToeAPI* | [**takeTurn**](docs/TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player.
+*TicTacToeAPI* | [**notePlayerReadiness**](docs/TicTacToeAPI.md#noteplayerreadiness) | **PUT** /v1/gaming-sessions/{session_id}/players/{player_id}/readiness | Called to indicate that a Player is ready to Play. This is required as part of the handshaking during new Game setup.
+*TicTacToeAPI* | [**takeTurn**](docs/TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player. Returns the Turn Result.
 
 
 ## Documentation For Models
@@ -48,19 +49,19 @@ Class | Method | HTTP request | Description
  - [EndGamingSessionParams](docs/EndGamingSessionParams.md)
  - [EventPlaneConfig](docs/EventPlaneConfig.md)
  - [EventPlaneTopicNames](docs/EventPlaneTopicNames.md)
- - [GameCreationResult](docs/GameCreationResult.md)
- - [GameInfo](docs/GameInfo.md)
+ - [GameCreationResponse](docs/GameCreationResponse.md)
+ - [GameInfoResponse](docs/GameInfoResponse.md)
  - [GameMode](docs/GameMode.md)
  - [GamePiece](docs/GamePiece.md)
  - [GameState](docs/GameState.md)
- - [GameTurnInfo](docs/GameTurnInfo.md)
- - [GamingSessionCreationResult](docs/GamingSessionCreationResult.md)
+ - [GameTurnParams](docs/GameTurnParams.md)
+ - [GamingSessionCreationResponse](docs/GamingSessionCreationResponse.md)
  - [JoinSessionParams](docs/JoinSessionParams.md)
  - [NewGamingSessionParams](docs/NewGamingSessionParams.md)
  - [NewSinglePlayerGameParams](docs/NewSinglePlayerGameParams.md)
  - [PlayStatus](docs/PlayStatus.md)
  - [PlayerInfo](docs/PlayerInfo.md)
- - [TurnResult](docs/TurnResult.md)
+ - [TurnResponse](docs/TurnResponse.md)
 
 
 <a id="documentation-for-authorization"></a>

@@ -15,6 +15,7 @@ public struct PlayerInfo: Codable, JSONEncodable, Hashable {
 
     /** Name of the Player. */
     public var displayName: String
+    /** The Game Piece assigned to the Player. */
     public var gamePiece: GamePiece
     /** Indicates that this Player's moves are automated, i.e., guided by this service. */
     public var isAutomated: Bool

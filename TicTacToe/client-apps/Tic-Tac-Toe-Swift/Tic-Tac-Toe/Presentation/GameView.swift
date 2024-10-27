@@ -88,11 +88,11 @@ struct GameView: View {
         })
         .task {
             if !self.gameInfoVM.invitationCode.isEmpty {
-                await joinGamingSession()
+                await self.joinGamingSession()
             } else if self.gameInfoVM.isTwoPlayer {
-                await self.beginTwoPlayerGameCreation()
+                await self.createTwoPlayerGame()
             } else {
-                await createSinglePlayerGame()
+                await self.createSinglePlayerGame()
             }
         }
         .onDisappear() {
@@ -177,6 +177,7 @@ struct GameView: View {
     /// Creates a new Single-Player Game.
     private func createSinglePlayerGame() async {
         
+        self.gameInfoVM.localPlayerInitiatedGamingSession = true
         self.gameInfoVM.isTwoPlayer = false
         
         await self.gameInfoVM.createGamingSession { succeeded, error in
@@ -192,14 +193,23 @@ struct GameView: View {
         }
     }
         
-    /// Begins the creation process for a new Two-Player Game. The first step is to create the Gaming Session. This returns the Invitation Code. When the Invitation Code is accepted, GameInfoViewModel will receive the onPlayerAddedToSession() event and will create the Two Player Game.
-    private func beginTwoPlayerGameCreation() async {
+    private func createTwoPlayerGame() async {
         
         self.gameInfoVM.localPlayerInitiatedGamingSession = true
         self.gameInfoVM.isTwoPlayer = true
 
         await self.gameInfoVM.createGamingSession { succeeded, error in
             if succeeded {
+                Task {
+                    if await self.gameInfoVM.createTwoPlayerGame() == nil {
+                        if await self.gameInfoVM.joinCurrentGame() == nil {
+                        } else {
+                            showGameCreationError = true
+                        }
+                    } else {
+                        showGameCreationError = true
+                    }
+                }
             } else {
                 showGameCreationError = true
             }

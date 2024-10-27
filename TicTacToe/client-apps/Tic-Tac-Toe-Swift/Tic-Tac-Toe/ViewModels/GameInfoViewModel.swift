@@ -150,32 +150,19 @@ extension GameInfoViewModel {
             DispatchQueue.main.async {
                 
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
-                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
+                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.gameId)
                           
                 self.setupPlayers(newGameInfo: newGameInfo)
                                                 
                 self._isTwoPlayer = Published(wrappedValue: false)
                 
-                self.updateGameInfo(turnResult: TurnResult(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
+                self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
             }
         }
         
         return result.error
     }
     
-    private func setupPlayers(newGameInfo: GameCreationResult) {
-        
-        self.localPlayer = newGameInfo.gameInfo.players.first(where: { it in
-            it.playerId == self.localPlayer.playerId
-        })!
-        
-        self.otherPlayer = newGameInfo.gameInfo.players.first(where: { it in
-            it.playerId != self.localPlayer.playerId
-        })!
-
-        self._playerOneId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
-    }
-
     func createTwoPlayerGame() async -> Error? {
         
         let result = await GameInfoService.createTwoPlayerGame(sessionId: self.gamingSessionId,
@@ -186,20 +173,20 @@ extension GameInfoViewModel {
             DispatchQueue.main.async {
             
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
-                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.id)
+                self._gameId = Published(wrappedValue: newGameInfo.gameInfo.gameId)
                 
                 self.setupPlayers(newGameInfo: newGameInfo)
 
                 self._isTwoPlayer = Published(wrappedValue: true)
                 
-                self.updateGameInfo(turnResult: TurnResult(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
+                self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
             }
         }
 
         return result.error
     }
     
-    /// Creates and starts a new Game. Note that localPlayerName must be set before calling this function.
+    /// Creates and starts a new Gaming Session.
     func createGamingSession(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
         
         let result = await GameInfoService.createGamingSession(sessionOwnerDisplayName: self.localPlayer.displayName)
@@ -239,21 +226,6 @@ extension GameInfoViewModel {
         return nil
     }
     
-    /// Ends the current Gaming Session.
-    func getSessionCurrentGame() async {
-        
-        let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
-        
-        if let gameCreationResult = result.gameCreationResult {
-            
-            DispatchQueue.main.async {
-                self._gameId = Published(wrappedValue: gameCreationResult.gameInfo.id)
-                self.setupPlayers(newGameInfo: gameCreationResult)
-                self.updateGameInfo(turnResult: TurnResult(currentPlayer: gameCreationResult.gameInfo.currentPlayer, newGameState: gameCreationResult.gameInfo.gameState))
-            }
-        }
-    }
-    
     /// Generates the appropriate Game completion text.
     private func getGameResults(gameState: GameState, winningPlayerName: String) -> String {
         switch gameState.playStatus {
@@ -268,6 +240,27 @@ extension GameInfoViewModel {
         default:
             return ""
         }
+    }
+    
+    /// Joins a Game.
+    func joinCurrentGame() async -> Error? {
+        
+        let result = await GameInfoService.joinCurrentGame(sessionId: self.gamingSessionId, localPlayerId: self.localPlayer.playerId)
+
+        if let newGamingSessionInfo = result.gamingSessionCreationResult {
+            
+            DispatchQueue.main.async {
+                
+                self.updateGamingSessionInfo(info: newGamingSessionInfo)
+
+                Task {
+                    let _ = await GameInfoService.notePlayerReadiness(sessionId: self.gamingSessionId, playerId: self.localPlayer.playerId)
+                    self.onGameStarted()
+                }
+            }
+        }
+        
+        return result.error
     }
     
     /// Joins a Gaming Session.
@@ -312,6 +305,21 @@ extension GameInfoViewModel {
         }
     }
     
+    private func setupPlayers(newGameInfo: GameCreationResponse) {
+        
+        self.localPlayer = newGameInfo.gameInfo.players.first(where: { it in
+            it.playerId == self.localPlayer.playerId
+        })!
+        
+        if let otherPlayer = newGameInfo.gameInfo.players.first(where: { it in
+            it.playerId != self.localPlayer.playerId
+        }) {
+            self.otherPlayer = otherPlayer
+        }
+
+        self._playerOneId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+    }
+
     /// Performs a Game move for the specified Player.
     func takeTurn(pos: Position) async -> Error? {
         
@@ -320,14 +328,14 @@ extension GameInfoViewModel {
                                                     localPlayerId: self.localPlayer.playerId, sessionId: self.gamingSessionId)
         
         if let gameInfo = result.gameInfo {
-            self.updateGameInfo(turnResult: TurnResult(newGameState: gameInfo.gameState))
+            self.updateGameInfo(turnResult: TurnResponse(newGameState: gameInfo.gameState))
         }
         
         return result.error
     }
     
     /// Performs the inital setup of the Game parameters.
-    private func updateGamingSessionInfo(info: GamingSessionCreationResult) {
+    private func updateGamingSessionInfo(info: GamingSessionCreationResponse) {
         //
         
         DispatchQueue.main.async {
@@ -347,8 +355,8 @@ extension GameInfoViewModel {
         }
     }
 
-    /// Updates this instance with the values of the passed in TurnResult.
-    private func updateGameInfo(turnResult: TurnResult) {
+    /// Updates this instance with the values of the passed in TurnResponse.
+    private func updateGameInfo(turnResult: TurnResponse) {
         
         DispatchQueue.main.async {
             
@@ -389,16 +397,16 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
     }
     
     func onGameStarted() {
-        if !self.localPlayerInitiatedGamingSession {
-            Task {
-                await self.getSessionCurrentGame()
-            }
-        } else {
-            refreshGameInfo()
-        }
-        DispatchQueue.main.async {
-            self._hasGameStarted = Published(wrappedValue: true)
-        }
+//        if !self.localPlayerInitiatedGamingSession {
+//            Task {
+//                await self.getSessionCurrentGame()
+//            }
+//        } else {
+//            refreshGameInfo()
+//        }
+//        DispatchQueue.main.async {
+//            self._hasGameStarted = Published(wrappedValue: true)
+//        }
     }
     
     func onGameEndedInStalemate() {
@@ -415,13 +423,13 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
         // TODO: JD: ask for a rematch
     }
 
-    func onPlayerReady() {
-        // All Players are ready in the Gaming Session. So, if this is a Two-Player Game that we have started, let's begin...
-        if self.localPlayerInitiatedGamingSession && self.isTwoPlayer {
-            Task {
-                await self.createTwoPlayerGame()
-            }
-        }
+    func onAllPlayersReady() {
+//        // All Players are ready in the Gaming Session. So, if this is a Two-Player Game that we have started, let's begin...
+//        if self.localPlayerInitiatedGamingSession && self.isTwoPlayer {
+//            Task {
+//                await self.createTwoPlayerGame()
+//            }
+//        }
     }
 
     func onSessionDeleted() {

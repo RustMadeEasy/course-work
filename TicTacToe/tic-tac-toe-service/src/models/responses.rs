@@ -22,7 +22,7 @@ pub struct GameCreationResponse {
     /// The Player who initiated the Gaming Session
     pub initiating_player: PlayerInfo,
     /// ID of the additional Player
-    pub other_player: PlayerInfo,
+    pub other_player: Option<PlayerInfo>,
     /// ID of the Gaming Session
     pub session_id: String,
 }

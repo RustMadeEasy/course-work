@@ -17,8 +17,14 @@ use chrono::{DateTime, Utc};
 pub(crate) trait GameTrait: Sized {
     //
 
+    /// Adds a Player to the Game.
+    fn add_player(&mut self, player: &PlayerInfo) -> Result<(), GameError>;
+
     /// Property accessor for the current state of the Game.
     fn get_current_game_state(&self) -> GameState;
+
+    /// Returns the number of Players.
+    fn get_player_count(&self) -> i8;
 
     /// Returns the Player who can currently make a Game move.
     fn get_current_player(&self) -> Option<PlayerInfo>;
@@ -40,8 +46,8 @@ pub(crate) trait GameTrait: Sized {
 
     /// Creates a new Game instance.
     fn new(game_mode: GameMode,
-           player: &PlayerInfo,
-           other_player: &PlayerInfo,
+           initial_player: &PlayerInfo,
+           other_player: Option<PlayerInfo>,
            session_id: &str) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.

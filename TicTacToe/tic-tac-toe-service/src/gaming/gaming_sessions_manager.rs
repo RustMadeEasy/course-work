@@ -20,12 +20,13 @@ use crate::models::player_info::PlayerInfo;
 use crate::models::requests::GameTurnParams;
 use crate::models::responses::{GamingSessionCreationResponse, TurnResponse};
 use chrono::Utc;
+use function_name::named;
 use log::debug;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-/// The length of time after which to consider an inactive Game as abandoned 
+/// The length of time after which to consider an inactive Game as abandoned
 const ABANDONED_GAME_TTL_MS: i64 = (SECONDS_IN_AN_HOUR * 1000) as i64;
 /// The interval on which to run the background Game cleanup task
 const CLEANUP_INTERVAL: Duration = Duration::from_secs(SECONDS_IN_AN_HOUR / 2);
@@ -48,17 +49,42 @@ pub(crate) struct GamingSessionsManager<T: GameTrait + Clone + Send + Sync + 'st
     sessions: Arc<tokio::sync::Mutex<HashMap<String, Box<GamingSession<T>>>>>,
 }
 
-// Session Management
+impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
+    //
+
+    /// Creates a new GamesManager instance.
+    #[named]
+    pub(crate) fn new() -> Self {
+        //
+
+        debug!("{} called", function_name!());
+
+        let mut instance = Self {
+            sessions: Arc::new(tokio::sync::Mutex::new(HashMap::new())),
+            observers: vec![],
+        };
+
+        let publisher = Box::new(GameUpdatesPublisher::new(MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT));
+        instance.observers.push(publisher.clone());
+
+        Self::auto_cleanup(instance.sessions.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
+
+        instance
+    }
+}
+
+// Gaming Session Management
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     //
 
     /// Adds a Player to the Gaming Session.
+    #[named]
     pub(crate) async fn add_player_to_session(&mut self,
                                               game_invitation_code: &str,
                                               player_display_name: &str) -> Result<GamingSessionCreationResponse, GameError> {
         //
 
-        debug!("GamesManager: add_player_to_session() called.");
+        debug!("{} called", function_name!());
 
         let mut session = match self.get_session_by_invitation_code(game_invitation_code).await {
             None => return Err(GameError::InvitationCodeNotFound),
@@ -86,11 +112,67 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         })
     }
 
+    /// Background task that regularly cleans up abandoned Sessions.
+    #[named]
+    fn auto_cleanup(sessions: Arc<tokio::sync::Mutex<HashMap<String, Box<GamingSession<T>>>>>, ttl: i64, interval: Duration) {
+        //
+
+        debug!("{} started", function_name!());
+
+        tokio::spawn(async move {
+            //
+
+            loop {
+                //
+
+                debug!("{} - waking for cleanup", function_name!());
+
+                let mut expired_sessions: Vec<GamingSession<T>> = vec!();
+                let mut gaming_sessions = sessions.lock().await;
+
+                // Note any Game that is abandoned or has ended.
+                let now = Utc::now().timestamp_millis();
+                for session in gaming_sessions.values().clone() {
+                    if let Some(game) = session.current_game.clone() {
+                        match game.get_time_of_latest_move() {
+                            None => {}
+                            Some(time_last_move) => {
+                                let game_age = now - time_last_move.timestamp_millis();
+                                if game_age > ttl || game.get_current_game_state().has_ended() {
+                                    expired_sessions.push(*session.clone());
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for session in expired_sessions.iter_mut() {
+                    session.current_game = None;
+                    gaming_sessions.insert(session.invitation_code.clone(), Box::new(session.clone()));
+                }
+
+                if !expired_sessions.is_empty() {
+                    debug!("{} - Cleanup complete. Removed {} expired games. Going back to sleep.", function_name!(), expired_sessions.len());
+                } else {
+                    debug!("{} - Cleanup complete. Going back to sleep.", function_name!());
+                }
+
+                drop(gaming_sessions);
+
+                // Sleep until the next cleanup.
+                tokio::time::sleep(interval).await;
+
+                // TODO: JD: exit when service is shutting down
+            }
+        });
+    }
+
     /// Creates a new Gaming Session.
+    #[named]
     pub(crate) async fn create_new_session(&mut self, session_owner_display_name: &str) -> Result<GamingSession<T>, GameError> {
         //
 
-        debug!("GamesManager: create_new_session() called.");
+        debug!("{} called", function_name!());
 
         let player_one = PlayerInfo::new(session_owner_display_name, false);
         let session = GamingSession::new(player_one, MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT);
@@ -99,30 +181,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         Ok(session.clone())
     }
 
-    /// Called to indicate that a Player is ready to Play. This is required as part of the handshaking 
-    /// during new Game setup.
-    pub(crate) async fn note_player_readiness(&self, session_id: &str, _player_id: &str) -> Result<(), GameError> {
-        //
-
-        debug!("GamesManager: note_player_readiness() called.");
-
-        let session = match self.get_session_by_session_id(session_id).await {
-            None => return Err(GameError::GamingSessionNotFound),
-            Some(session) => session,
-        };
-
-        self.notify_observers_of_session_change(GamingSessionStateChanges::AllPlayersReady, &session).await;
-
-        Ok(())
-    }
-
     /// Retrieves the Gaming Session by Invitation Code.
     async fn get_session_by_invitation_code(&self, invitation_code: &str) -> Option<Box<GamingSession<T>>> {
         self.sessions.lock().await.get(invitation_code).cloned()
     }
 
     /// Retrieves the Gaming Session by ID.
-    pub(crate) async fn get_session_by_session_id(&self, session_id: &str) -> Option<Box<GamingSession<T>>> {
+    pub(crate) async fn get_session_by_id(&self, session_id: &str) -> Option<Box<GamingSession<T>>> {
         self.sessions.lock().await.iter().find(|it| it.1.session_id.as_str() == session_id).map(|it| it.1.clone())
     }
 
@@ -154,14 +219,15 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     //
 
     /// Creates a new Single-Player Game.
+    #[named]
     pub(crate) async fn create_new_single_player_game(&mut self,
                                                       session_id: &str,
                                                       computer_skill_level: &AutomaticPlayerSkillLevel) -> Result<T, GameError> {
         //
 
-        debug!("GamesManager: create_new_single_player_game() called. Session ID: {:?}, Skill Level: {:?}", session_id, computer_skill_level);
+        debug!("{} - Session ID: {:?}, Skill Level: {:?}", function_name!(), session_id, computer_skill_level);
 
-        let mut session = match self.get_session_by_session_id(session_id).await {
+        let mut session = match self.get_session_by_id(session_id).await {
             None => return Err(GameError::GamingSessionNotFound),
             Some(session) => session,
         };
@@ -173,7 +239,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         let computer_player = PlayerInfo::new(AutomaticPlayer::<T>::get_name().as_str(), true);
 
-        let game = T::new(GameMode::SinglePlayer, human_player, &computer_player, &session.session_id)?;
+        let game = T::new(GameMode::SinglePlayer, human_player, Some(computer_player.clone()), &session.session_id)?;
 
         // Create an AutomaticPlayer to play against Player One.
         let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), &computer_player, computer_skill_level);
@@ -193,25 +259,24 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Creates a new Two-Player Game. Returns the new Game as well as a list of Players.
+    #[named]
     pub(crate) async fn create_new_two_player_game(&mut self, session_id: &str) -> Result<(T, Vec<PlayerInfo>), GameError> {
         //
 
-        debug!("GamesManager: create_new_two_player_game() called for Session ID: {}", session_id);
+        debug!("{} called for Session ID: {}.", function_name!(), session_id);
 
-        let mut session = match self.get_session_by_session_id(session_id).await {
+        let mut session = match self.get_session_by_id(session_id).await {
             Some(session) => *session,
             None => {
                 return Err(GameError::GamingSessionNotFound);
             }
         };
 
-        if session.participants.len() < 2 {
-            return Err(GameError::GamingSessionHasTooFewPlayers);
-        }
-
+        let session_owner = session.session_owner.clone();
+        let other_player = session.participants.iter().find(|it| it.player_id != session_owner.player_id).cloned();
         let game = T::new(GameMode::TwoPlayers,
-                          session.participants.first().unwrap(),
-                          session.participants.last().unwrap(),
+                          &session_owner,
+                          other_player,
                           &session.session_id)?;
 
         self.upsert_game(&game).await;
@@ -224,25 +289,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         Ok((game.clone(), session.participants))
     }
 
-    async fn remove_game(&mut self, game_id: &str) -> bool {
-        match self.get_session_containing_game(game_id).await {
-            None => false,
-            Some(mut session) => {
-                session.clear_game();
-                self.upsert_session(&session).await;
-                self.notify_observers_of_session_change(GamingSessionStateChanges::GameDeleted, &session).await;
-                true
-            }
-        }
-    }
-
     /// Closes down the specified Game instance.
+    #[named]
     pub(crate) async fn end_game(&mut self, game_id: &str, _player_id: &str, session_id: &str) -> Result<(), GameError> {
         //
 
-        debug!("GamesManager: end_game() called for game: {:?}.", game_id);
+        debug!("{} called for game: {:?}.", function_name!(), game_id);
 
-        let session = match self.get_session_by_session_id(session_id).await {
+        let session = match self.get_session_by_id(session_id).await {
             Some(session) => session,
             None => return Err(GameError::GamingSessionNotFound),
         };
@@ -264,12 +318,13 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Closes down the specified Game instance.
+    #[named]
     pub(crate) async fn end_gaming_session(&mut self, _player_id: &str, session_id: &str) -> Result<(), GameError> {
         //
 
-        debug!("GamesManager: end_gaming_session() called for session: {:?}.", session_id);
+        debug!("{} called for session: {:?}.", function_name!(), session_id);
 
-        match self.get_session_by_session_id(session_id).await {
+        match self.get_session_by_id(session_id).await {
             None => Err(GameError::GamingSessionNotFound),
             Some(session) => {
                 //
@@ -290,24 +345,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
                 self.notify_observers_of_session_change(GamingSessionStateChanges::GamingSessionDeleted, &session).await;
 
                 Ok(())
-            }
-        }
-    }
-
-    /// Retrieves the Game being played in the specified Gaming Session.
-    pub(crate) async fn get_game_in_session(&self, session_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
-        match self.get_session_by_session_id(&session_id.into()).await {
-            None => Err(GameError::GamingSessionNotFound),
-            Some(session) => {
-                let session = (*session).clone();
-                match session.current_game {
-                    None => {
-                        Err(GameError::GameNotFound)
-                    }
-                    Some(ref game) => {
-                        Ok((session.clone(), game.clone()))
-                    }
-                }
             }
         }
     }
@@ -333,95 +370,71 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         Ok(game.get_play_history())
     }
 
-    async fn upsert_game(&mut self, game: &T) -> bool {
-        match self.get_session_containing_game(&game.get_id()).await {
-            Some(mut session) => {
-                session.set_game(game);
-                self.upsert_session(&session).await;
-                true
-            }
-            None => false,
-        }
-    }
-}
-
-impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
-    //
-
-    /// Background task that regularly cleans up abandoned Sessions.
-    fn auto_cleanup(sessions: Arc<tokio::sync::Mutex<HashMap<String, Box<GamingSession<T>>>>>, ttl: i64, interval: Duration) {
-        //
-
-        debug!("GamesManager: auto_cleanup() started.");
-
-        tokio::spawn(async move {
-            //
-
-            loop {
-                //
-
-                debug!("GamesManager: Cleanup task: Waking.");
-
-                let mut expired_sessions: Vec<GamingSession<T>> = vec!();
-                let mut gaming_sessions = sessions.lock().await;
-
-                // Note any Game that is abandoned or has ended.
-                let now = Utc::now().timestamp_millis();
-                for session in gaming_sessions.values().clone() {
-                    if let Some(game) = session.current_game.clone() {
-                        match game.get_time_of_latest_move() {
-                            None => {}
-                            Some(time_last_move) => {
-                                let game_age = now - time_last_move.timestamp_millis();
-                                if game_age > ttl || game.get_current_game_state().has_ended() {
-                                    expired_sessions.push(*session.clone());
-                                }
-                            }
-                        }
+    /// Retrieves the Game being played in the specified Gaming Session.
+    pub(crate) async fn get_game_in_session(&self, session_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
+        match self.get_session_by_id(&session_id.into()).await {
+            None => Err(GameError::GamingSessionNotFound),
+            Some(session) => {
+                let session = (*session).clone();
+                match session.current_game {
+                    None => {
+                        Err(GameError::GameNotFound)
+                    }
+                    Some(ref game) => {
+                        Ok((session.clone(), game.clone()))
                     }
                 }
-
-                for session in expired_sessions.iter_mut() {
-                    session.current_game = None;
-                    gaming_sessions.insert(session.invitation_code.clone(), Box::new(session.clone()));
-                }
-
-                if !expired_sessions.is_empty() {
-                    debug!("GamesManager: Cleanup task: Complete. Removed {} expired games. Going back to sleep.", expired_sessions.len());
-                } else {
-                    debug!("GamesManager: Cleanup task: Complete. Going back to sleep.");
-                }
-
-                drop(gaming_sessions);
-
-                // Sleep until the next cleanup.
-                tokio::time::sleep(interval).await;
-
-                // TODO: JD: exit when service is shutting down
             }
-        });
+        }
     }
 
-    /// Creates a new GamesManager instance.
-    pub(crate) fn new() -> Self {
+    #[named]
+    pub(crate) async fn join_current_game(&mut self, session_id: &str, player_id: &str) -> Result<(), GameError> {
         //
 
-        debug!("GamesManager: new()");
+        debug!("{} called", function_name!());
 
-        let mut instance = Self {
-            sessions: Arc::new(tokio::sync::Mutex::new(HashMap::new())),
-            observers: vec![],
+        let session = match self.get_session_by_id(session_id).await {
+            None => return Err(GameError::GamingSessionNotFound),
+            Some(session) => session,
         };
 
-        let publisher = Box::new(GameUpdatesPublisher::new(MQTT_BROKER_ADDRESS.to_string(), MQTT_PORT));
-        instance.observers.push(publisher.clone());
+        // The Player must have already joined the Gaming Session
+        let player = match session.participants.iter().find(|it| it.player_id == player_id) {
+            None => return Err(GameError::PlayerNotFound),
+            Some(player) => player.clone(),
+        };
 
-        Self::auto_cleanup(instance.sessions.clone(), ABANDONED_GAME_TTL_MS, CLEANUP_INTERVAL);
+        let mut game = match session.current_game {
+            None => return Err(GameError::GameNotFound),
+            Some(ref game) => game.clone(),
+        };
 
-        instance
+        game.add_player(&player)?;
+
+        self.upsert_game(&game).await;
+
+        if game.get_player_count() == 2 {
+            self.notify_observers_of_session_change(GamingSessionStateChanges::AllPlayersReady, &session).await;
+        }
+
+        Ok(())
+    }
+
+    async fn remove_game(&mut self, game_id: &str) -> bool {
+        match self.get_session_containing_game(game_id).await {
+            None => false,
+            Some(mut session) => {
+                session.clear_game();
+                self.upsert_session(&session).await;
+                self.notify_observers_of_session_change(GamingSessionStateChanges::GameDeleted, &session).await;
+                true
+            }
+        }
     }
 
     /// Takes a turn for the specified Player.
+    #[named]
     pub(crate) async fn take_turn(
         &mut self,
         game_id: &str,
@@ -429,9 +442,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     ) -> Result<TurnResponse, GameError> {
         //
 
-        debug!("GamesManager: take_turn() called for game: {:?}.", game_id);
+        debug!("{} called for game: {:?}.", function_name!(), game_id);
 
-        let session = match self.get_session_by_session_id(game_turn_info.session_id.as_str()).await {
+        let session = match self.get_session_by_id(game_turn_info.session_id.as_str()).await {
             Some(session) => session,
             None => { return Err(GameError::GamingSessionNotFound); }
         };
@@ -467,27 +480,41 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             Err(GameError::GameNotFound)
         }
     }
+
+    async fn upsert_game(&mut self, game: &T) -> bool {
+        match self.get_session_containing_game(&game.get_id()).await {
+            Some(mut session) => {
+                session.set_game(game);
+                self.upsert_session(&session).await;
+                true
+            }
+            None => false,
+        }
+    }
 }
 
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     //
 
+    #[named]
     async fn notify_observers_of_game_change(&self, game_state_change: GamingSessionStateChanges, session: &GamingSession<T>, game: &T) {
-        debug!("GamesManager: notifying observers of game stage change: {:?}.", game_state_change);
+        debug!("{} - notifying observers of Game stage change: {:?}.", function_name!(), game_state_change);
         for observer in self.observers.iter() {
-            let _ = observer.session_updated(&game_state_change, session, Some(game)).await;
+            let _ = observer.session_updated(&game_state_change, session, Some(game.clone())).await;
         }
     }
 
+    #[named]
     async fn notify_observers_of_session_change(&self, state_change: GamingSessionStateChanges, game_session: &GamingSession<T>) {
-        debug!("GamesManager: notifying observers of Gaming Session change: {:?}.", state_change);
+        debug!("{} - notifying observers of Gaming Session change: {:?}.", function_name!(), state_change);
         for observer in self.observers.iter() {
             let _ = observer.session_updated(&state_change, game_session, None).await;
         }
     }
 
+    #[named]
     fn remove_auto_player_observer(&mut self, game_id: &str) {
-        debug!("GamesManager: remove_auto_player_observer() called for game: {:?}.", game_id);
+        debug!("{} called for game: {:?}.", function_name!(), game_id);
         if let Some(index) = self.observers.iter().position(|it| it.unique_id().as_str() == game_id) {
             self.observers.remove(index);
         }

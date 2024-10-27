@@ -35,7 +35,7 @@ use crate::models::responses::GamingSessionCreationResponse;
 use crate::models::responses::TurnResponse;
 use actix_web::get;
 use log::debug;
-use utoipa::openapi::{ContactBuilder, Tag};
+use utoipa::openapi::{ContactBuilder, LicenseBuilder, Tag};
 use utoipa::OpenApi;
 
 
@@ -51,8 +51,8 @@ use utoipa::OpenApi;
         get_game_history,
         get_latest_game_turn,
         get_session_current_game,
+        join_current_game,
         join_gaming_session,
-        note_player_readiness,
         take_turn,
     ),
     components(schemas(
@@ -94,6 +94,10 @@ pub(crate) async fn api_docs() -> actix_web::Result<String> {
             .url(Some("https://RustMadeEasy.com"))
             .email(Some("JoelDavisEngineering@Gmail.com"))
             .build(),
+    );
+    doc.info.license = Some(LicenseBuilder::new()
+        .identifier(Some("GPL3"))
+        .build()
     );
     doc.info.title = "Tic-Tac-Toe Service".to_string();
     doc.tags = Some(vec!(Tag::new("Tic-Tac-Toe Service")));

@@ -15,7 +15,9 @@ public struct BoardPosition: Codable, JSONEncodable, Hashable {
 
     static let columnRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: nil, exclusiveMaximum: false, multipleOf: nil)
     static let rowRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: nil, exclusiveMaximum: false, multipleOf: nil)
+    /** The position's column */
     public var column: Int
+    /** The position's row */
     public var row: Int
 
     public init(column: Int, row: Int) {

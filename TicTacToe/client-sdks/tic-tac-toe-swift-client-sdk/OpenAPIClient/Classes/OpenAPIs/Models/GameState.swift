@@ -13,10 +13,11 @@ import AnyCodable
 /** Models the state of a Game at a particular Move (turn). */
 public struct GameState: Codable, JSONEncodable, Hashable {
 
-    /** The board on which the Game is played. */
+    /** Specifies the layout of the Game Pieces for this particular Game State. */
     public var gameBoard: [[GamePiece]]
-    /** ID of the Player who made this Move. */
+    /** ID of the Player who made the Move that brought about this Game State. */
     public var idOfPlayerWhoMadeMove: String
+    /** The current status of the Game. */
     public var playStatus: PlayStatus
 
     public init(gameBoard: [[GamePiece]], idOfPlayerWhoMadeMove: String, playStatus: PlayStatus) {

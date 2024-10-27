@@ -13,12 +13,11 @@
  */
 
 use crate::api::games::validate_id_string;
-use crate::errors::GameError;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::requests::{EndGamingSessionParams, JoinSessionParams, NewGamingSessionParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResponse, GameInfoResponse, GamingSessionCreationResponse};
-use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
+use actix_web::{delete, get, post, web, Error, HttpResponse};
 use log::debug;
 use validator::Validate;
 
@@ -40,12 +39,12 @@ pub(crate) async fn create_gaming_session(
 ) -> actix_web::Result<web::Json<GamingSessionCreationResponse>> {
     //
 
-    debug!("HTTP POST to /gaming-sessions. Params: {:?}", params);
-
     // *** Validate input params ***
     if let Err(e) = params.validate() {
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
+
+    debug!("HTTP POST to /gaming-sessions. Params: {:?}", params);
 
     let mut manager = manager.lock().await;
 
@@ -84,14 +83,14 @@ pub(crate) async fn end_gaming_session(
 ) -> HttpResponse {
     //
 
-    debug!("HTTP DELETE to /gaming-sessions/{}", session_id);
-
     // *** Validate input params ***
     if session_id.is_empty() {
         return HttpResponse::BadRequest().body("Gaming Session ID is empty");
     } else if session_id.len() as u64 > ID_LENGTH_MAX {
         return HttpResponse::BadRequest().body("Gaming Session ID exceeds maximum length");
     }
+
+    debug!("HTTP DELETE to /gaming-sessions/{}", session_id);
 
     match manager.lock().await.end_gaming_session(params.player_id.as_str(), &session_id).await {
         Ok(_) => HttpResponse::Ok().finish(),
@@ -119,10 +118,10 @@ pub(crate) async fn get_session_current_game(
 ) -> actix_web::Result<web::Json<GameCreationResponse>> {
     //
 
-    debug!("HTTP GET to /gaming-sessions/{}/current-game", session_id);
-
     // *** Validate input params ***
     validate_id_string(&session_id)?;
+
+    debug!("HTTP GET to /gaming-sessions/{}/current-game", session_id);
 
     match manager
         .lock()
@@ -130,20 +129,14 @@ pub(crate) async fn get_session_current_game(
         .get_game_in_session(session_id.as_str()).await
     {
         Ok((session, game)) => {
-            match session.participants.iter().find(|it| it.player_id != session.session_owner.player_id) {
-                None => {
-                    Err(Error::from(GameError::GamingSessionHasTooFewPlayers))
-                }
-                Some(other_player) => {
-                    let result = GameCreationResponse {
-                        game_info: GameInfoResponse::from(game),
-                        initiating_player: session.session_owner,
-                        other_player: other_player.clone(),
-                        session_id: session.session_id,
-                    };
-                    Ok(web::Json(result))
-                }
-            }
+            let other_player = session.participants.iter().find(|it| it.player_id != session.session_owner.player_id).cloned();
+            let result = GameCreationResponse {
+                game_info: GameInfoResponse::from(game),
+                initiating_player: session.session_owner,
+                other_player,
+                session_id: session.session_id,
+            };
+            Ok(web::Json(result))
         }
         Err(error) => {
             Err(Error::from(error))
@@ -169,12 +162,12 @@ pub(crate) async fn join_gaming_session(
 ) -> actix_web::Result<web::Json<GamingSessionCreationResponse>> {
     //
 
-    debug!("HTTP POST to /gaming-sessions/players. Params: {:?}", params);
-
     // *** Validate input params ***
     if let Err(e) = params.validate() {
         return Err(actix_web::error::ErrorBadRequest(e.to_string()));
     }
+
+    debug!("HTTP POST to /gaming-sessions/players. Params: {:?}", params);
 
     let mut manager = manager.lock().await;
     let params = params.into_inner();
@@ -184,41 +177,6 @@ pub(crate) async fn join_gaming_session(
             Ok(web::Json(result))
         }
         Err(error) => Err(error.into()),
-    }
-}
-
-/// Called to indicate that a Player is ready to Play. This is required as part of the handshaking 
-/// during new Game setup.
-#[utoipa::path(
-    put,
-    tag = "TicTacToe",
-    path = "/v1/gaming-sessions/{session_id}/players/{player_id}/readiness",
-    responses(
-    (status = 200, description = "Notifies other Players that the newly added Player is ready to begin the Game"),
-    (status = 400, description = "Bad request - Malformed Session ID or Player ID"),
-    (status = 404, description = "No Gaming Session found"),
-    (status = 500, description = "Internal server error")
-,), )]
-#[put("/gaming-sessions/{session_id}/players/{player_id}/readiness")]
-pub(crate) async fn note_player_readiness(
-    ids: web::Path<(String, String)>,
-    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
-) -> impl Responder {
-    //
-
-    debug!("HTTP POST to /gaming-sessions/{}/players/{}/readiness.", ids.0, ids.1);
-
-    let (session_id, player_id) = ids.into_inner();
-
-    // *** Validate input params ***
-    validate_id_string(&session_id)?;
-    validate_id_string(&player_id)?;
-
-    let manager = manager.lock().await;
-
-    match manager.note_player_readiness(&session_id, &player_id).await {
-        Ok(_) => Ok(HttpResponse::Ok().finish()),
-        Err(error) => Err(Error::from(error)),
     }
 }
 

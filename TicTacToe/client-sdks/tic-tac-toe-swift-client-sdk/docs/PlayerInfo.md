@@ -4,7 +4,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **displayName** | **String** | Name of the Player. | 
-**gamePiece** | [**GamePiece**](GamePiece.md) |  | 
+**gamePiece** | [**GamePiece**](GamePiece.md) | The Game Piece assigned to the Player. | 
 **isAutomated** | **Bool** | Indicates that this Player&#39;s moves are automated, i.e., guided by this service. | 
 **playerId** | **String** | Unique ID of the Player. | 
 

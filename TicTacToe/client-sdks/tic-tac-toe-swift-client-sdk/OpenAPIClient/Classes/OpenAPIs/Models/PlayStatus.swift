@@ -10,7 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Lists valid Game play statuses. */
+/** Defines the valid Game play statuses */
 public enum PlayStatus: String, Codable, CaseIterable {
     case endedInStalemate = "EndedInStalemate"
     case endedInWin = "EndedInWin"

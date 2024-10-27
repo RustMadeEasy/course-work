@@ -11,10 +11,10 @@ import OpenAPIClient
 /// The data set returned by the GameInfoService methods.
 struct GameInfoServiceResult {
     var error: Error? = nil
-    var gameInfo: GameInfo? = nil
-    var gameCreationResult: GameCreationResult? = nil
-    var gamingSessionCreationResult: GamingSessionCreationResult? = nil
-    var turnResult: TurnResult? = nil
+    var gameInfo: GameInfoResponse? = nil
+    var gameCreationResult: GameCreationResponse? = nil
+    var gamingSessionCreationResult: GamingSessionCreationResponse? = nil
+    var turnResult: TurnResponse? = nil
 }
 
 /// Enumerates the errors potentially returned by the GameInfoService methods.
@@ -204,26 +204,17 @@ class GameInfoService {
         }
     }
 
-    /// Retrieves the current Game in in the specified Gaming Session.
-    static func getSessionCurrentGame(sessionId: String) async -> GameInfoServiceResult {
-                
+    /// Joins the Gaming Session's current Game.
+    static func joinCurrentGame(sessionId: String, localPlayerId: String) async -> GameInfoServiceResult {
+        
         do {
             
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                
-                TicTacToeAPI.getSessionCurrentGame(sessionId: sessionId) { info, error in
+                TicTacToeAPI.joinCurrentGame(sessionId: sessionId, playerId: localPlayerId) { data, error in
                     if error == nil {
-                        if info != nil {
-                            DispatchQueue.main.async {
-                                continuation.resume(returning: GameInfoServiceResult(gameCreationResult: info) )
-                            }
-                        } else {
-                            let error = GameInfoManagerError.emptyData;
-                            print("retrieveGameInfo() error: \(String(describing: error))")
-                            continuation.resume(returning: GameInfoServiceResult(error: error))
-                        }
+                        continuation.resume(returning: GameInfoServiceResult())
                     } else {
-                        print("retrieveGameInfo() error: \(String(describing: error))")
+                        print("joinCurrentGame() error: \(String(describing: error))")
                         continuation.resume(returning: GameInfoServiceResult(error: error))
                     }
                 }
@@ -231,7 +222,7 @@ class GameInfoService {
             return result
             
         } catch {
-            print("retrieveGameInfo() error: \(String(describing: error))")
+            print("joinCurrentGame() error: \(String(describing: error))")
             return GameInfoServiceResult(error: error)
         }
     }
@@ -298,8 +289,8 @@ class GameInfoService {
         do {
             
             let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
-                let turnInfo = GameTurnInfo(destination: boardPosition, playerId: localPlayerId, sessionId: sessionId)
-                TicTacToeAPI.takeTurn(gameId: gameId, gameTurnInfo: turnInfo) { data, error in
+                let turnInfo = GameTurnParams(destination: boardPosition, playerId: localPlayerId, sessionId: sessionId)
+                TicTacToeAPI.takeTurn(gameId: gameId, gameTurnParams: turnInfo) { data, error in
                     if let data = data {
                         DispatchQueue.main.async {
                             continuation.resume(returning: GameInfoServiceResult(turnResult: data))

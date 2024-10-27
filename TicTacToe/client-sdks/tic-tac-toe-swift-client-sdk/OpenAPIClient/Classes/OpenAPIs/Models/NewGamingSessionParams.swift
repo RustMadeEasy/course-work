@@ -10,9 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models info needed to start a new Gaming Session. */
+/** Models info needed to start a new Gaming Session */
 public struct NewGamingSessionParams: Codable, JSONEncodable, Hashable {
 
+    /** The proposed display name of the Player */
     public var sessionOwnerDisplayName: String
 
     public init(sessionOwnerDisplayName: String) {

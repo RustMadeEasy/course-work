@@ -83,7 +83,24 @@ impl TicTacToeGame {
 }
 
 impl GameTrait for TicTacToeGame {
+
     //
+
+    fn add_player(&mut self, player: &PlayerInfo) -> Result<(), GameError> {
+        //
+
+        if self.players.len() >= 2 {
+            return Err(GameError::GameHasMaximumNumberOfPlayers);
+        }
+
+        self.players.push(player.clone());
+
+        if self.get_player_count() == 2 {
+            self.begin();
+        }
+
+        Ok(())
+    }
 
     /// Returns the current state of the Game Board.
     fn get_current_game_state(&self) -> GameState {
@@ -106,6 +123,10 @@ impl GameTrait for TicTacToeGame {
                 GameState::new()
             }
         }
+    }
+
+    fn get_player_count(&self) -> i8 {
+        self.players.len() as i8
     }
 
     fn get_current_player(&self) -> Option<PlayerInfo> {
@@ -139,8 +160,8 @@ impl GameTrait for TicTacToeGame {
         self.play_history.last().map(|game_state| game_state.created_date)
     }
 
-    /// Creates a new Game instance. Note that the begin() function must be called 
-    fn new(game_mode: GameMode, player: &PlayerInfo, other_player: &PlayerInfo, session_id: &str) -> Result<Self, GameError> {
+    /// Creates a new Game instance. Note that the begin() function must be called before game play can commence.
+    fn new(game_mode: GameMode, player: &PlayerInfo, other_player: Option<PlayerInfo>, session_id: &str) -> Result<Self, GameError> {
         //
 
         debug!("TicTacToeGame::new() Creating new game. Session ID: {:?} with Player: {:?}", session_id, player);
@@ -150,11 +171,13 @@ impl GameTrait for TicTacToeGame {
             game_mode,
             id: Uuid::new_v4().to_string(),
             latest_turn_result: None,
-            players: vec![player.clone(), other_player.clone()],
+            players: vec![player.clone()],
             play_history: vec![],
         };
 
-        game.begin();
+        if let Some(other_player) = other_player {
+            game.add_player(&other_player)?;
+        }
 
         Ok(game)
     }

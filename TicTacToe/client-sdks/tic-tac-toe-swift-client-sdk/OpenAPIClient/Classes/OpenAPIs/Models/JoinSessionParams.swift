@@ -10,10 +10,12 @@ import Foundation
 import AnyCodable
 #endif
 
-/** Models info needed to join a Gaming Session. */
+/** Models info needed to join a Gaming Session */
 public struct JoinSessionParams: Codable, JSONEncodable, Hashable {
 
+    /** Game Invitation Code */
     public var gameInvitationCode: String
+    /** The proposed display name of the Player being added */
     public var playerDisplayName: String
 
     public init(gameInvitationCode: String, playerDisplayName: String) {

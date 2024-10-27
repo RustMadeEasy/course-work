@@ -188,7 +188,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T> for AutomaticPlayer<T> {
     //
 
-    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<&T>) {
+    async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<T>) {
         //
 
         if let Some(game) = game {
@@ -204,7 +204,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
                             // Is it my turn?
                             if let Some(current_player) = game.get_current_player() {
                                 if current_player.player_id == self.player_info.player_id {
-                                    self.take_turn(game, session.session_id.clone()).await;
+                                    self.take_turn(&game, session.session_id.clone()).await;
                                 }
                             }
                         }
