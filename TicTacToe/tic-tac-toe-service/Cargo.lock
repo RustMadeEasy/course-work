@@ -758,7 +758,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1ab577a896d09940b5fe12ec5ae71f9d8211fff62c919c03a3750a9901e98a7"
 dependencies = [
-    "function_name-proc-macro",
+ "function_name-proc-macro",
 ]
 
 [[package]]
@@ -2060,7 +2060,7 @@ dependencies = [
  "chrono",
  "derive_more 1.0.0",
  "env_logger",
-    "function_name",
+ "function_name",
  "log",
  "mqtt-publisher-lib",
  "rand 0.8.5",

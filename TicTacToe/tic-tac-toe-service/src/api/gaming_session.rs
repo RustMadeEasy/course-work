@@ -13,11 +13,13 @@
  */
 
 use crate::api::games::validate_id_string;
+use crate::errors::GameError;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
+use crate::models::player_info::PlayerInfo;
 use crate::models::requests::{EndGamingSessionParams, JoinSessionParams, NewGamingSessionParams, ID_LENGTH_MAX};
 use crate::models::responses::{GameCreationResponse, GameInfoResponse, GamingSessionCreationResponse};
-use actix_web::{delete, get, post, web, Error, HttpResponse};
+use actix_web::{delete, get, post, put, web, Error, HttpResponse};
 use log::debug;
 use validator::Validate;
 
@@ -98,7 +100,6 @@ pub(crate) async fn end_gaming_session(
     }
 }
 
-
 /// Retrieves the Gaming Session's current Game.
 #[utoipa::path(
     get,
@@ -141,6 +142,62 @@ pub(crate) async fn get_session_current_game(
         Err(error) => {
             Err(Error::from(error))
         }
+    }
+}
+
+/// Adds a Player to the Session's Current Game.
+#[utoipa::path(
+    put,
+    tag = "TicTacToe",
+    path = "/v1/gaming-sessions/{session_id}/current_game/players/{player_id}",
+    responses(
+    (status = 200, description = "Player joined Game successfully", body = GameCreationResponse, content_type = "application/json"),
+    (status = 404, description = "Game not found"),
+    (status = 404, description = "Player not found"),
+    (status = 404, description = "Session not found"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[put("/gaming-sessions/{session_id}/current_game/players/{player_id}")]
+pub(crate) async fn join_current_game(
+    session_and_player: web::Path<(String, String)>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+) -> actix_web::Result<web::Json<GameCreationResponse>> {
+    //
+
+    // *** Validate input params ***
+    match validate_id_string(&session_and_player.0) {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(error) => error.into(),
+    };
+    match validate_id_string(&session_and_player.1) {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(error) => error.into(),
+    };
+
+    debug!("HTTP PUT to /gaming-sessions/{}/current_game/players/{}.",
+        session_and_player.0,
+        session_and_player.1);
+
+    let mut manager = manager.lock().await;
+
+    let session = match manager.get_session_by_id(&session_and_player.0).await {
+        None => return Err(Error::from(GameError::GamingSessionNotFound)),
+        Some(session) => session,
+    };
+
+    match manager.join_current_game(&session_and_player.0, &session_and_player.1).await {
+        Ok(result) => {
+            // Add the other Player if they are already part of the Gaming Session.
+            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants);
+            let new_game_info = GameCreationResponse {
+                game_info: GameInfoResponse::from(result.0.clone()),
+                initiating_player: session.session_owner,
+                other_player,
+                session_id: session.session_id,
+            };
+            Ok(web::Json(new_game_info))
+        }
+        Err(error) => Err(error.into()),
     }
 }
 

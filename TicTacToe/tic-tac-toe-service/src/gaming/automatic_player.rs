@@ -197,7 +197,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
             debug!("AutomaticPlayer: received session_updated() for session {} and game {}", session.session_id, game.get_id());
 
             match state_change {
-                GamingSessionStateChanges::GameStarted | GamingSessionStateChanges::GameTurnTaken => {
+                GamingSessionStateChanges::GameTurnTaken => {
                     let game_state = game.get_current_game_state();
                     match game_state.play_status {
                         PlayStatus::InProgress => {

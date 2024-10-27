@@ -12,8 +12,6 @@ pub(crate) enum GamingSessionStateChanges {
     AllPlayersReady,
     /// The Game has been deleted
     GameDeleted,
-    /// The Game has begun
-    GameStarted,
     /// The new Game Turn has been taken
     GameTurnTaken,
     /// The Gaming Session has been deleted

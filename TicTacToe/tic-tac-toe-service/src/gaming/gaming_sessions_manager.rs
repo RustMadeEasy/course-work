@@ -248,8 +248,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         session.current_game = Some(game.clone());
         self.upsert_session(&session).await;
 
-        self.notify_observers_of_game_change(GamingSessionStateChanges::GameStarted, &session, &game).await;
-
         Ok(game.clone())
     }
 
@@ -273,8 +271,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         session.current_game = Some(game.clone());
         self.upsert_session(&session).await;
-
-        self.notify_observers_of_game_change(GamingSessionStateChanges::GameStarted, &session, &game).await;
 
         Ok((game.clone(), session.participants))
     }

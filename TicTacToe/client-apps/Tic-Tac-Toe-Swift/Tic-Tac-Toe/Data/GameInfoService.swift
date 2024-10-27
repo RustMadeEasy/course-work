@@ -204,6 +204,37 @@ class GameInfoService {
         }
     }
 
+    /// Creates a new Single-Player Game. Returns GameCreationResult.
+    static func getSessionCurrentGame(sessionId: String) async -> GameInfoServiceResult {
+
+        do {
+
+            let result: GameInfoServiceResult = try await withCheckedThrowingContinuation { continuation in
+                TicTacToeAPI.getSessionCurrentGame(sessionId: sessionId) { data, error in
+                    if error == nil {
+                        if data != nil {
+                            DispatchQueue.main.async {
+                                continuation.resume(returning: GameInfoServiceResult(gameCreationResult: data) )
+                            }
+                        } else {
+                            let error = GameInfoManagerError.emptyData;
+                            print("getSessionCurrentGame() error: \(String(describing: error))")
+                            continuation.resume(returning: GameInfoServiceResult(error: error))
+                        }
+                    } else {
+                        print("getSessionCurrentGame() error: \(String(describing: error))")
+                        continuation.resume(returning: GameInfoServiceResult(error: error))
+                    }
+                }
+            }
+            return result
+            
+        } catch {
+            print("getSessionCurrentGame() error: \(String(describing: error))")
+            return GameInfoServiceResult(error: error)
+        }
+    }
+
     /// Joins the Gaming Session's current Game.
     static func joinCurrentGame(sessionId: String, localPlayerId: String) async -> GameInfoServiceResult {
         

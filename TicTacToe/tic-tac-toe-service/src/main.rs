@@ -52,17 +52,18 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new().app_data(manager.clone()).service(
             web::scope("/v1")
-                // *** Gaming API ***
+                // *** Gaming Session API ***
                 .service(create_gaming_session)
+                .service(end_gaming_session)
+                .service(get_session_current_game)
+                .service(join_gaming_session)
+                // *** Games API ***
                 .service(create_single_player_game)
                 .service(create_two_player_game)
                 .service(end_game)
-                .service(end_gaming_session)
                 .service(get_game_history)
                 .service(get_latest_game_turn)
-                .service(get_session_current_game)
                 .service(join_current_game)
-                .service(join_gaming_session)
                 .service(take_turn)
                 // *** Health & Docs API ***
                 .service(api_docs)

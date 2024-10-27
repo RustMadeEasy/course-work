@@ -254,7 +254,6 @@ extension GameInfoViewModel {
                 self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
                 
                 Task {
-                    self.onGameStarted()
                     completion(true, nil)
                 }
             }
@@ -269,14 +268,8 @@ extension GameInfoViewModel {
         let result = await GameInfoService.joinGamingSession(invitationCode: self.invitationCode, playerName: self.localPlayer.displayName)
 
         if let newGamingSessionInfo = result.gamingSessionCreationResult {
-            
             DispatchQueue.main.async {
-                
                 self.updateGamingSessionInfo(info: newGamingSessionInfo)
-
-                Task {
-                    self.onGameStarted()
-                }
             }
         }
         
@@ -391,21 +384,28 @@ extension GameInfoViewModel {
 /// GameInfoReceiverDelegate implementation
 extension GameInfoViewModel: GameInfoReceiverDelegate {
         
+    func onAllPlayersReady() {
+
+        if self.localPlayerInitiatedGamingSession {
+            Task {
+                let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
+                if let gameCreationResult = result.gameCreationResult {
+                    DispatchQueue.main.async {
+                        self.setupPlayers(newGameInfo: gameCreationResult)
+                        self.updateGameInfo(turnResult: TurnResponse(currentPlayer: gameCreationResult.gameInfo.currentPlayer, newGameState: gameCreationResult.gameInfo.gameState))
+                    }
+                }
+            }
+        } else {
+            DispatchQueue.main.async {
+                self.refreshGameInfo()
+                self._hasGameStarted = Published(wrappedValue: true)
+            }
+        }
+    }
+
     func onGameDeleted() {
         refreshGameInfo()
-    }
-    
-    func onGameStarted() {
-//        if !self.localPlayerInitiatedGamingSession {
-//            Task {
-//                await self.getSessionCurrentGame()
-//            }
-//        } else {
-//            refreshGameInfo()
-//        }
-//        DispatchQueue.main.async {
-//            self._hasGameStarted = Published(wrappedValue: true)
-//        }
     }
     
     func onGameEndedInStalemate() {
@@ -420,15 +420,6 @@ extension GameInfoViewModel: GameInfoReceiverDelegate {
         refreshGameInfo()
 
         // TODO: JD: ask for a rematch
-    }
-
-    func onAllPlayersReady() {
-//        // All Players are ready in the Gaming Session. So, if this is a Two-Player Game that we have started, let's begin...
-//        if self.localPlayerInitiatedGamingSession && self.isTwoPlayer {
-//            Task {
-//                await self.createTwoPlayerGame()
-//            }
-//        }
     }
 
     func onSessionDeleted() {

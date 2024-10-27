@@ -58,9 +58,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
             GamingSessionStateChanges::GameDeleted => {
                 EventPlaneTopicNames::GameDeleted.build(topic_prefix)
             }
-            GamingSessionStateChanges::GameStarted => {
-                EventPlaneTopicNames::GameStarted.build(topic_prefix)
-            }
             GamingSessionStateChanges::GameTurnTaken => {
                 if let Some(game) = game {
                     match game.get_current_game_state().play_status {

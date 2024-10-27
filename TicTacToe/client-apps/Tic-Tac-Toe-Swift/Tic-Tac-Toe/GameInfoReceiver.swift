@@ -11,11 +11,10 @@ import OpenAPIClient
 
 /// Defines handler for game info events.
 protocol GameInfoReceiverDelegate {
+    func onAllPlayersReady()
     func onGameDeleted()
     func onGameEndedInStalemate()
     func onGameEndedInWin()
-    func onGameStarted()
-    func onAllPlayersReady()
     func onSessionDeleted()
     func onTurnTaken()
 }
@@ -30,7 +29,6 @@ class GameInfoReceiver {
     private var topicGameDeleted: String!
     private var topicGameEndedInStalemate: String!
     private var topicGameEndedInWin: String!
-    private var topicGameStarted: String!
     private var topicAllPlayersReady: String!
     private var topicSessionDeleted: String!
     private var topicTurnTaken: String!
@@ -53,11 +51,10 @@ extension GameInfoReceiver {
     
     /// Pre-builds the topics so that we are not parsing each time a message is received.
     private func prebuildTopics() {
+        self.topicAllPlayersReady = buildTopic(topic: EventPlaneTopicNames.allPlayersReady)
         self.topicGameDeleted = buildTopic(topic: EventPlaneTopicNames.gameDeleted)
         self.topicGameEndedInStalemate = buildTopic(topic: EventPlaneTopicNames.gameEndedInStalemate)
         self.topicGameEndedInWin = buildTopic(topic: EventPlaneTopicNames.gameEndedInWin)
-        self.topicGameStarted = buildTopic(topic: EventPlaneTopicNames.gameStarted)
-        self.topicAllPlayersReady = buildTopic(topic: EventPlaneTopicNames.allPlayersReady)
         self.topicSessionDeleted = buildTopic(topic: EventPlaneTopicNames.sessionDeleted)
         self.topicTurnTaken = buildTopic(topic: EventPlaneTopicNames.turnTaken)
     }
@@ -94,8 +91,6 @@ extension GameInfoReceiver {
                 self.delegate.onGameEndedInStalemate()
             case self.topicGameEndedInWin:
                 self.delegate.onGameEndedInWin()
-            case self.topicGameStarted:
-                self.delegate.onGameStarted()
             case self.topicAllPlayersReady:
                 self.delegate.onAllPlayersReady()
             case self.topicSessionDeleted:
