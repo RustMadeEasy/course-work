@@ -229,7 +229,7 @@ pub(crate) async fn join_gaming_session(
     let mut manager = manager.lock().await;
     let params = params.into_inner();
 
-    match manager.add_player_to_session(&params.game_invitation_code, &params.player_display_name).await {
+    match manager.join_session(&params.game_invitation_code, &params.player_display_name).await {
         Ok(result) => {
             Ok(web::Json(result))
         }

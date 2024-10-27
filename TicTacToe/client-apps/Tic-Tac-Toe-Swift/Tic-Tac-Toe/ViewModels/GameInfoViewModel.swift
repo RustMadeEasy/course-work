@@ -249,6 +249,8 @@ extension GameInfoViewModel {
             
             DispatchQueue.main.async {
                 
+                self.gameId = newGameInfo.gameInfo.gameId
+                
                 self.setupPlayers(newGameInfo: newGameInfo)
                 
                 self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))

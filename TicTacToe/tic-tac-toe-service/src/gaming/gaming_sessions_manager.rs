@@ -79,9 +79,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
     /// Adds a Player to the Gaming Session.
     #[named]
-    pub(crate) async fn add_player_to_session(&mut self,
-                                              game_invitation_code: &str,
-                                              player_display_name: &str) -> Result<GamingSessionCreationResponse, GameError> {
+    pub(crate) async fn join_session(&mut self,
+                                     game_invitation_code: &str,
+                                     player_display_name: &str) -> Result<GamingSessionCreationResponse, GameError> {
         //
 
         debug!("{} called", function_name!());
@@ -91,21 +91,23 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             Some(session) => session,
         };
 
-        // Make sure the name is not already used by the other Player.
-        if session.participants.iter().any(|p| p.display_name.to_lowercase() == player_display_name.to_lowercase()) {
-            return Err(GameError::NameAlreadyInUseInGamingSession);
-        }
-
-        // Create and add the new Player.
-        let new_player = PlayerInfo::new(player_display_name, false);
-        session.add_participant(&new_player);
-        self.upsert_session(&session).await;
+        // Make the new Player if not already part of the Gaming Session.
+        let other_player = match session.participants.iter().find(|p| p.display_name.to_lowercase() == player_display_name.to_lowercase()) {
+            None => {
+                // Create and add the new Player.
+                let other_player = PlayerInfo::new(player_display_name, false);
+                session.add_participant(&other_player);
+                self.upsert_session(&session).await;
+                other_player
+            }
+            Some(other_player) => other_player.clone(),
+        };
 
         Ok(GamingSessionCreationResponse {
             event_plane_config: session.event_plane_config,
             initiating_player: session.session_owner,
             invitation_code: session.invitation_code,
-            other_player: Some(new_player),
+            other_player: Some(other_player),
             session_id: session.session_id,
         })
     }
