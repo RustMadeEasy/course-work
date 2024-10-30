@@ -39,7 +39,7 @@ use utoipa::openapi::{ContactBuilder, LicenseBuilder, Tag};
 use utoipa::OpenApi;
 
 
-/// Generates the OpenAPI3 documentation.
+/// Generates OpenAPI3 documentation.
 #[derive(utoipa::OpenApi)]
 #[openapi(
     paths(
@@ -79,8 +79,8 @@ use utoipa::OpenApi;
 )]
 pub(crate) struct ApiDoc;
 
-/// Responds with the OpenAPI specification of this Service. This can be used to create, for
-/// instance, PostMan Collections, Client SDKs, etc.
+/// Responds with the OpenAPI specification of this Service. This can be used to create 
+/// PostMan Collections, Client SDKs, etc.
 #[get("/api-docs")]
 pub(crate) async fn api_docs() -> actix_web::Result<String> {
     //

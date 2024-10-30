@@ -4,17 +4,17 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**createGamingSession**](TicTacToeAPI.md#creategamingsession) | **POST** /v1/gaming-sessions | Creates a new Gaming Session. Returns GamingSessionCreationResult.
-[**createSinglePlayerGame**](TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/gaming-sessions/{session_id}/games | Creates a new Game. Returns Game Creation Result.
-[**createTwoPlayerGame**](TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/{session_id}/two-player-games | Creates a new Two-Player Game. Returns Game Creation Result.
+[**createGamingSession**](TicTacToeAPI.md#creategamingsession) | **POST** /v1/gaming-sessions | Creates a new Gaming Session. Returns Gaming Session Creation Response.
+[**createSinglePlayerGame**](TicTacToeAPI.md#createsingleplayergame) | **POST** /v1/gaming-sessions/{session_id}/games | Creates a new Single-Player Game. Returns Game Creation Response.
+[**createTwoPlayerGame**](TicTacToeAPI.md#createtwoplayergame) | **POST** /v1/gaming-session/{session_id}/two-player-games | Creates a new Two-Player Game. Returns Game Creation Response.
 [**endGame**](TicTacToeAPI.md#endgame) | **DELETE** /v1/games/{game_id} | Closes down the specified Game.
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
-[**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of Game States from the initial move (turn) to the latest Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
-[**getLatestGameTurn**](TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves the most recent Turn Result for the specified Game.
+[**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of Game States from the initial move (turn) to the current Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
+[**getLatestGameTurn**](TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves the most recent Turn for the specified Game.
 [**getSessionCurrentGame**](TicTacToeAPI.md#getsessioncurrentgame) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Gaming Session&#39;s current Game.
 [**joinCurrentGame**](TicTacToeAPI.md#joincurrentgame) | **PUT** /v1/gaming-sessions/{session_id}/current_game/players/{player_id} | Adds a Player to the Session&#39;s Current Game.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
-[**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player. Returns the Turn Result.
+[**takeTurn**](TicTacToeAPI.md#taketurn) | **POST** /v1/games/{game_id}/turns | Make a Game move (turn) for the specified Player. Returns the Turn Response.
 
 
 # **createGamingSession**
@@ -22,7 +22,7 @@ Method | HTTP request | Description
     open class func createGamingSession(newGamingSessionParams: NewGamingSessionParams, completion: @escaping (_ data: GamingSessionCreationResponse?, _ error: Error?) -> Void)
 ```
 
-Creates a new Gaming Session. Returns GamingSessionCreationResult.
+Creates a new Gaming Session. Returns Gaming Session Creation Response.
 
 ### Example
 ```swift
@@ -31,7 +31,7 @@ import OpenAPIClient
 
 let newGamingSessionParams = NewGamingSessionParams(sessionOwnerDisplayName: "sessionOwnerDisplayName_example") // NewGamingSessionParams | 
 
-// Creates a new Gaming Session. Returns GamingSessionCreationResult.
+// Creates a new Gaming Session. Returns Gaming Session Creation Response.
 TicTacToeAPI.createGamingSession(newGamingSessionParams: newGamingSessionParams) { (response, error) in
     guard error == nil else {
         print(error)
@@ -70,7 +70,7 @@ No authorization required
     open class func createSinglePlayerGame(sessionId: String, newSinglePlayerGameParams: NewSinglePlayerGameParams, completion: @escaping (_ data: GameCreationResponse?, _ error: Error?) -> Void)
 ```
 
-Creates a new Game. Returns Game Creation Result.
+Creates a new Single-Player Game. Returns Game Creation Response.
 
 ### Example
 ```swift
@@ -80,7 +80,7 @@ import OpenAPIClient
 let sessionId = "sessionId_example" // String | 
 let newSinglePlayerGameParams = NewSinglePlayerGameParams(computerSkillLevel: AutomaticPlayerSkillLevel()) // NewSinglePlayerGameParams | 
 
-// Creates a new Game. Returns Game Creation Result.
+// Creates a new Single-Player Game. Returns Game Creation Response.
 TicTacToeAPI.createSinglePlayerGame(sessionId: sessionId, newSinglePlayerGameParams: newSinglePlayerGameParams) { (response, error) in
     guard error == nil else {
         print(error)
@@ -120,7 +120,7 @@ No authorization required
     open class func createTwoPlayerGame(sessionId: String, completion: @escaping (_ data: GameCreationResponse?, _ error: Error?) -> Void)
 ```
 
-Creates a new Two-Player Game. Returns Game Creation Result.
+Creates a new Two-Player Game. Returns Game Creation Response.
 
 ### Example
 ```swift
@@ -129,7 +129,7 @@ import OpenAPIClient
 
 let sessionId = "sessionId_example" // String | 
 
-// Creates a new Two-Player Game. Returns Game Creation Result.
+// Creates a new Two-Player Game. Returns Game Creation Response.
 TicTacToeAPI.createTwoPlayerGame(sessionId: sessionId) { (response, error) in
     guard error == nil else {
         print(error)
@@ -268,7 +268,7 @@ No authorization required
     open class func getGameHistory(gameId: String, completion: @escaping (_ data: [GameState]?, _ error: Error?) -> Void)
 ```
 
-Retrieves the history of Game States from the initial move (turn) to the latest Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
+Retrieves the history of Game States from the initial move (turn) to the current Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
 
 ### Example
 ```swift
@@ -277,7 +277,7 @@ import OpenAPIClient
 
 let gameId = "gameId_example" // String | 
 
-// Retrieves the history of Game States from the initial move (turn) to the latest Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
+// Retrieves the history of Game States from the initial move (turn) to the current Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
 TicTacToeAPI.getGameHistory(gameId: gameId) { (response, error) in
     guard error == nil else {
         print(error)
@@ -316,7 +316,7 @@ No authorization required
     open class func getLatestGameTurn(gameId: String, completion: @escaping (_ data: TurnResponse?, _ error: Error?) -> Void)
 ```
 
-Retrieves the most recent Turn Result for the specified Game.
+Retrieves the most recent Turn for the specified Game.
 
 ### Example
 ```swift
@@ -325,7 +325,7 @@ import OpenAPIClient
 
 let gameId = "gameId_example" // String | Game ID
 
-// Retrieves the most recent Turn Result for the specified Game.
+// Retrieves the most recent Turn for the specified Game.
 TicTacToeAPI.getLatestGameTurn(gameId: gameId) { (response, error) in
     guard error == nil else {
         print(error)
@@ -510,7 +510,7 @@ No authorization required
     open class func takeTurn(gameId: String, gameTurnParams: GameTurnParams, completion: @escaping (_ data: TurnResponse?, _ error: Error?) -> Void)
 ```
 
-Make a Game move (turn) for the specified Player. Returns the Turn Result.
+Make a Game move (turn) for the specified Player. Returns the Turn Response.
 
 ### Example
 ```swift
@@ -520,7 +520,7 @@ import OpenAPIClient
 let gameId = "gameId_example" // String | 
 let gameTurnParams = GameTurnParams(destination: BoardPosition(column: 123, row: 123), playerId: "playerId_example", sessionId: "sessionId_example") // GameTurnParams | 
 
-// Make a Game move (turn) for the specified Player. Returns the Turn Result.
+// Make a Game move (turn) for the specified Player. Returns the Turn Response.
 TicTacToeAPI.takeTurn(gameId: gameId, gameTurnParams: gameTurnParams) { (response, error) in
     guard error == nil else {
         print(error)

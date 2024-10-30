@@ -19,7 +19,7 @@ pub(crate) struct PlayOutcome {
 impl PlayOutcome {
     //
 
-    /// Creates a new PlayOutcome instance.
+    /// Creates a new instance.
     pub(crate) fn new(play_status: &PlayStatus) -> Self {
         Self {
             play_status: play_status.clone(),
@@ -28,7 +28,7 @@ impl PlayOutcome {
         }
     }
 
-    /// Creates a new PlayOutcome instance with details regarding the win.
+    /// Creates a new instance with details regarding the win.
     pub(crate) fn new_with_win_details(
         play_status: &PlayStatus,
         winning_position: &[BoardPosition],

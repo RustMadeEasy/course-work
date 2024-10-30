@@ -8,10 +8,10 @@
 /// Defines the changes in state for a Gaming Session
 #[derive(Debug)]
 pub(crate) enum GamingSessionStateChanges {
-    /// All Players are ready to play
-    AllPlayersReady,
     /// The Game has been deleted
     GameDeleted,
+    /// The Game is ready to play
+    GameIsReady,
     /// The new Game Turn has been taken
     GameTurnTaken,
     /// The Gaming Session has been deleted

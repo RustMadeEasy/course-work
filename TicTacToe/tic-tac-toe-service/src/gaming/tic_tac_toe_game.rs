@@ -160,7 +160,7 @@ impl GameTrait for TicTacToeGame {
         self.play_history.last().map(|game_state| game_state.created_date)
     }
 
-    /// Creates a new Game instance. Note that the begin() function must be called before game play can commence.
+    /// Creates a new instance. Note that the begin() function must be called before game play can commence.
     fn new(game_mode: GameMode, session_id: &str) -> Result<Self, GameError> {
         //
 
@@ -233,7 +233,7 @@ impl GameTrait for TicTacToeGame {
         self.latest_turn_result = Some(final_board_state.clone());
 
         // Change Players
-        self.current_player = Some(other_player);
+        self.current_player = Some(other_player.clone());
 
         Ok(final_board_state.clone())
     }

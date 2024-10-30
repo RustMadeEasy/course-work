@@ -44,7 +44,7 @@ pub(crate) trait GameTrait: Sized {
     /// Property accessor for the date/time of the Game's latest move.
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
 
-    /// Creates a new Game instance.
+    /// Creates a new instance.
     fn new(game_mode: GameMode, session_id: &str) -> Result<Self, GameError>;
 
     /// Make a Game move for the specified Player.

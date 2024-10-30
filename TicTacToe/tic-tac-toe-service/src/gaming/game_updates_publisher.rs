@@ -19,6 +19,7 @@ use mqtt_publisher_lib::publisher_qos::PublisherQoS;
 use std::time::Duration;
 use uuid::Uuid;
 
+/// Observes Game updates and publishes the via MQTT.
 #[derive(Clone)]
 pub(crate) struct GameUpdatesPublisher {
     //
@@ -32,6 +33,7 @@ pub(crate) struct GameUpdatesPublisher {
 impl GameUpdatesPublisher {
     //
 
+    /// Creates a new instance.
     pub(crate) fn new(broker_address: String, broker_port: u16) -> Self {
         let config = BrokerInfo::new(broker_address,
                                      10,
@@ -70,7 +72,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
                     return; // Early return. Nothing to publish.
                 }
             }
-            GamingSessionStateChanges::AllPlayersReady => {
+            GamingSessionStateChanges::GameIsReady => {
                 EventPlaneTopicNames::AllPlayersReady.build(topic_prefix)
             }
             GamingSessionStateChanges::GamingSessionDeleted => {

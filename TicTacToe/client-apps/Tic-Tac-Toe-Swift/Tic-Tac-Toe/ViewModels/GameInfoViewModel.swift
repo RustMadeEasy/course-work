@@ -152,12 +152,6 @@ extension GameInfoViewModel {
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
                 self._gameId = Published(wrappedValue: newGameInfo.gameInfo.gameId)
                 
-                self.setupPlayers(newGameInfo: newGameInfo)
-                
-                self._isTwoPlayer = Published(wrappedValue: false)
-                
-                self.updateGameInfo(turnResult: TurnResponse(currentPlayer: newGameInfo.gameInfo.currentPlayer, newGameState: newGameInfo.gameInfo.gameState))
-                
                 completion(true, nil)
             }
         } else {
@@ -192,8 +186,9 @@ extension GameInfoViewModel {
         if let newGamingSessionInfo = result.gamingSessionCreationResult {
             DispatchQueue.main.async {
                 self._localPlayerInitiatedGamingSession = Published(wrappedValue: true)
-                self.updateGamingSessionInfo(info: newGamingSessionInfo)
-                completion(true, nil)
+                self.updateGamingSessionInfo(info: newGamingSessionInfo) {
+                    completion(true, nil)
+                }
             }
         } else {
             completion(false, result.error)
@@ -265,17 +260,19 @@ extension GameInfoViewModel {
     }
     
     /// Joins a Gaming Session.
-    func joinGamingSession(invitationCode: String) async -> Error? {        
+    func joinGamingSession(invitationCode: String, completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
         
         let result = await GameInfoService.joinGamingSession(invitationCode: self.invitationCode, playerName: self.localPlayer.displayName)
 
         if let newGamingSessionInfo = result.gamingSessionCreationResult {
             DispatchQueue.main.async {
-                self.updateGamingSessionInfo(info: newGamingSessionInfo)
+                self.updateGamingSessionInfo(info: newGamingSessionInfo) {
+                    completion(true, nil)
+                }
             }
+        } else {
+            completion(false, result.error)
         }
-        
-        return result.error
     }
     
     /// When a Game has been won, this function determines whether the specified position (block) represents a position that won the Game.
@@ -329,7 +326,7 @@ extension GameInfoViewModel {
     }
     
     /// Performs the inital setup of the Game parameters.
-    private func updateGamingSessionInfo(info: GamingSessionCreationResponse) {
+    private func updateGamingSessionInfo(info: GamingSessionCreationResponse, completion: @escaping (() -> Void)) {
         //
         
         DispatchQueue.main.async {
@@ -346,6 +343,8 @@ extension GameInfoViewModel {
 
             // Setup MQTT listener
             self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: info.eventPlaneConfig, delegate: self)
+            
+            completion()
         }
     }
 
@@ -360,8 +359,8 @@ extension GameInfoViewModel {
             
             self.hasGameStarted = turnResult.newGameState.playStatus != .notStarted
             
-            self._isPlayerOneCurrentPlayer = Published(wrappedValue: turnResult.currentPlayer?.playerId == self.playerOneId)
-            self._isPlayerTwoCurrentPlayer = Published(wrappedValue: turnResult.currentPlayer?.playerId != self.playerOneId)
+            self._isPlayerOneCurrentPlayer = Published(wrappedValue: self.hasGameStarted && (turnResult.currentPlayer?.playerId == self.playerOneId))
+            self._isPlayerTwoCurrentPlayer = Published(wrappedValue: self.hasGameStarted && (turnResult.currentPlayer?.playerId != self.playerOneId))
 
             // winningPlayerName and winningLocations
             if turnResult.newGameState.playStatus == .endedInWin {

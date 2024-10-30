@@ -24,7 +24,7 @@ use log::debug;
 use validator::Validate;
 
 
-/// Creates a new Gaming Session. Returns GamingSessionCreationResult.
+/// Creates a new Gaming Session. Returns Gaming Session Creation Response.
 #[utoipa::path(
     post,
     tag = "TicTacToe",

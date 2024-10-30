@@ -52,7 +52,7 @@ pub(crate) struct GamingSessionsManager<T: GameTrait + Clone + Send + Sync + 'st
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     //
 
-    /// Creates a new GamesManager instance.
+    /// Creates a new instance.
     #[named]
     pub(crate) fn new() -> Self {
         //
@@ -234,7 +234,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
         let computer_player = PlayerInfo::new(AutomaticPlayer::<T>::get_name().as_str(), true);
 
-        let mut game = T::new(GameMode::SinglePlayer, &session.session_id)?;
+        let game = T::new(GameMode::SinglePlayer, &session.session_id)?;
 
         // Create an AutomaticPlayer to play against Player One.
         let auto_player = AutomaticPlayer::<T>::new(&game.get_id(), &computer_player, computer_skill_level);
@@ -242,13 +242,14 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         // Make sure the AutomaticPlayer can follow the Game.
         self.observers.push(Box::new(auto_player));
 
-        game.add_player(&computer_player)?;
-
         self.upsert_game(&game).await;
 
         session.participants.push(computer_player.clone());
         session.current_game = Some(game.clone());
         self.upsert_session(&session).await;
+
+        // Now, add the Automatic Player in the same way the end-user will be added. 
+        self.join_current_game(&session.session_id, &computer_player.player_id).await?;
 
         Ok(game.clone())
     }
@@ -403,7 +404,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         self.upsert_game(&game).await;
 
         if game.get_player_count() == 2 {
-            self.notify_observers_of_session_change(GamingSessionStateChanges::AllPlayersReady, &session).await;
+            self.notify_observers_of_game_change(GamingSessionStateChanges::GameIsReady, &session, &game).await;
         }
 
         Ok((game.clone(), session.participants))
@@ -413,7 +414,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         match self.get_session_containing_game(game_id).await {
             None => false,
             Some(mut session) => {
-                session.clear_game();
+                session.current_game = None;
                 self.upsert_session(&session).await;
                 self.notify_observers_of_session_change(GamingSessionStateChanges::GameDeleted, &session).await;
                 true
@@ -472,7 +473,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     async fn upsert_game(&mut self, game: &T) -> bool {
         match self.get_session_containing_game(&game.get_id()).await {
             Some(mut session) => {
-                session.set_game(game);
+                session.current_game = Some(game.clone());
                 self.upsert_session(&session).await;
                 true
             }

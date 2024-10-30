@@ -31,7 +31,7 @@ pub struct EventPlaneConfig {
 }
 
 impl EventPlaneConfig {
-    /// Creates a new EventPlaneConfig instance.
+    /// Creates a new instance.
     pub fn new(broker_address: String, broker_port: u16, channel_id: String) -> Self {
         Self {
             broker_address,

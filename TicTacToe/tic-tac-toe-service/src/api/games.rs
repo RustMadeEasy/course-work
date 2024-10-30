@@ -24,7 +24,7 @@ use log::debug;
 use validator::Validate;
 
 
-/// Creates a new Game. Returns Game Creation Result.
+/// Creates a new Single-Player Game. Returns Game Creation Response.
 #[utoipa::path(
     post,
     tag = "TicTacToe",
@@ -73,7 +73,7 @@ pub(crate) async fn create_single_player_game(
     }
 }
 
-/// Creates a new Two-Player Game. Returns Game Creation Result.
+/// Creates a new Two-Player Game. Returns Game Creation Response.
 #[utoipa::path(
     post,
     tag = "TicTacToe",
@@ -154,7 +154,7 @@ pub(crate) async fn end_game(
     }
 }
 
-/// Retrieves the history of Game States from the initial move (turn) to the latest Game State. 
+/// Retrieves the history of Game States from the initial move (turn) to the current Game State. 
 /// This can be used, for instance, to create an animated time-lapse of the Game play.
 #[utoipa::path(
     get,
@@ -184,7 +184,7 @@ pub(crate) async fn get_game_history(
     }
 }
 
-/// Retrieves the most recent Turn Result for the specified Game.
+/// Retrieves the most recent Turn for the specified Game.
 #[utoipa::path(
     get,
     tag = "TicTacToe",
@@ -223,7 +223,7 @@ pub(crate) async fn get_latest_game_turn(
     }
 }
 
-/// Make a Game move (turn) for the specified Player. Returns the Turn Result.
+/// Make a Game move (turn) for the specified Player. Returns the Turn Response.
 #[utoipa::path(
     post,
     tag = "TicTacToe",

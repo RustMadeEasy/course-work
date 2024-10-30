@@ -36,7 +36,7 @@ impl PlayerInfo {
         players.iter().find(|it| it.player_id != player_id).cloned()
     }
 
-    /// Creates a new PlayerInfo instance.
+    /// Creates a new instance.
     pub fn new(display_name: impl Into<String>,
                is_automated: bool) -> Self {
         Self {

@@ -35,7 +35,7 @@ pub(crate) struct GameState {
 impl GameState {
     //
 
-    /// Creates a new GameState instance.
+    /// Creates a new instance.
     pub(crate) fn new() -> Self {
         Self {
             created_date: Utc::now(),

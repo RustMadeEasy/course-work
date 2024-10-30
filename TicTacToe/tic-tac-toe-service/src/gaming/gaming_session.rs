@@ -20,9 +20,9 @@ use verification_code_gen::verification_code_generator::VerificationCodeGenerato
 pub(crate) struct GamingSession<T: GameTrait + Clone + Send + Sync + 'static> {
     /// The Game currently being played.
     pub(crate) current_game: Option<T>,
-    /// MQTT config info
+    /// MQTT configuration info
     pub(crate) event_plane_config: EventPlaneConfig,
-    /// Identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
+    /// Uniquely identifies the Gaming Session. This also serves as the communication channel for MQTT notifications.
     pub(crate) session_id: String,
     /// Unique Code that is used to invite others to the Gaming Session.
     pub(crate) invitation_code: String,
@@ -35,14 +35,9 @@ pub(crate) struct GamingSession<T: GameTrait + Clone + Send + Sync + 'static> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSession<T> {
     //
 
-    /// Adds a new participant.
+    /// Adds a new participant (Player).
     pub(crate) fn add_participant(&mut self, player_info: &PlayerInfo) {
         self.participants.push(player_info.clone());
-    }
-
-    /// Clears all Game-related fields.
-    pub(crate) fn clear_game(&mut self) {
-        self.current_game = None;
     }
 
     /// Creates a unique, 6-digit code for use as an Invitation.
@@ -51,12 +46,12 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSession<T> {
         VerificationCodeGenerator::generate()
     }
 
-    /// Returns the configuration that clients can use to subscribe to game change events.
+    /// Returns the configuration that clients can use to subscribe to Game change events.
     pub(crate) fn get_event_plane_config(&self) -> EventPlaneConfig {
         self.event_plane_config.clone()
     }
 
-    /// Creates a new GamingSession instance.
+    /// Creates a new instance.
     pub(crate) fn new(session_owner: PlayerInfo, broker_address: String, broker_port: u16) -> Self {
         Self {
             current_game: None,
@@ -66,10 +61,5 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSession<T> {
             participants: vec![session_owner.clone()],
             session_owner,
         }
-    }
-
-    /// Sets the current Game.
-    pub(crate) fn set_game(&mut self, game: &T) {
-        self.current_game = Some(game.clone());
     }
 }

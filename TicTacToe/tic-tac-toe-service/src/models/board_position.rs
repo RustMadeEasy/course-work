@@ -21,7 +21,7 @@ pub(crate) struct BoardPosition {
 }
 
 impl BoardPosition {
-    /// Creates a new BoardPosition instance.
+    /// Creates a new instance.
     pub(crate) fn new(row: usize, column: usize) -> Self {
         Self { row, column }
     }

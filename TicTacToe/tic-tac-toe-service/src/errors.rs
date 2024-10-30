@@ -29,8 +29,6 @@ pub(crate) enum GameError {
     InvalidBoardPosition,
     /// The specified Invitation Code does not exist 
     InvitationCodeNotFound,
-    /// The Player name is already used by a Player in the Gaming Session
-    NameAlreadyInUseInGamingSession,
     /// The Player's Game Piece has not been selected as yet
     PlayerGamePieceNotSelected,
     /// The specified Player does not exist in the Gaming Session
@@ -47,7 +45,6 @@ impl ResponseError for GameError {
         match *self {
             GameError::GameNotStarted
             | GameError::InvalidBoardPosition
-            | GameError::NameAlreadyInUseInGamingSession
             | GameError::PlayerGamePieceNotSelected => StatusCode::BAD_REQUEST,
 
             GameError::GameHasAlreadyEnded => StatusCode::NOT_ACCEPTABLE,

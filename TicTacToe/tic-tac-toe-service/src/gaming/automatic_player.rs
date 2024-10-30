@@ -31,9 +31,13 @@ static MIN_DELIBERATION_TIME_SECS: usize = 1;
 
 /// AutomaticPlayer can play a game of Tic-Tac-Toe at various skill levels.
 pub(crate) struct AutomaticPlayer<T: GameTrait + Clone + Send + Sync> {
+    /// The ID the Game being played.
     game_id: String,
+    /// Needed to mark T as in use
     phantom_type: PhantomData<T>,
+    /// The Automatic Player's details
     player_info: PlayerInfo,
+    /// The skill level at which the Automatic Player is to play the Game.
     skill_level: AutomaticPlayerSkillLevel,
 }
 
@@ -45,7 +49,7 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
         "Reema".to_string()
     }
 
-    /// Creates a new AutomaticPlayer instance.
+    /// Creates a new instance.
     pub(crate) fn new(game_id: &str, player_info: &PlayerInfo, skill_level: &AutomaticPlayerSkillLevel) -> Self {
         info!("Creating AutomaticPlayer {}", game_id);
         Self {
@@ -197,11 +201,11 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
             debug!("AutomaticPlayer: received session_updated() for session {} and game {}", session.session_id, game.get_id());
 
             match state_change {
-                GamingSessionStateChanges::GameTurnTaken => {
+                // Is it my turn?
+                GamingSessionStateChanges::GameIsReady | GamingSessionStateChanges::GameTurnTaken => {
                     let game_state = game.get_current_game_state();
                     match game_state.play_status {
                         PlayStatus::InProgress => {
-                            // Is it my turn?
                             if let Some(current_player) = game.get_current_player() {
                                 if current_player.player_id == self.player_info.player_id {
                                     self.take_turn(&game, session.session_id.clone()).await;
@@ -212,7 +216,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
                         _ => {}
                     }
                 }
-                GamingSessionStateChanges::GameDeleted | GamingSessionStateChanges::AllPlayersReady | GamingSessionStateChanges::GamingSessionDeleted => {}
+                GamingSessionStateChanges::GameDeleted | GamingSessionStateChanges::GamingSessionDeleted => {}
             }
         }
     }

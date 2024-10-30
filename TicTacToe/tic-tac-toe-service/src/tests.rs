@@ -353,7 +353,7 @@ mod game_play_tests {
         let _ = game.add_player(&player_one);
         let _ = game.add_player(&player_two);
 
-        game.current_player = Some(player_one.clone());
+        game.current_player_id = Some(player_one.clone());
 
         // Let Player One take their turn
         let turn_info = GameTurnParams {
@@ -401,7 +401,7 @@ mod game_play_tests {
         let _ = game.add_player(&player_one);
         let _ = game.add_player(&player_two);
 
-        game.current_player = Some(player_one.clone());
+        game.current_player_id = Some(player_one.clone());
 
         // There should be no moves in the history at this point
         assert_eq!(game.play_history.len(), 0);
@@ -450,16 +450,16 @@ mod game_play_tests {
         let mut game = TicTacToeGame::new(GameMode::TwoPlayers, Uuid::new_v4().to_string().as_str()).unwrap();
         let _ = game.add_player(&player_one);
         let _ = game.add_player(&player_two);
-        
+
         let first_destination = BoardPosition::new(0, 0);
         let second_destination = BoardPosition::new(1, 1);
 
-        let first_player_game_piece = game.current_player.clone().unwrap().game_piece;
+        let first_player_game_piece = game.current_player_id.clone().unwrap().game_piece;
 
         // Let Player One take their turn
         let turn_info = GameTurnParams {
             destination: first_destination.clone(),
-            player_id: game.current_player.clone().unwrap().player_id,
+            player_id: game.current_player_id.clone().unwrap().player_id,
             session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {
@@ -475,12 +475,12 @@ mod game_play_tests {
             first_player_game_piece
         );
 
-        let second_player_game_piece = game.current_player.clone().unwrap().game_piece;
+        let second_player_game_piece = game.current_player_id.clone().unwrap().game_piece;
 
         // Let Player Two take their turn.
         let turn_info = GameTurnParams {
             destination: second_destination.clone(),
-            player_id: game.current_player.clone().unwrap().player_id,
+            player_id: game.current_player_id.clone().unwrap().player_id,
             session_id: "".to_string(),
         };
         match game.take_turn(&turn_info) {

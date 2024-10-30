@@ -15,7 +15,8 @@ pub(crate) mod health;
         Player:    
             Create a Gaming Session
             Subscribe to MQTT
-            Create a Single-Player Game
+            Create Single-Player Game
+            Join Current Game
 
         Player and Automatic Player:
             Take Turn

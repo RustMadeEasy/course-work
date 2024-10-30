@@ -37,7 +37,16 @@ struct GameView: View {
 
     /// Invokes an alert to indicate user is making a move to a location that is already occupied
     @State private var showLocationAlreadyOccupiedError = false
+    
+    // MARK: Initialization
 
+    /// Creates a new instance. The invitation code must be provided when joining an existing Game.
+    public init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {
+        self._gameInfoVM = StateObject(wrappedValue: GameInfoViewModel(localPlayerName: localPlayerName, isTwoPlayer: isTwoPlayer, invitationCode: invitationCode))
+    }
+
+    // MARK: Layout
+    
     /// The Game board.
     var board: some View {
         
@@ -173,85 +182,7 @@ struct GameView: View {
                 }
             }
     }
-
-    /// Creates a new Single-Player Game.
-    private func createSinglePlayerGame() async {
-        
-        self.gameInfoVM.localPlayerInitiatedGamingSession = true
-        self.gameInfoVM.isTwoPlayer = false
-        
-        await self.gameInfoVM.createGamingSession { succeeded, _ in
-            if succeeded {
-                Task {
-                    await self.gameInfoVM.createSinglePlayerGame { succeeded2, _ in
-                        if !succeeded2 {
-                            DispatchQueue.main.async {
-                                self.showGameCreationError = true
-                            }
-                        }
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.showGameCreationError = true
-                }
-            }
-        }
-    }
-        
-    private func createTwoPlayerGame() async {
-        
-        self.gameInfoVM.localPlayerInitiatedGamingSession = true
-        self.gameInfoVM.isTwoPlayer = true    
-
-        await self.gameInfoVM.createGamingSession { succeeded, _ in
-            if succeeded {
-                Task {
-                    await self.gameInfoVM.createTwoPlayerGame { succeeded2, _ in
-                        if succeeded2 {
-                            Task {
-                                await self.gameInfoVM.joinCurrentGame { succeeded3, _ in
-                                    if !succeeded3 {
-                                        DispatchQueue.main.async {
-                                            self.showGameCreationError = true
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            DispatchQueue.main.async {
-                                self.showGameCreationError = true
-                            }
-                        }
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.showGameCreationError = true
-                }
-            }
-        }
-    }
-        
-    /// Joins an existing Gaming Session.
-    private func joinGamingSession() async {
-        
-        let _ = await self.gameInfoVM.joinGamingSession(invitationCode: self.gameInfoVM.invitationCode)
-
-        await self.gameInfoVM.joinCurrentGame { succeeded, error in
-            if !succeeded {
-                DispatchQueue.main.async {
-                    self.showGameCreationError = true
-                }
-            }
-        }
-    }
-        
-    /// Creates a new GameInfoViewModel instance. The invitation code must be provided when joining an existing Game.
-    public init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {
-        self._gameInfoVM = StateObject(wrappedValue: GameInfoViewModel(localPlayerName: localPlayerName, isTwoPlayer: isTwoPlayer, invitationCode: invitationCode))
-    }
-
+    
     /// Section of the View that shows the Game invitation.
     var invitationSection: AnyView {
         
@@ -280,17 +211,125 @@ struct GameView: View {
 
     /// Section of the view holding the Players.
     var playersSection: some View {
-     
+        
         VStack {
-            let playerOne = String(localized: "Player One (X): \(gameInfoVM.getPlayerOne().displayName)")
+            let playerOne = String(localized: "Player One\(self.gamePieceToText(gamePiece: gameInfoVM.getPlayerOne().gamePiece)): \(gameInfoVM.getPlayerOne().displayName)")
             Text(playerOne)
                 .foregroundStyle(Color("AlternateColor").gradient)
                 .bold(gameInfoVM.isPlayerOneCurrentPlayer)
-            let playerTwo = String(localized: "Player Two (O): \(gameInfoVM.getPlayerTwo().displayName)")
+            let playerTwo = String(localized: "Player Two\(self.gamePieceToText(gamePiece: gameInfoVM.getPlayerTwo().gamePiece)): \(gameInfoVM.getPlayerTwo().displayName)")
             Text(playerTwo)
                 .foregroundStyle(Color("AlternateColor").gradient)
                 .bold(gameInfoVM.isPlayerTwoCurrentPlayer)
         }.padding()
+    }
+    
+    /// Horizontal separator.
+    var rowSeparator: some View {
+        Rectangle()
+            .frame(height: GameView.separatorWidth)
+            .foregroundColor(Color("MainColor"))
+    }
+
+    // MARK: Funtionality
+
+    /// Begins a new Single-Player Game.
+    private func createSinglePlayerGame() async {
+        
+        self.gameInfoVM.localPlayerInitiatedGamingSession = true
+        self.gameInfoVM.isTwoPlayer = false
+        
+        await self.gameInfoVM.createGamingSession { succeeded, _ in
+            if succeeded {
+                Task {
+                    await self.gameInfoVM.createSinglePlayerGame { succeeded2, _ in
+                        if succeeded2 {
+                            Task {
+                                await self.gameInfoVM.joinCurrentGame { succeeded3, _ in
+                                    if !succeeded3 {
+                                        DispatchQueue.main.async {
+                                            self.showGameCreationError = true
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            DispatchQueue.main.async {
+                                self.showGameCreationError = true
+                            }
+                        }
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.gameInfoVM.localPlayerInitiatedGamingSession = false
+                    self.gameInfoVM.isTwoPlayer = false
+                    self.showGameCreationError = true
+                }
+            }
+        }
+    }
+        
+    /// Begins a Two-Player Game.
+    private func createTwoPlayerGame() async {
+        
+        self.gameInfoVM.localPlayerInitiatedGamingSession = true
+        self.gameInfoVM.isTwoPlayer = true    
+
+        await self.gameInfoVM.createGamingSession { succeeded, _ in
+            if succeeded {
+                Task {
+                    await self.gameInfoVM.createTwoPlayerGame { succeeded2, _ in
+                        if succeeded2 {
+                            Task {
+                                await self.gameInfoVM.joinCurrentGame { succeeded3, _ in
+                                    if !succeeded3 {
+                                        DispatchQueue.main.async {
+                                            self.showGameCreationError = true
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            DispatchQueue.main.async {
+                                self.showGameCreationError = true
+                            }
+                        }
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.gameInfoVM.localPlayerInitiatedGamingSession = false
+                    self.gameInfoVM.isTwoPlayer = false
+                    self.showGameCreationError = true
+                }
+            }
+        }
+    }
+        
+    private func gamePieceToText(gamePiece: GamePiece) -> String {
+        switch gamePiece {
+        case .o, .x:
+            return " (\(gamePiece.rawValue.uppercased()))"
+        default:
+            return ""
+        }
+    }
+ 
+    /// Joins an existing Gaming Session.
+    private func joinGamingSession() async {
+        
+        await self.gameInfoVM.joinGamingSession(invitationCode: self.gameInfoVM.invitationCode) { succeeded, error in
+            Task {
+                await self.gameInfoVM.joinCurrentGame { succeeded, error in
+                    if !succeeded {
+                        DispatchQueue.main.async {
+                            self.showGameCreationError = true
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// Renders a Game block (game piece holder).
@@ -337,13 +376,6 @@ struct GameView: View {
         }.background(.white)
     }
     
-    /// Horizontal separator.
-    var rowSeparator: some View {
-        Rectangle()
-            .frame(height: GameView.separatorWidth)
-            .foregroundColor(Color("MainColor"))
-    }
-    
     /// Performs a Game move for the specified Player.
     private func takeTurn(position: Position) {
         Task {
@@ -367,6 +399,8 @@ struct GameView: View {
     }
 }
 
+// MARK: Preview generation
+
 #Preview {
-    GameView(localPlayerName: "", isTwoPlayer: false)
+    GameView(localPlayerName: "Player One", isTwoPlayer: false)
 }
