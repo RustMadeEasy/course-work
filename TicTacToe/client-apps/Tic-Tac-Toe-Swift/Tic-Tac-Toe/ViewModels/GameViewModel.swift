@@ -16,8 +16,10 @@ struct Position {
 }
 
 /// Provides control over a Tic-Tac-Toe Game.
-class GameInfoViewModel: ObservableObject {
+class GameViewModel: ObservableObject {
     
+    @Published private var currentPlayer: PlayerInfo?
+
     /// Specifies the locations of the Game pieces
     @Published private var gameBoard: [[GamePiece]] = []
     
@@ -42,26 +44,18 @@ class GameInfoViewModel: ObservableObject {
     /// The code used to invite a new player to the Game.
     @Published var invitationCode: String = ""
     
-    /// Indicates whether Player One is the current player.
-    @Published var isPlayerOneCurrentPlayer: Bool = false
-    
-    /// Indicates whether Player Two is the current player.
-    @Published var isPlayerTwoCurrentPlayer: Bool = false
-    
-    /// Name of the local Player, i.e. the Player using this app instance.
+    /// Indicates that this is a Two-Player Game.
     @Published var isTwoPlayer: Bool = true
     
+    // TODO: JD: we also need localPlayerInitiatedGame for when we support rematch within the same Gaming Session.
     /// Indicates that this client app instance is the one that started the Gaming Session.
     @Published var localPlayerInitiatedGamingSession: Bool = false
     
     /// ID of the local Player, i.e. the Player using this app instance.
     @Published var localPlayer: PlayerInfo
 
-    /// Indicates whether the local Player is the one who takes their turn firstly.
-    @Published var playerOneId: String = ""
-    
     /// ID of the local Player, i.e. the Player using this app instance.
-    @Published var otherPlayer: PlayerInfo
+    @Published var otherPlayer: PlayerInfo?
 
     /// If/when the Game has been won, winningPlayerName contains the name of the player who won the Game.
     @Published private var winningPlayerName: String?
@@ -84,25 +78,48 @@ class GameInfoViewModel: ObservableObject {
     }
     
     /// Returns the first Player.
-    func getPlayerOne() -> PlayerInfo {
-        if self.playerOneId == self.localPlayer.playerId {
+    func getPlayerOne() -> PlayerInfo? {
+        if self.localPlayer.gamePiece == .x {
             self.localPlayer
-        } else {
+        } else if self.otherPlayer?.gamePiece == .x {
             self.otherPlayer
+        } else {
+            nil
         }
     }
 
     /// Returns the second Player.
-    func getPlayerTwo() -> PlayerInfo {
-        if self.playerOneId != self.localPlayer.playerId {
+    func getPlayerTwo() -> PlayerInfo? {
+        if self.localPlayer.gamePiece == .o {
             self.localPlayer
-        } else {
+        } else if self.otherPlayer?.gamePiece == .o {
             self.otherPlayer
+        } else {
+            nil
         }
     }
 }
 
-extension GameInfoViewModel {
+extension GameViewModel {
+    
+    func isPlayerOneCurrentPlayer() -> Bool {
+        self.getPlayerOne()?.playerId == self.currentPlayer?.playerId
+    }
+    
+    func isPlayerTwoCurrentPlayer() -> Bool {
+        self.getPlayerTwo()?.playerId == self.currentPlayer?.playerId
+    }
+    
+    /// When a Game has been won, this function determines whether the specified position (block) represents a position that won the Game.
+    func isWinningPosition(pos: Position) -> Bool {
+        if let winningLocations = self.winningLocations {
+            return winningLocations.contains(where: { position in
+                position.column == pos.column && position.row == pos.row
+            })
+        } else {
+            return false
+        }
+    }
     
     /// Clears all of the variables that must be cleared in order to start a new Game.
     private func prepareForNewGame() {
@@ -113,8 +130,6 @@ extension GameInfoViewModel {
         hasGameStarted = false
         localPlayerInitiatedGamingSession = false
         invitationCode = ""
-        isPlayerOneCurrentPlayer = false
-        isPlayerTwoCurrentPlayer = false
         winningPlayerName = nil
         winningLocations = nil
     }
@@ -138,7 +153,7 @@ extension GameInfoViewModel {
     }
 }
 
-extension GameInfoViewModel {
+extension GameViewModel {
     
     func createSinglePlayerGame(completion: @escaping ((_ succeeded: Bool, _ error: Error?) -> Void)) async {
         
@@ -275,17 +290,6 @@ extension GameInfoViewModel {
         }
     }
     
-    /// When a Game has been won, this function determines whether the specified position (block) represents a position that won the Game.
-    func isWinningPosition(pos: Position) -> Bool {
-        if let winningLocations = self.winningLocations {
-            return winningLocations.contains(where: { position in
-                position.column == pos.column && position.row == pos.row
-            })
-        } else {
-            return false
-        }
-    }
-    
     /// Retrieves new game state info from our Tic Tac Toe service.
     func refreshGameInfo() {
         Task {
@@ -297,18 +301,9 @@ extension GameInfoViewModel {
     }
     
     private func setupPlayers(newGameInfo: GameCreationResponse) {
-        
-        self.localPlayer = newGameInfo.gameInfo.players.first(where: { it in
-            it.playerId == self.localPlayer.playerId
-        })!
-        
-        if let otherPlayer = newGameInfo.gameInfo.players.first(where: { it in
-            it.playerId != self.localPlayer.playerId
-        }) {
-            self.otherPlayer = otherPlayer
-        }
-
-        self._playerOneId = Published(wrappedValue: newGameInfo.gameInfo.players.first!.playerId)
+        self._currentPlayer = Published(wrappedValue: newGameInfo.gameInfo.currentPlayer)
+        self._localPlayer = Published(wrappedValue: newGameInfo.initiatingPlayer)
+        self._otherPlayer = Published(wrappedValue: newGameInfo.otherPlayer)
     }
 
     /// Performs a Game move for the specified Player.
@@ -344,7 +339,12 @@ extension GameInfoViewModel {
             // Setup MQTT listener
             self.gameInfoReceiver = GameInfoReceiver(eventPlaneConfig: info.eventPlaneConfig, delegate: self)
             
-            completion()
+            Task {
+                // Wait for MQTT to be connected. Otherwise, we miss important the onAllPlayersReady event.
+                while self.gameInfoReceiver!.isConnecting {}
+                // TODO: JD: provide a timeout
+                completion()
+            }
         }
     }
 
@@ -353,15 +353,14 @@ extension GameInfoViewModel {
         
         DispatchQueue.main.async {
             
+            self.currentPlayer = turnResult.currentPlayer
+            
             self.gameBoard = turnResult.newGameState.gameBoard
             
             self.gameEnded = turnResult.newGameState.playStatus == .endedInStalemate || turnResult.newGameState.playStatus == .endedInWin
             
             self.hasGameStarted = turnResult.newGameState.playStatus != .notStarted
             
-            self._isPlayerOneCurrentPlayer = Published(wrappedValue: self.hasGameStarted && (turnResult.currentPlayer?.playerId == self.playerOneId))
-            self._isPlayerTwoCurrentPlayer = Published(wrappedValue: self.hasGameStarted && (turnResult.currentPlayer?.playerId != self.playerOneId))
-
             // winningPlayerName and winningLocations
             if turnResult.newGameState.playStatus == .endedInWin {
                 
@@ -383,7 +382,7 @@ extension GameInfoViewModel {
 }
 
 /// GameInfoReceiverDelegate implementation
-extension GameInfoViewModel: GameInfoReceiverDelegate {
+extension GameViewModel: GameInfoReceiverDelegate {
         
     func onAllPlayersReady() {
 

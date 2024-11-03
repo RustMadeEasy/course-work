@@ -18,7 +18,7 @@ struct GameView: View {
     static let separatorWidth = 2.0
     
     /// Wraps our Tic-Tac-Toe API calls and provides the local game state
-    @StateObject private var gameInfoVM: GameInfoViewModel
+    @StateObject private var gameInfoVM: GameViewModel
 
     /// Invokes the 'game creation error' alert
     @State private var showGameCreationError = false
@@ -42,7 +42,7 @@ struct GameView: View {
 
     /// Creates a new instance. The invitation code must be provided when joining an existing Game.
     public init(localPlayerName: String, isTwoPlayer: Bool, invitationCode: String = "") {
-        self._gameInfoVM = StateObject(wrappedValue: GameInfoViewModel(localPlayerName: localPlayerName, isTwoPlayer: isTwoPlayer, invitationCode: invitationCode))
+        self._gameInfoVM = StateObject(wrappedValue: GameViewModel(localPlayerName: localPlayerName, isTwoPlayer: isTwoPlayer, invitationCode: invitationCode))
     }
 
     // MARK: Layout
@@ -167,7 +167,7 @@ struct GameView: View {
                     okText
                 }
             }
-            .alert(String(localized: "It is currently time for '\(self.gameInfoVM.otherPlayer.displayName)' to take their turn."), isPresented: $showWrongTurnError ) {
+            .alert(String(localized: "It is currently time for '\(self.gameInfoVM.otherPlayer?.displayName ?? "")' to take their turn."), isPresented: $showWrongTurnError ) {
                 Button() {
                     showWrongTurnError = false
                 } label: {
@@ -213,14 +213,14 @@ struct GameView: View {
     var playersSection: some View {
         
         VStack {
-            let playerOne = String(localized: "Player One\(self.gamePieceToText(gamePiece: gameInfoVM.getPlayerOne().gamePiece)): \(gameInfoVM.getPlayerOne().displayName)")
+            let playerOne = String(localized: "Player One\(self.gamePieceToText(gamePiece: gameInfoVM.getPlayerOne()?.gamePiece ?? .unselected)): \(gameInfoVM.getPlayerOne()?.displayName ?? "")")
             Text(playerOne)
                 .foregroundStyle(Color("AlternateColor").gradient)
-                .bold(gameInfoVM.isPlayerOneCurrentPlayer)
-            let playerTwo = String(localized: "Player Two\(self.gamePieceToText(gamePiece: gameInfoVM.getPlayerTwo().gamePiece)): \(gameInfoVM.getPlayerTwo().displayName)")
+                .bold(gameInfoVM.isPlayerOneCurrentPlayer())
+            let playerTwo = String(localized: "Player Two\(self.gamePieceToText(gamePiece: gameInfoVM.getPlayerTwo()?.gamePiece ?? .unselected)): \(gameInfoVM.getPlayerTwo()?.displayName ?? "")")
             Text(playerTwo)
                 .foregroundStyle(Color("AlternateColor").gradient)
-                .bold(gameInfoVM.isPlayerTwoCurrentPlayer)
+                .bold(gameInfoVM.isPlayerTwoCurrentPlayer())
         }.padding()
     }
     
@@ -236,11 +236,10 @@ struct GameView: View {
     /// Begins a new Single-Player Game.
     private func createSinglePlayerGame() async {
         
-        self.gameInfoVM.localPlayerInitiatedGamingSession = true
-        self.gameInfoVM.isTwoPlayer = false
-        
         await self.gameInfoVM.createGamingSession { succeeded, _ in
             if succeeded {
+                self.gameInfoVM.localPlayerInitiatedGamingSession = true
+                self.gameInfoVM.isTwoPlayer = false
                 Task {
                     await self.gameInfoVM.createSinglePlayerGame { succeeded2, _ in
                         if succeeded2 {
@@ -273,11 +272,10 @@ struct GameView: View {
     /// Begins a Two-Player Game.
     private func createTwoPlayerGame() async {
         
-        self.gameInfoVM.localPlayerInitiatedGamingSession = true
-        self.gameInfoVM.isTwoPlayer = true    
-
         await self.gameInfoVM.createGamingSession { succeeded, _ in
             if succeeded {
+                self.gameInfoVM.localPlayerInitiatedGamingSession = true
+                self.gameInfoVM.isTwoPlayer = true
                 Task {
                     await self.gameInfoVM.createTwoPlayerGame { succeeded2, _ in
                         if succeeded2 {

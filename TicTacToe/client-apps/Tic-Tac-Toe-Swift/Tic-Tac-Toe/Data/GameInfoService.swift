@@ -25,7 +25,7 @@ enum GameInfoManagerError: Error {
 /// Performs all access to our Tic-Tac-Toe API.
 class GameInfoService {
 
-    /// Creates a new Gaming Session. Returns the Game Info.
+    /// Creates a new Gaming Session. Returns the Session Creation Result.
     static func createGamingSession(sessionOwnerDisplayName: String) async -> GameInfoServiceResult {
 
         let params = NewGamingSessionParams(sessionOwnerDisplayName: sessionOwnerDisplayName)

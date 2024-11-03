@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3D07BB5A2BB7F57F000273A4 /* GameInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D07BB592BB7F57F000273A4 /* GameInfoViewModel.swift */; };
+		3D07BB5A2BB7F57F000273A4 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D07BB592BB7F57F000273A4 /* GameViewModel.swift */; };
 		3D385C402BE2211600A22674 /* OpenAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3D385C3F2BE2211600A22674 /* OpenAPIClient */; };
 		3D5AD6BF2BE3C53500197B46 /* OpenAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3D5AD6BE2BE3C53500197B46 /* OpenAPIClient */; };
 		3D7316292BAF78A000B16F80 /* OpenAPIClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3D7316282BAF78A000B16F80 /* OpenAPIClient */; };
@@ -85,7 +85,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3D07BB592BB7F57F000273A4 /* GameInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameInfoViewModel.swift; sourceTree = "<group>"; };
+		3D07BB592BB7F57F000273A4 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
 		3D7316362BAFCF3100B16F80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3DACB3442BB1115100BE6BEA /* EnterInvitationCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterInvitationCodeView.swift; sourceTree = "<group>"; };
 		3DB398A92BAED38C005A1F6F /* Tic-Tac-Toe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tic-Tac-Toe.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -179,7 +179,7 @@
 		3D07BB582BB7F4C7000273A4 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				3D07BB592BB7F57F000273A4 /* GameInfoViewModel.swift */,
+				3D07BB592BB7F57F000273A4 /* GameViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -387,7 +387,7 @@
 				3DFB83D32BB56FD60093B6D8 /* ClipboardHelper.swift in Sources */,
 				3DB398C22BAED415005A1F6F /* GameInfoService.swift in Sources */,
 				3DB398C32BAED415005A1F6F /* StartGameView.swift in Sources */,
-				3D07BB5A2BB7F57F000273A4 /* GameInfoViewModel.swift in Sources */,
+				3D07BB5A2BB7F57F000273A4 /* GameViewModel.swift in Sources */,
 				7A6A7F8C2C840996004E0622 /* GameInfoReceiver.swift in Sources */,
 				3DB398AD2BAED38C005A1F6F /* Tic_Tac_ToeApp.swift in Sources */,
 				3DB398C52BAED415005A1F6F /* GameView.swift in Sources */,
