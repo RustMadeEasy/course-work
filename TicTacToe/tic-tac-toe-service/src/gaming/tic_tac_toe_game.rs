@@ -237,4 +237,8 @@ impl GameTrait for TicTacToeGame {
 
         Ok(final_board_state.clone())
     }
+
+    fn get_players(&self) -> Vec<PlayerInfo> {
+        self.players.clone()
+    }
 }

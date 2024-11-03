@@ -23,9 +23,6 @@ pub(crate) trait GameTrait: Sized {
     /// Property accessor for the current state of the Game.
     fn get_current_game_state(&self) -> GameState;
 
-    /// Returns the number of Players.
-    fn get_player_count(&self) -> i8;
-
     /// Returns the Player who can currently make a Game move.
     fn get_current_player(&self) -> Option<PlayerInfo>;
 
@@ -35,11 +32,17 @@ pub(crate) trait GameTrait: Sized {
     /// Property accessor for the Game ID.
     fn get_id(&self) -> String;
 
+    /// Returns the number of Players.
+    fn get_player_count(&self) -> i8;
+
     /// Property accessor for the Game Play History.
     fn get_play_history(&self) -> Vec<GameState>;
 
     /// Property accessor for the specified Player.
     fn get_player_info_by_id(&self, player_id: impl Into<String>) -> Result<PlayerInfo, GameError>;
+
+    /// Property accessor for the list of Players.
+    fn get_players(&self) -> Vec<PlayerInfo>;
 
     /// Property accessor for the date/time of the Game's latest move.
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>>;
