@@ -301,9 +301,16 @@ extension GameViewModel {
     }
     
     private func setupPlayers(newGameInfo: GameCreationResponse) {
+        
         self._currentPlayer = Published(wrappedValue: newGameInfo.gameInfo.currentPlayer)
-        self._localPlayer = Published(wrappedValue: newGameInfo.initiatingPlayer)
-        self._otherPlayer = Published(wrappedValue: newGameInfo.otherPlayer)
+
+        if self.localPlayerInitiatedGamingSession {
+            self._localPlayer = Published(wrappedValue: newGameInfo.initiatingPlayer)
+            self._otherPlayer = Published(wrappedValue: newGameInfo.otherPlayer)
+        } else {
+            self._localPlayer = Published(wrappedValue: newGameInfo.otherPlayer!)
+            self._otherPlayer = Published(wrappedValue: newGameInfo.initiatingPlayer)
+        }
     }
 
     /// Performs a Game move for the specified Player.
@@ -386,7 +393,7 @@ extension GameViewModel: GameInfoReceiverDelegate {
         
     func onAllPlayersReady() {
 
-        if self.localPlayerInitiatedGamingSession {
+//        if self.localPlayerInitiatedGamingSession {
             Task {
                 let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
                 if let gameCreationResult = result.gameCreationResult {
@@ -396,12 +403,13 @@ extension GameViewModel: GameInfoReceiverDelegate {
                     }
                 }
             }
-        } else {
-            DispatchQueue.main.async {
-                self.refreshGameInfo()
-                self._hasGameStarted = Published(wrappedValue: true)
-            }
-        }
+//        }
+//        else {
+//            DispatchQueue.main.async {
+//                self.refreshGameInfo()
+//                self._hasGameStarted = Published(wrappedValue: true)
+//            }
+//        }
     }
 
     func onGameDeleted() {

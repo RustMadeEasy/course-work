@@ -26,6 +26,12 @@ class GameInfoReceiver {
     private var delegate: GameInfoReceiverDelegate!
     private var eventPlaneConfig: EventPlaneConfig
     
+    public var isConnecting: Bool {
+        get {
+            self.client.isConnecting
+        }
+    }
+    
     private var topicGameDeleted: String!
     private var topicGameEndedInStalemate: String!
     private var topicGameEndedInWin: String!
@@ -39,7 +45,6 @@ class GameInfoReceiver {
         prebuildTopics()
         self.client = setupMqttClient(eventPlaneConfig: eventPlaneConfig)
     }
-    
 }
 
 extension GameInfoReceiver {
