@@ -411,7 +411,8 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
 
             let session_copy = session.clone();
 
-            // Release the session mutex before posting the GameIsReady event.
+            // Release the session mutex before posting the GameIsReady event so that clients can 
+            // access the latest Session and Game info to complete their Game setup.
             drop(session);
 
             self.notify_observers_of_game_change(GamingSessionStateChanges::GameIsReady, &session_copy, &game).await;
