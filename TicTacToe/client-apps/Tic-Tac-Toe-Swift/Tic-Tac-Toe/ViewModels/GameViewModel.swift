@@ -25,7 +25,7 @@ class GameViewModel: ObservableObject {
     
     /// Indicates whether the Game has ended.
     @Published var gameEnded: Bool = false
-    
+
     /// Remembers the ID of the Game. This is used for subsequent cals to the GameInfoService.
     @Published private var gameId: String = ""
     
@@ -77,7 +77,7 @@ class GameViewModel: ObservableObject {
                                       playerId: "")
     }
     
-    /// Returns the first Player.
+    /// Returns the first Player. By convention, Player One uses X.
     func getPlayerOne() -> PlayerInfo? {
         if self.localPlayer.gamePiece == .x {
             self.localPlayer
@@ -88,7 +88,7 @@ class GameViewModel: ObservableObject {
         }
     }
 
-    /// Returns the second Player.
+    /// Returns the second Player. By convention, Player Two uses O.
     func getPlayerTwo() -> PlayerInfo? {
         if self.localPlayer.gamePiece == .o {
             self.localPlayer
@@ -348,8 +348,11 @@ extension GameViewModel {
             
             Task {
                 // Wait for MQTT to be connected. Otherwise, we miss important the onAllPlayersReady event.
-                while self.gameInfoReceiver!.isConnecting {}
-                // TODO: JD: provide a timeout
+                while self.gameInfoReceiver!.isConnecting {
+                    // TODO: JD: provide a timeout
+                }
+                // Also, wait another 1/4 second for the MQTT client to settle
+                try await Task.sleep(nanoseconds: 1000 * 1000 * 250)
                 completion()
             }
         }
@@ -393,23 +396,17 @@ extension GameViewModel: GameInfoReceiverDelegate {
         
     func onAllPlayersReady() {
 
-//        if self.localPlayerInitiatedGamingSession {
-            Task {
-                let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
-                if let gameCreationResult = result.gameCreationResult {
-                    DispatchQueue.main.async {
-                        self.setupPlayers(newGameInfo: gameCreationResult)
-                        self.updateGameInfo(turnResult: TurnResponse(currentPlayer: gameCreationResult.gameInfo.currentPlayer, newGameState: gameCreationResult.gameInfo.gameState))
-                    }
+        self._hasGameStarted = Published(wrappedValue: true)
+        
+        Task {
+            let result = await GameInfoService.getSessionCurrentGame(sessionId: self.gamingSessionId)
+            if let gameCreationResult = result.gameCreationResult {
+                DispatchQueue.main.async {
+                    self.setupPlayers(newGameInfo: gameCreationResult)
+                    self.updateGameInfo(turnResult: TurnResponse(currentPlayer: gameCreationResult.gameInfo.currentPlayer, newGameState: gameCreationResult.gameInfo.gameState))
                 }
             }
-//        }
-//        else {
-//            DispatchQueue.main.async {
-//                self.refreshGameInfo()
-//                self._hasGameStarted = Published(wrappedValue: true)
-//            }
-//        }
+        }
     }
 
     func onGameDeleted() {
