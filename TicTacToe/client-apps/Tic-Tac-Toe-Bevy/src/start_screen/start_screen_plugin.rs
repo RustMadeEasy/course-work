@@ -58,7 +58,7 @@ mod functionality {
 
     use crate::shared::app_mode::AppMode;
     use crate::shared::app_state::AppStateResource;
-    use crate::shared::local_models::local_game_state::LocalGameStateResource;
+    use crate::shared::game_state_resource::GameStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
     use crate::start_screen::start_screen_plugin::{ButtonPurpose, PlayerNameLabelComponent};
 
@@ -66,6 +66,7 @@ mod functionality {
     #[allow(clippy::type_complexity)] // The query is complex by necessity.
     pub(super) fn button_interaction(
         mut app_state: ResMut<AppStateResource>,
+        mut game_state: ResMut<GameStateResource>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
         mut interactions: Query<
             (
@@ -95,19 +96,19 @@ mod functionality {
                         // Which button was pressed?
                         match button_info.get_purpose() {
                             ButtonPurpose::AcceptInvitation => {
-                                app_state.local_player_initiated_game = false;
+                                app_state.local_player_initiated_gaming_session = false;
                                 next_state.set(AppMode::EnterInvitation);
                             }
                             ButtonPurpose::StartTwoPlayerGame => {
                                 // Reflect the fact that this local Player is the one who initiated the Game.
-                                app_state.local_player_initiated_game = true;
-                                app_state.is_two_player_game = true;
+                                app_state.local_player_initiated_gaming_session = true;
+                                game_state.is_two_player_game = true;
                                 next_state.set(AppMode::GamePlay);
                             }
                             ButtonPurpose::StartSinglePlayerGame => {
                                 // Reflect the fact that this local Player is the one who initiated the Game.
-                                app_state.local_player_initiated_game = true;
-                                app_state.is_two_player_game = false;
+                                app_state.local_player_initiated_gaming_session = true;
+                                game_state.is_two_player_game = false;
                                 next_state.set(AppMode::GamePlay);
                             }
                         }
@@ -127,7 +128,7 @@ mod functionality {
     /// Clears the relevant values of the local Game state.
     pub(super) fn reset_game_play(
         mut app_state: ResMut<AppStateResource>,
-        mut local_game_state: ResMut<LocalGameStateResource>,
+        mut local_game_state: ResMut<GameStateResource>,
     ) {
         // Forget everything except for the local Player's chosen name.
         let local_player_name = app_state.local_player.display_name.clone();

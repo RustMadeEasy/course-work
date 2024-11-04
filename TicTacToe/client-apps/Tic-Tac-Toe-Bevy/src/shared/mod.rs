@@ -1,15 +1,15 @@
+//  Tic-Tac-Toe Bevy Client App
+//
+//  © 2024 Rust Made Easy. All rights reserved.
+//  @author JoelDavisEngineering@Gmail.com
+
 use bevy::prelude::{Color, Commands, Component, Entity, Query, With};
 use std::sync::LazyLock;
 
 pub(crate) mod app_mode;
 pub(crate) mod app_state;
-pub(crate) mod local_models;
-pub(crate) mod local_service_client;
-
-//  Tic-Tac-Toe Bevy Client App
-//
-//  © 2024 Rust Made Easy. All rights reserved.
-//  @author JoelDavisEngineering@Gmail.com
+pub(crate) mod game_state_resource;
+pub(crate) mod api_helpers;
 
 pub(crate) static BACKGROUND_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::hex("521c93").unwrap() });
 pub(crate) static FOREGROUND_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::hex("ff7e79").unwrap() });

@@ -170,7 +170,7 @@ mod ui {
         //
 
         // Ensure a good state from which to set the Invitation Code
-        app_state.local_player_initiated_game = false;
+        app_state.local_player_initiated_gaming_session = false;
         app_state.invitation_code = "".to_string();
 
         // TODO: JD: localize the text

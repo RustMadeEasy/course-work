@@ -3,14 +3,13 @@
 //  © 2024 Rust Made Easy. All rights reserved.
 //  @author JoelDavisEngineering@Gmail.com
 
-use bevy::app::PluginGroupBuilder;
-use bevy::math::Vec2;
-use bevy::prelude::{Component, Event, PluginGroup};
-
 use crate::game_play_screen::info_panel_plugin::InfoPanelPlugin;
 use crate::game_play_screen::local_game_play_plugin::LocalGamePlayPlugin;
 use crate::game_play_screen::tiles_plugin::TilesPlugin;
-use crate::shared::local_models::local_grid_position::LocalGridPosition;
+use bevy::app::PluginGroupBuilder;
+use bevy::math::Vec2;
+use bevy::prelude::{Component, Event, PluginGroup};
+use tic_tac_toe_rust_client_sdk::models::BoardPosition;
 
 pub(super) mod info_panel_plugin;
 pub(super) mod local_game_play_plugin;
@@ -70,5 +69,5 @@ impl Into<Vec2> for Point {
 #[derive(Event)]
 pub(super) struct TilePressedEvent {
     /// Indicates the tile's location on the game board.
-    pub(super) grid_position: LocalGridPosition,
+    pub(super) grid_position: BoardPosition,
 }

@@ -15,5 +15,6 @@ tic_tac_toe_rust_client_sdk = { path = "../../client-sdks/tic-tac-toe-rust-clien
 
 # *** Outside dependencies ***
 bevy = "0.13.2"
+function_name = "0.3.0"
 lazy_static = "1.4.0"
 uuid = { version = "1.8.0", features = ["v4"] }

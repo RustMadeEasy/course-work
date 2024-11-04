@@ -3,6 +3,13 @@
 //  © 2024 Rust Made Easy. All rights reserved.
 //  @author JoelDavisEngineering@Gmail.com
 
+use crate::game_play_screen::tile_components::{
+    TileDetailsComponent, TileHighlightComponent, TileLabelComponent,
+};
+use crate::game_play_screen::{OnGamePlayScreen, Point, TilePressedEvent, GRID_COLUMNS, GRID_ROWS};
+use crate::shared::app_mode::AppMode;
+use crate::shared::game_state_resource::GameStateResource;
+use crate::shared::{BACKGROUND_COLOR, FOREGROUND_COLOR};
 use bevy::a11y::accesskit::Size;
 use bevy::app::{App, FixedUpdate};
 use bevy::input::common_conditions::input_pressed;
@@ -15,15 +22,7 @@ use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy::text::{Text, Text2dBundle};
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
-
-use crate::game_play_screen::tile_components::{
-    TileDetailsComponent, TileHighlightComponent, TileLabelComponent,
-};
-use crate::game_play_screen::{OnGamePlayScreen, Point, TilePressedEvent, GRID_COLUMNS, GRID_ROWS};
-use crate::shared::app_mode::AppMode;
-use crate::shared::local_models::local_game_state::LocalGameStateResource;
-use crate::shared::local_models::local_grid_position::LocalGridPosition;
-use crate::shared::{BACKGROUND_COLOR, FOREGROUND_COLOR};
+use tic_tac_toe_rust_client_sdk::models::BoardPosition;
 
 const TILE_FONT_SIZE: f32 = 44_f32;
 const TILE_SIDE: f32 = 100_f32;
@@ -105,7 +104,7 @@ impl TilesPlugin {
     /// Provides a backing visual flare (highlight) to the Tiles that represent the TicTacToe
     /// 3-in-a-row winning combination.
     fn highlight_winning_tiles(
-        local_game_state: Res<LocalGameStateResource>,
+        local_game_state: Res<GameStateResource>,
         mut tile_highlights: Query<
             (&mut Visibility, &TileHighlightComponent),
             With<TileHighlightComponent>,
@@ -117,7 +116,7 @@ impl TilesPlugin {
             return;
         }
 
-        if let Some(winning_locations) = local_game_state.get_winning_location() {
+        if let Some(winning_locations) = &local_game_state.winning_locations {
             for (mut visibility, tile_info) in tile_highlights.iter_mut() {
                 if winning_locations.contains(&tile_info.grid_position) {
                     *visibility = Visibility::Visible;
@@ -128,7 +127,7 @@ impl TilesPlugin {
 
     /// Updates the Tile's label with the visual representation of its Game Piece (if any).
     fn update_tiles(
-        local_game_state: Res<LocalGameStateResource>,
+        local_game_state: Res<GameStateResource>,
         mut label_query: Query<(&mut Text, &TileLabelComponent), With<TileLabelComponent>>,
     ) {
         //
@@ -139,7 +138,7 @@ impl TilesPlugin {
 
         for (mut label, tile_info) in label_query.iter_mut() {
             let game_piece = local_game_state.get_game_piece_at_placement(&tile_info.grid_position);
-            label.sections[0].value = game_piece.into();
+            label.sections[0].value = game_piece.to_string();
         }
     }
 }
@@ -175,7 +174,7 @@ impl TilesPlugin {
                         (row as f32 * TILE_SIDE) + offset_y,
                     );
 
-                    let pos = LocalGridPosition::new(2 - row, col);
+                    let pos = BoardPosition::new(col as i32, (2 - row) as i32);
 
                     // The Tile
                     let tile_bundle = MaterialMesh2dBundle {

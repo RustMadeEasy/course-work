@@ -67,7 +67,7 @@ mod functionality {
     };
     use crate::shared::app_mode::AppMode;
     use crate::shared::app_state::AppStateResource;
-    use crate::shared::local_models::local_game_state::LocalGameStateResource;
+    use crate::shared::game_state_resource::GameStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
 
     /// Provides button functionality, including state changes as well as response to presses.
@@ -99,9 +99,10 @@ mod functionality {
     pub(super) fn set_status_text(
         mut event_writer: EventWriter<SetStatusTextEvent>,
         app_state: Res<AppStateResource>,
+        local_game_state: Res<GameStateResource>,
         _window_query: Query<&Window, With<PrimaryWindow>>,
     ) {
-        if app_state.local_player_initiated_game && app_state.is_two_player_game {
+        if app_state.local_player_initiated_gaming_session && local_game_state.is_two_player_game {
             let event = SetStatusTextEvent::new_with_duration(
                 "Please send the Invitation Code to another player so they can join the game...",
                 Duration::from_secs(30),
@@ -113,13 +114,13 @@ mod functionality {
     /// Sets the text of the info panel's top row, based on the current state of the Game.
     pub(super) fn update_info_panel_top(
         app_state: Res<AppStateResource>,
-        local_game_state: Res<LocalGameStateResource>,
+        local_game_state: Res<GameStateResource>,
         mut text_query: Query<&mut Text, With<InfoPanelUiComponentTop>>,
     ) {
         if local_game_state.is_changed() {
             if let Ok(mut text_sections) = text_query.get_single_mut() {
                 // Show the Invitation Code instructions until the Game has started
-                if app_state.local_player_initiated_game && !local_game_state.has_game_started() {
+                if app_state.local_player_initiated_gaming_session && !local_game_state.has_game_started {
                     text_sections.sections[0].value = format!(
                         "Hi {}. Please send the Invitation Code: {} to another player so they can join...",
                         app_state.local_player.display_name, app_state.invitation_code.clone()
@@ -134,13 +135,13 @@ mod functionality {
     /// Sets the text of the info panel's bottom row, based on the current state of the Game.
     pub(super) fn update_info_panel_bottom(
         app_state: Res<AppStateResource>,
-        local_game_state: Res<LocalGameStateResource>,
+        local_game_state: Res<GameStateResource>,
         mut bottom_text_query: Query<&mut Text, With<InfoPanelUiComponentBottom>>,
     ) {
         if local_game_state.is_changed() {
             if let Ok(mut text_sections) = bottom_text_query.get_single_mut() {
                 // Hide the other Player's section until the Game has started
-                if local_game_state.has_game_started() {
+                if local_game_state.has_game_started {
                     text_sections.sections[0].value = app_state
                         .other_player
                         .clone()
