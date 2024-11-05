@@ -17,7 +17,7 @@ use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemC
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetLatestGameTurnError;
-use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error, ResponseContent};
+use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
 use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GamePiece, GameTurnParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
 
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
@@ -147,6 +147,13 @@ impl LocalGamePlayPlugin {
         }
     }
 
+    fn create_two_player_game(
+        app_state: &mut AppStateResource,
+        local_game_state: &mut GameStateResource,
+    ) {
+        
+    }
+
     fn create_single_player_game(
         app_state: &mut AppStateResource,
         local_game_state: &mut GameStateResource,
@@ -165,6 +172,7 @@ impl LocalGamePlayPlugin {
         };
 
         *app_state = gaming_session_info.into();
+        app_state.invitation_code = "".to_string(); // Not needed for Single-Player Game.
 
         // TODO: JD: setup MQTT
 
@@ -172,15 +180,13 @@ impl LocalGamePlayPlugin {
         match tic_tac_toe_api::create_single_player_game(&SDK_CONFIG, &app_state.gaming_session_id, params) {
             Ok(new_game_state) => {
                 app_state.local_player_initiated_gaming_session = true;
-                local_game_state.is_two_player_game = false;
-                local_game_state.current_game_state = new_game_state.game_info.game_state;
-                local_game_state.game_id = new_game_state.game_info.game_id;
                 app_state.other_player = new_game_state.other_player.unwrap_or_default();
-                // local_game_state. = new_game_state;
-                // local_game_state = new_game_state;
-                // local_game_state = new_game_state;
-                // local_game_state = new_game_state;
-                // local_game_state = new_game_state;
+                local_game_state.current_game_state = new_game_state.game_info.game_state.clone();
+                local_game_state.current_player = new_game_state.game_info.current_player.clone().unwrap_or_default();
+                local_game_state.game_id = new_game_state.game_info.game_id;
+                local_game_state.has_game_ended = (new_game_state.game_info.game_state.play_status == PlayStatus::EndedInWin) || (new_game_state.game_info.game_state.play_status == PlayStatus::EndedInStalemate);
+                local_game_state.has_game_started = new_game_state.game_info.game_state.play_status == PlayStatus::InProgress;
+                local_game_state.is_two_player_game = false;
             }
             Err(error) => {}
         }
@@ -200,8 +206,12 @@ impl LocalGamePlayPlugin {
             //
 
             // TODO: JD: need to handle both Single-Player and Two-Player
-
-            Self::create_single_player_game(&mut app_state, &mut local_game_state);
+            
+            match local_game_state.is_two_player_game {
+                true => Self::create_two_player_game(&mut app_state, &mut local_game_state),
+                false => Self::create_single_player_game(&mut app_state, &mut local_game_state),
+            }
+            
         } else {
             //
 
@@ -257,8 +267,8 @@ impl LocalGamePlayPlugin {
 
     /// Pulls the latest Game state from the GameStateCache.
     fn refresh_game_state(
-        mut app_state: ResMut<AppStateResource>,
-        mut local_game_state: ResMut<GameStateResource>,
+        app_state: ResMut<AppStateResource>,
+        local_game_state: ResMut<GameStateResource>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
     ) {
         //
