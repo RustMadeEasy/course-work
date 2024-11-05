@@ -18,6 +18,7 @@ struct Position {
 /// Provides control over a Tic-Tac-Toe Game.
 class GameViewModel: ObservableObject {
     
+    /// The Player who can take the next turn.
     @Published private var currentPlayer: PlayerInfo?
 
     /// Specifies the locations of the Game pieces
