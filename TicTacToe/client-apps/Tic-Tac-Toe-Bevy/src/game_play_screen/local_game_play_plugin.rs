@@ -16,9 +16,8 @@ use bevy::log::error;
 use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, NextState, OnEnter, OnExit, Plugin, Res, ResMut, Update};
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
-use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetLatestGameTurnError;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
-use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GamePiece, GameTurnParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus, PlayerInfo};
+use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GamePiece, GameTurnParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
 
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
 pub(super) struct LocalGamePlayPlugin;
@@ -97,7 +96,7 @@ impl LocalGamePlayPlugin {
 
             // Ignore clicks if it is not the local Player's turn.
             if let Some(current_player) = local_game_state.current_player.clone() {
-                if current_player.player_id != app_state.local_player.player_id {
+                if app_state.local_player.player_id != current_player.player_id {
                     event_writer.send(SetStatusTextEvent::new_with_duration(
                         not_local_player_turn,
                         Duration::from_secs(10),
@@ -152,12 +151,11 @@ impl LocalGamePlayPlugin {
     //
 
     fn create_two_player_game(
-        app_state: &mut AppStateResource,
-        local_game_state: &mut GameStateResource,
+        _app_state: &mut AppStateResource,
+        _local_game_state: &mut GameStateResource,
     ) {}
 
     fn create_single_player_game(
-        session_id: &str,
         app_state: &mut AppStateResource,
         local_game_state: &mut GameStateResource,
     ) {
@@ -213,7 +211,7 @@ impl LocalGamePlayPlugin {
 
             match local_game_state.is_two_player_game {
                 true => Self::create_two_player_game(&mut app_state, &mut local_game_state),
-                false => Self::create_single_player_game(&gaming_session_info.session_id, &mut app_state, &mut local_game_state),
+                false => Self::create_single_player_game(&mut app_state, &mut local_game_state),
             }
 
             // *** Join the Game ***

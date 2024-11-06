@@ -56,7 +56,6 @@ mod functionality {
     use std::time::Duration;
 
     use bevy::prelude::{BackgroundColor, Button, Changed, DetectChanges, EventWriter, Interaction, NextState, Query, Res, ResMut, Text, TextStyle, Window, With};
-    use bevy::text::Font;
     use bevy::window::PrimaryWindow;
     use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 
@@ -65,6 +64,7 @@ mod functionality {
     use crate::shared::app_state::AppStateResource;
     use crate::shared::game_state_resource::GameStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED, FOREGROUND_COLOR};
+    use crate::shared::api_helpers::GamePieceHelper;
 
     /// Provides button functionality, including state changes as well as response to presses.
     #[allow(clippy::type_complexity)] // The query is complex by necessity.
@@ -122,7 +122,7 @@ mod functionality {
                         app_state.local_player.display_name, app_state.invitation_code.clone()
                     );
                 } else {
-                    text_sections.sections[0].value = app_state.local_player.display_name.clone();
+                    text_sections.sections[0].value = format!("{} {}", app_state.local_player.display_name, GamePieceHelper::display_name(app_state.local_player.game_piece));
                     if local_game_state.current_player.clone().unwrap().player_id == app_state.local_player.player_id {
                         text_sections.sections[0].style = TextStyle {
                             color: *BUTTON_COLOR_HOVERED,
@@ -152,7 +152,7 @@ mod functionality {
                 // Hide the other Player's section until the Game has started
                 if local_game_state.has_game_started {
                     let other_player = app_state.other_player.clone().unwrap_or_default();
-                    text_sections.sections[0].value = other_player.display_name;
+                    text_sections.sections[0].value = format!("{} {}", other_player.display_name, GamePieceHelper::display_name(other_player.game_piece));
                     if local_game_state.current_player.clone().unwrap().player_id == other_player.player_id {
                         text_sections.sections[0].style = TextStyle {
                             color: *BUTTON_COLOR_HOVERED,

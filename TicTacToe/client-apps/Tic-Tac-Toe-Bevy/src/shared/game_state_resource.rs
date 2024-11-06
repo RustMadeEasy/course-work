@@ -21,9 +21,6 @@ pub(crate) struct GameStateResource {
     /// Remembers the ID of the Game. This is used for subsequent cals to the GameInfoService
     pub(crate) game_id: String,
 
-    /// When the game has ended, game_results contains localized messaging that details the result of the Game
-    pub(crate) game_results: String,
-
     /// Indicates whether the Game has ended
     pub(crate) has_game_ended: bool,
 
@@ -35,9 +32,6 @@ pub(crate) struct GameStateResource {
 
     /// If/when the Game has been won, winningLocations lists the locations of the winning Game pieces
     pub(crate) winning_locations: Option<Vec<BoardPosition>>,
-
-    /// If/when the Game has been won, winningPlayer contains the Player who won the Game
-    pub(crate) winning_player: Option<PlayerInfo>,
 }
 
 // Helper functions

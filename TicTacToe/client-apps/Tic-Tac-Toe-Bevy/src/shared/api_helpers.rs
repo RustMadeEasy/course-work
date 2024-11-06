@@ -10,7 +10,7 @@ use std::time::Duration;
 use tic_tac_toe_rust_client_sdk::apis::configuration::Configuration;
 use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetLatestGameTurnError;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
-use tic_tac_toe_rust_client_sdk::models::TurnResponse;
+use tic_tac_toe_rust_client_sdk::models::{GamePiece, TurnResponse};
 
 /// An auto-refreshing Game State info cache.
 pub(crate) struct GameStateCache;
@@ -129,4 +129,15 @@ pub(crate) struct AutoUpdateInfo {
     pub(crate) interval: Duration,
     pub(crate) is_running: bool,
     pub(crate) latest_results: Option<TurnResponse>,
+}
+
+pub(crate) struct GamePieceHelper;
+impl GamePieceHelper {
+    pub(crate) fn display_name(game_piece: GamePiece) -> String {
+        match game_piece {
+            GamePiece::Unselected => "".to_string(),
+            GamePiece::X => "(X)".to_string(),
+            GamePiece::O => "(O)".to_string(),
+        }
+    }
 }
