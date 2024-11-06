@@ -239,6 +239,7 @@ impl LocalGamePlayPlugin {
             local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
             local_game_state.has_game_ended = (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInWin) || (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInStalemate);
             local_game_state.has_game_started = game_creation_response.game_info.game_state.play_status != PlayStatus::NotStarted;
+
         } else {
             //
 
@@ -334,6 +335,7 @@ impl LocalGamePlayPlugin {
         };
 
         local_game_state.current_game_state = turn_response.new_game_state.clone();
+        local_game_state.current_player = turn_response.current_player.clone().unwrap_or_default();
 
         // If the Game has ended, let the user know the results.
         match local_game_state.current_game_state.play_status {

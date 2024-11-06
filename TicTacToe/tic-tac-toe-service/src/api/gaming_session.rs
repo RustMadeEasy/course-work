@@ -188,11 +188,12 @@ pub(crate) async fn join_current_game(
     match manager.join_current_game(&session_and_player.0, &session_and_player.1).await {
         Ok(result) => {
             // Add the other Player if they are already part of the Gaming Session.
-            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &session.participants);
+            let other_player = PlayerInfo::get_other_player_info(session.session_owner.player_id.clone(), &result.1).unwrap();
+            let session_owner = PlayerInfo::get_other_player_info(other_player.player_id.clone(), &result.1).unwrap();
             let new_game_info = GameCreationResponse {
                 game_info: GameInfoResponse::from(result.0.clone()),
-                initiating_player: session.session_owner,
-                other_player,
+                initiating_player: session_owner,
+                other_player: Some(other_player),
                 session_id: session.session_id,
             };
             Ok(web::Json(new_game_info))

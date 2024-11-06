@@ -415,6 +415,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             // access the latest Session and Game info to complete their Game setup.
             drop(session);
 
+            let gp1 = session_copy.participants.first().unwrap().game_piece.clone();
+            let gp2 = session_copy.participants.last().unwrap().game_piece.clone();
+            
             self.notify_observers_of_game_change(GamingSessionStateChanges::GameIsReady, &session_copy, &game).await;
 
             Ok((game.clone(), session_copy.participants))

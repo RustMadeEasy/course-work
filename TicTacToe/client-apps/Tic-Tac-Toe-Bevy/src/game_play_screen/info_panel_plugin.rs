@@ -123,7 +123,7 @@ mod functionality {
                     );
                 } else {
                     text_sections.sections[0].value = format!("{} {}", app_state.local_player.display_name, GamePieceHelper::display_name(app_state.local_player.game_piece));
-                    if local_game_state.current_player.clone().unwrap().player_id == app_state.local_player.player_id {
+                    if local_game_state.current_player.clone().unwrap().player_id != app_state.local_player.player_id {
                         text_sections.sections[0].style = TextStyle {
                             color: *BUTTON_COLOR_HOVERED,
                             font: Default::default(),
@@ -153,7 +153,7 @@ mod functionality {
                 if local_game_state.has_game_started {
                     let other_player = app_state.other_player.clone().unwrap_or_default();
                     text_sections.sections[0].value = format!("{} {}", other_player.display_name, GamePieceHelper::display_name(other_player.game_piece));
-                    if local_game_state.current_player.clone().unwrap().player_id == other_player.player_id {
+                    if local_game_state.current_player.clone().unwrap().player_id != other_player.player_id {
                         text_sections.sections[0].style = TextStyle {
                             color: *BUTTON_COLOR_HOVERED,
                             font: Default::default(),
