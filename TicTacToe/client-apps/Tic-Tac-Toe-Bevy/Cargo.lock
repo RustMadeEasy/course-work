@@ -3923,6 +3923,7 @@ dependencies = [
  "function_name",
  "helpers-for-bevy",
  "lazy_static",
+ "reqwest",
  "tic_tac_toe_rust_client_sdk",
  "uuid",
 ]

@@ -48,7 +48,7 @@ impl GameStateResource {
         &self,
         position: &BoardPosition,
     ) -> GamePiece {
-        self.current_game_state.game_board[position.row as usize][position.column as usize].clone()
+        self.current_game_state.game_board[position.row as usize][position.column as usize]
     }
 
     /// Generates Game completion text.

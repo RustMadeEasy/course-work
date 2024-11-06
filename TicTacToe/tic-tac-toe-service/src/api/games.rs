@@ -208,15 +208,19 @@ pub(crate) async fn get_latest_game_turn(
 
     debug!("HTTP GET to /games/{}/turns/latest", game_id);
 
-    match manager
-        .lock()
-        .await
-        .get_game_by_id(game_id.as_str()).await
+    let manager = manager.lock().await;
+
+    match manager.get_game_by_id(game_id.as_str()).await
     {
         Ok(game) => {
             match game.latest_turn_result {
-                Some(result) => Ok(web::Json(result)),
-                None => Err(Error::from(GameError::GameNotStarted)),
+                Some(result) => {
+                    let result = result.clone();
+                    Ok(web::Json(result))
+                }
+                None => {
+                    Err(GameError::GameNotStarted.into())
+                }
             }
         }
         Err(error) => Err(error.into()),

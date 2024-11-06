@@ -18,3 +18,4 @@ bevy = "0.13.2"
 function_name = "0.3.0"
 lazy_static = "1.4.0"
 uuid = { version = "1.8.0", features = ["v4"] }
+reqwest = "0.12.5"

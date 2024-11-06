@@ -22,7 +22,7 @@ use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy::text::{Text, Text2dBundle};
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
-use tic_tac_toe_rust_client_sdk::models::BoardPosition;
+use tic_tac_toe_rust_client_sdk::models::{BoardPosition, GamePiece};
 
 const TILE_FONT_SIZE: f32 = 44_f32;
 const TILE_SIDE: f32 = 100_f32;
@@ -137,8 +137,11 @@ impl TilesPlugin {
         }
 
         for (mut label, tile_info) in label_query.iter_mut() {
-            let game_piece = local_game_state.get_game_piece_at_placement(&tile_info.grid_position);
-            label.sections[0].value = game_piece.to_string();
+            label.sections[0].value = match local_game_state.get_game_piece_at_placement(&tile_info.grid_position) {
+                GamePiece::Unselected => "".to_string(),
+                GamePiece::X => "X".to_string(),
+                GamePiece::O => "O".to_string(),
+            }
         }
     }
 }

@@ -55,20 +55,16 @@ pub(super) struct InfoPanelUiComponentBottom;
 mod functionality {
     use std::time::Duration;
 
-    use bevy::prelude::{
-        BackgroundColor, Button, Changed, DetectChanges, EventWriter, Interaction, NextState,
-        Query, Res, ResMut, Text, Window, With,
-    };
+    use bevy::prelude::{BackgroundColor, Button, Changed, DetectChanges, EventWriter, Interaction, NextState, Query, Res, ResMut, Text, TextStyle, Window, With};
+    use bevy::text::Font;
     use bevy::window::PrimaryWindow;
     use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 
-    use crate::game_play_screen::info_panel_plugin::{
-        InfoPanelUiComponentBottom, InfoPanelUiComponentTop,
-    };
+    use crate::game_play_screen::info_panel_plugin::{InfoPanelUiComponentBottom, InfoPanelUiComponentTop, INFO_PANEL_FONT_SIZE_LABEL};
     use crate::shared::app_mode::AppMode;
     use crate::shared::app_state::AppStateResource;
     use crate::shared::game_state_resource::GameStateResource;
-    use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
+    use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED, FOREGROUND_COLOR};
 
     /// Provides button functionality, including state changes as well as response to presses.
     #[allow(clippy::type_complexity)] // The query is complex by necessity.
@@ -115,10 +111,10 @@ mod functionality {
     pub(super) fn update_info_panel_top(
         app_state: Res<AppStateResource>,
         local_game_state: Res<GameStateResource>,
-        mut text_query: Query<&mut Text, With<InfoPanelUiComponentTop>>,
+        mut top_text_query: Query<&mut Text, With<InfoPanelUiComponentTop>>,
     ) {
         if local_game_state.is_changed() {
-            if let Ok(mut text_sections) = text_query.get_single_mut() {
+            if let Ok(mut text_sections) = top_text_query.get_single_mut() {
                 // Show the Invitation Code instructions until the Game has started
                 if app_state.local_player_initiated_gaming_session && !local_game_state.has_game_started {
                     text_sections.sections[0].value = format!(
@@ -127,6 +123,19 @@ mod functionality {
                     );
                 } else {
                     text_sections.sections[0].value = app_state.local_player.display_name.clone();
+                    if local_game_state.current_player.clone().unwrap().player_id == app_state.local_player.player_id {
+                        text_sections.sections[0].style = TextStyle {
+                            color: *BUTTON_COLOR_HOVERED,
+                            font: Default::default(),
+                            font_size: INFO_PANEL_FONT_SIZE_LABEL,
+                        };
+                    } else {
+                        text_sections.sections[0].style = TextStyle {
+                            color: *FOREGROUND_COLOR,
+                            font: Default::default(),
+                            font_size: INFO_PANEL_FONT_SIZE_LABEL,
+                        };
+                    }
                 }
             }
         }
@@ -142,11 +151,21 @@ mod functionality {
             if let Ok(mut text_sections) = bottom_text_query.get_single_mut() {
                 // Hide the other Player's section until the Game has started
                 if local_game_state.has_game_started {
-                    text_sections.sections[0].value = app_state
-                        .other_player
-                        .clone()
-                        .unwrap_or_default()
-                        .display_name;
+                    let other_player = app_state.other_player.clone().unwrap_or_default();
+                    text_sections.sections[0].value = other_player.display_name;
+                    if local_game_state.current_player.clone().unwrap().player_id == other_player.player_id {
+                        text_sections.sections[0].style = TextStyle {
+                            color: *BUTTON_COLOR_HOVERED,
+                            font: Default::default(),
+                            font_size: INFO_PANEL_FONT_SIZE_LABEL,
+                        };
+                    } else {
+                        text_sections.sections[0].style = TextStyle {
+                            color: *FOREGROUND_COLOR,
+                            font: Default::default(),
+                            font_size: INFO_PANEL_FONT_SIZE_LABEL,
+                        };
+                    }
                 }
             }
         }

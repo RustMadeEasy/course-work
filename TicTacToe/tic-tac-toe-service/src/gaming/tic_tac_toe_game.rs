@@ -79,6 +79,13 @@ impl TicTacToeGame {
         self.players.push(other_player.clone());
 
         self.current_player = Some(starting_player);
+
+        self.latest_turn_result = Some(TurnResponse {
+            current_player: self.current_player.clone(),
+            new_game_state: self.get_current_game_state(),
+            winning_locations: None,
+            winning_player: None,
+        });
     }
 }
 

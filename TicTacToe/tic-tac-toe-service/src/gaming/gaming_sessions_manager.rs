@@ -334,7 +334,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         }
     }
 
-    /// Retrieves the specified Session and Game pair.
+    /// Retrieves the specified Game.
     pub(crate) async fn get_game_by_id(&self, game_id: impl Into<String>) -> Result<T, GameError> {
         match self.get_session_containing_game(&game_id.into()).await {
             None => Err(GameError::GameNotFound),

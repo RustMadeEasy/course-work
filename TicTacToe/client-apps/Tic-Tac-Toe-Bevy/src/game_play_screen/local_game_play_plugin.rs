@@ -6,7 +6,7 @@
 use std::time::Duration;
 
 use crate::game_play_screen::{OnGamePlayScreen, TilePressedEvent};
-use crate::shared::api_helpers::api_helpers::{GameStateCache, SDK_CONFIG};
+use crate::shared::api_helpers::{GameStateCache, SDK_CONFIG};
 use crate::shared::app_mode::AppMode;
 use crate::shared::app_state::AppStateResource;
 use crate::shared::despawn;
@@ -18,7 +18,7 @@ use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetLatestGameTurnError;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
-use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GamePiece, GameTurnParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
+use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GamePiece, GameTurnParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus, PlayerInfo};
 
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
 pub(super) struct LocalGamePlayPlugin;
@@ -146,50 +146,37 @@ impl LocalGamePlayPlugin {
             }
         }
     }
+}
+
+impl LocalGamePlayPlugin {
+    //
 
     fn create_two_player_game(
         app_state: &mut AppStateResource,
         local_game_state: &mut GameStateResource,
-    ) {
-        
-    }
+    ) {}
 
     fn create_single_player_game(
+        session_id: &str,
         app_state: &mut AppStateResource,
         local_game_state: &mut GameStateResource,
     ) {
         //
 
-        let params = NewGamingSessionParams { session_owner_display_name: app_state.local_player.display_name.clone() };
-        let gaming_session_info = match tic_tac_toe_api::create_gaming_session(&SDK_CONFIG, params) {
-            Ok(result) => {
-                result
-            }
+        // *** Create a Single Player Game ***
+
+        let params = NewSinglePlayerGameParams { computer_skill_level: AutomaticPlayerSkillLevel::Beginner };
+        let new_game_state = match tic_tac_toe_api::create_single_player_game(&SDK_CONFIG, &app_state.gaming_session_id, params) {
+            Ok(new_game_state) => new_game_state,
             Err(error) => {
-                error!("Error creating gaming session: {:?}", error);
+                // TODO: JD: finish
+                error!("Error joining gaming session: {:?}", error);
                 return;
             }
         };
-
-        *app_state = gaming_session_info.into();
-        app_state.invitation_code = "".to_string(); // Not needed for Single-Player Game.
-
-        // TODO: JD: setup MQTT
-
-        let params = NewSinglePlayerGameParams { computer_skill_level: AutomaticPlayerSkillLevel::Beginner };
-        match tic_tac_toe_api::create_single_player_game(&SDK_CONFIG, &app_state.gaming_session_id, params) {
-            Ok(new_game_state) => {
-                app_state.local_player_initiated_gaming_session = true;
-                app_state.other_player = new_game_state.other_player.unwrap_or_default();
-                local_game_state.current_game_state = new_game_state.game_info.game_state.clone();
-                local_game_state.current_player = new_game_state.game_info.current_player.clone().unwrap_or_default();
-                local_game_state.game_id = new_game_state.game_info.game_id;
-                local_game_state.has_game_ended = (new_game_state.game_info.game_state.play_status == PlayStatus::EndedInWin) || (new_game_state.game_info.game_state.play_status == PlayStatus::EndedInStalemate);
-                local_game_state.has_game_started = new_game_state.game_info.game_state.play_status == PlayStatus::InProgress;
-                local_game_state.is_two_player_game = false;
-            }
-            Err(error) => {}
-        }
+        app_state.other_player = new_game_state.other_player.unwrap_or_default();
+        local_game_state.reset();
+        local_game_state.game_id = new_game_state.game_info.game_id;
     }
 
     /// Starts a new Game or joins an existing Game - depending upon whether the local Player is
@@ -205,13 +192,55 @@ impl LocalGamePlayPlugin {
         if app_state.local_player_initiated_gaming_session {
             //
 
-            // TODO: JD: need to handle both Single-Player and Two-Player
-            
+            // *** Create a new Gaming Session ***
+
+            let params = NewGamingSessionParams { session_owner_display_name: app_state.local_player.display_name.clone() };
+            let gaming_session_info = match tic_tac_toe_api::create_gaming_session(&SDK_CONFIG, params) {
+                Ok(result) => {
+                    result
+                }
+                Err(error) => {
+                    error!("Error creating gaming session: {:?}", error);
+                    return;
+                }
+            };
+
+            *app_state = gaming_session_info.clone().into();
+            if !local_game_state.is_two_player_game {
+                app_state.invitation_code = "".to_string(); // Not needed for Single-Player Game.
+            }
+            app_state.local_player_initiated_gaming_session = true;
+
             match local_game_state.is_two_player_game {
                 true => Self::create_two_player_game(&mut app_state, &mut local_game_state),
-                false => Self::create_single_player_game(&mut app_state, &mut local_game_state),
+                false => Self::create_single_player_game(&gaming_session_info.session_id, &mut app_state, &mut local_game_state),
             }
-            
+
+            // *** Join the Game ***
+
+            let game_creation_response = match tic_tac_toe_api::join_current_game(&SDK_CONFIG, &gaming_session_info.session_id, &app_state.local_player.player_id) {
+                Ok(response) => response,
+                Err(error) => {
+                    // TODO: JD: finish
+                    error!("Error joining gaming session: {:?}", error);
+                    return;
+                }
+            };
+
+            if app_state.local_player_initiated_gaming_session {
+                app_state.local_player = game_creation_response.initiating_player;
+                app_state.other_player = game_creation_response.other_player.unwrap_or_default();
+            } else {
+                if let Some(Some(player)) = game_creation_response.other_player {
+                    app_state.local_player = player
+                }
+                app_state.other_player = Some(game_creation_response.initiating_player);
+            }
+
+            local_game_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
+            local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
+            local_game_state.has_game_ended = (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInWin) || (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInStalemate);
+            local_game_state.has_game_started = game_creation_response.game_info.game_state.play_status != PlayStatus::NotStarted;
         } else {
             //
 
@@ -258,6 +287,8 @@ impl LocalGamePlayPlugin {
             // }
         };
 
+        // *** Begin listening for Game change events ***
+
         // Point the background update thread to the new Game ID.
         GameStateCache::setup_auto_update(
             &local_game_state.game_id,
@@ -268,7 +299,7 @@ impl LocalGamePlayPlugin {
     /// Pulls the latest Game state from the GameStateCache.
     fn refresh_game_state(
         app_state: ResMut<AppStateResource>,
-        local_game_state: ResMut<GameStateResource>,
+        mut local_game_state: ResMut<GameStateResource>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
     ) {
         //
@@ -280,23 +311,18 @@ impl LocalGamePlayPlugin {
 
         let game_started_before_call = local_game_state.has_game_started;
 
-        // Call the server
+        // Grab the latest Turn info
         let turn_response = match GameStateCache::get_latest_game_turn(&local_game_state.game_id) {
             Ok(remote_game_info) => remote_game_info,
             Err(error) => {
                 // TODO: JD: localize the text.
                 let message = match error {
                     Error::ResponseError(error) => {
-                        match error.entity {
-                            None => "",
-                            Some(error) => {
-                                match error {
-                                    GetLatestGameTurnError::Status404() => "Game not found.",
-                                    GetLatestGameTurnError::Status400() => "Bad request - Malformed Game ID",
-                                    GetLatestGameTurnError::Status500() => "Internal server error",
-                                    GetLatestGameTurnError::UnknownValue(_) => "An unexpected error was returned from the TicTacToe server.",
-                                }
-                            }
+                        match error.status {
+                            reqwest::StatusCode::NOT_FOUND => "Game not found.",
+                            reqwest::StatusCode::BAD_REQUEST => "Bad request - Game not started",
+                            reqwest::StatusCode::INTERNAL_SERVER_ERROR => "Internal server error",
+                            _ => "An unexpected error was returned from the TicTacToe server.",
                         }
                     }
                     _ => "An unexpected error was returned from the TicTacToe server.",
@@ -309,9 +335,7 @@ impl LocalGamePlayPlugin {
             }
         };
 
-        // TODO: JD: finish
-        // *local_game_state = result.into();
-        // app_state.update(&result.1);
+        local_game_state.current_game_state = turn_response.new_game_state.clone();
 
         // If the Game has ended, let the user know the results.
         match local_game_state.current_game_state.play_status {
