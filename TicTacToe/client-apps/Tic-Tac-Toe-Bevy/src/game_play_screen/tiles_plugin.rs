@@ -22,7 +22,7 @@ use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy::text::{Text, Text2dBundle};
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
-use tic_tac_toe_rust_client_sdk::models::{BoardPosition, GamePiece};
+use tic_tac_toe_rust_client_sdk::models::{BoardPosition, GamePiece, PlayStatus};
 
 const TILE_FONT_SIZE: f32 = 44_f32;
 const TILE_SIDE: f32 = 100_f32;
@@ -132,7 +132,7 @@ impl TilesPlugin {
     ) {
         //
 
-        if !local_game_state.is_changed() {
+        if !local_game_state.is_changed() || local_game_state.current_game_state.play_status != PlayStatus::InProgress {
             return;
         }
 
