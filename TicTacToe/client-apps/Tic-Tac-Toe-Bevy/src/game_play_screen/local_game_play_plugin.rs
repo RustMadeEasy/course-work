@@ -13,11 +13,11 @@ use crate::shared::despawn;
 use crate::shared::game_state_resource::GameStateResource;
 use bevy::app::App;
 use bevy::log::error;
-use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, NextState, OnEnter, OnExit, Plugin, Res, ResMut, Update};
+use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, OnEnter, OnExit, Plugin, Res, ResMut, Update};
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
-use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GamePiece, GameTurnParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
+use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GameCreationResponse, GamePiece, GameTurnParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
 
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
 pub(super) struct LocalGamePlayPlugin;
@@ -150,18 +150,21 @@ impl LocalGamePlayPlugin {
 impl LocalGamePlayPlugin {
     //
 
-    fn create_two_player_game(
-        _app_state: &mut AppStateResource,
-        _local_game_state: &mut GameStateResource,
-    ) {}
+    fn create_two_player_game(app_state: &AppStateResource) -> Option<GameCreationResponse> {
+        let new_game_state = match tic_tac_toe_api::create_two_player_game(&SDK_CONFIG, &app_state.gaming_session_id) {
+            Ok(new_game_state) => new_game_state,
+            Err(error) => {
+                // TODO: JD: finish
+                error!("Error joining gaming session: {:?}", error);
+                return None;
+            }
+        };
 
-    fn create_single_player_game(
-        app_state: &mut AppStateResource,
-        local_game_state: &mut GameStateResource,
-    ) {
+        Some(new_game_state)
+    }
+
+    fn create_single_player_game(app_state: &AppStateResource) -> Option<GameCreationResponse> {
         //
-
-        // *** Create a Single Player Game ***
 
         let params = NewSinglePlayerGameParams { computer_skill_level: AutomaticPlayerSkillLevel::Beginner };
         let new_game_state = match tic_tac_toe_api::create_single_player_game(&SDK_CONFIG, &app_state.gaming_session_id, params) {
@@ -169,12 +172,11 @@ impl LocalGamePlayPlugin {
             Err(error) => {
                 // TODO: JD: finish
                 error!("Error joining gaming session: {:?}", error);
-                return;
+                return None;
             }
         };
-        app_state.other_player = new_game_state.other_player.unwrap_or_default();
-        local_game_state.reset();
-        local_game_state.game_id = new_game_state.game_info.game_id;
+
+        Some(new_game_state)
     }
 
     /// Starts a new Game or joins an existing Game - depending upon whether the local Player is
@@ -182,8 +184,6 @@ impl LocalGamePlayPlugin {
     fn join_or_begin_new_game(
         mut app_state: ResMut<AppStateResource>,
         mut local_game_state: ResMut<GameStateResource>,
-        mut _event_writer: EventWriter<SetStatusTextEvent>,
-        mut _next_state: ResMut<NextState<AppMode>>,
     ) {
         //
 
@@ -209,9 +209,16 @@ impl LocalGamePlayPlugin {
             }
             app_state.local_player_initiated_gaming_session = true;
 
-            match local_game_state.is_two_player_game {
-                true => Self::create_two_player_game(&mut app_state, &mut local_game_state),
-                false => Self::create_single_player_game(&mut app_state, &mut local_game_state),
+            // *** Create a new Game ***
+
+            let game_creation_function = match local_game_state.is_two_player_game {
+                true => Self::create_two_player_game,
+                false => Self::create_single_player_game,
+            };
+            if let Some(new_game_state) = game_creation_function(&app_state) {
+                app_state.other_player = new_game_state.other_player.unwrap_or_default();
+                local_game_state.reset();
+                local_game_state.game_id = new_game_state.game_info.game_id;
             }
 
             // *** Join the Game ***
@@ -239,7 +246,6 @@ impl LocalGamePlayPlugin {
             local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
             local_game_state.has_game_ended = (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInWin) || (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInStalemate);
             local_game_state.has_game_started = game_creation_response.game_info.game_state.play_status != PlayStatus::NotStarted;
-
         } else {
             //
 
