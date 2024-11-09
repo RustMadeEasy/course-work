@@ -189,7 +189,7 @@ impl GameState {
         {
             PlayOutcome::new_with_win_details(
                 &PlayStatus::EndedInWin,
-                &GameState::winning_board_positions_from_binary(current_player_binary_representation).unwrap(),
+                &GameState::winning_board_positions_from_binary(current_player_binary_representation).unwrap_or_default(),
                 current_player,
             )
         } else if (as_binary.0 | as_binary.1) == BIN_FULL_BOARD {

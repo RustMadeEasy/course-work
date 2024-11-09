@@ -217,7 +217,7 @@ impl GameTrait for TicTacToeGame {
         let player_taking_a_turn = self.get_player_info_by_id(&game_turn_info.player_id)?;
 
         // Ensure that the Player is not making a move out of turn.
-        if player_taking_a_turn.player_id != self.current_player.clone().unwrap().player_id {
+        if player_taking_a_turn.player_id != self.current_player.clone().unwrap_or_default().player_id {
             return Err(GameError::WrongPlayerTakingTurn);
         }
 
