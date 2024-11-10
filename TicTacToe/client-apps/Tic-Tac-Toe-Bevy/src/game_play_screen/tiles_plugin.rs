@@ -125,14 +125,14 @@ impl TilesPlugin {
         }
     }
 
-    /// Updates the Tile's label with the visual representation of its Game Piece (if any).
+    /// Updates each Tile's label with the visual representation of its Game Piece (if any).
     fn update_tiles(
         local_game_state: Res<GameStateResource>,
         mut label_query: Query<(&mut Text, &TileLabelComponent), With<TileLabelComponent>>,
     ) {
         //
 
-        if !local_game_state.is_changed() || local_game_state.current_game_state.play_status != PlayStatus::InProgress {
+        if !local_game_state.is_changed() || local_game_state.current_game_state.play_status == PlayStatus::NotStarted {
             return;
         }
 
