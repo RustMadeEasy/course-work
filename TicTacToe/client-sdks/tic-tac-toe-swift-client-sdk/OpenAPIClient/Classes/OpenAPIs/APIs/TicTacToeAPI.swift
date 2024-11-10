@@ -338,6 +338,52 @@ open class TicTacToeAPI {
     }
 
     /**
+     Retrieves the readiness of the Game's Players, answering the questions: Have all Players been added to the Game and setup?
+     
+     - parameter gameId: (path) Game ID 
+     - parameter apiResponseQueue: The queue on which api response is dispatched.
+     - parameter completion: completion handler to receive the data and the error objects
+     */
+    @discardableResult
+    open class func getPlayersReadiness(gameId: String, apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue, completion: @escaping ((_ data: PlayersReadinessResponse?, _ error: Error?) -> Void)) -> RequestTask {
+        return getPlayersReadinessWithRequestBuilder(gameId: gameId).execute(apiResponseQueue) { result in
+            switch result {
+            case let .success(response):
+                completion(response.body, nil)
+            case let .failure(error):
+                completion(nil, error)
+            }
+        }
+    }
+
+    /**
+     Retrieves the readiness of the Game's Players, answering the questions: Have all Players been added to the Game and setup?
+     - GET /v1/games/{game_id}/players/readiness
+     - parameter gameId: (path) Game ID 
+     - returns: RequestBuilder<PlayersReadinessResponse> 
+     */
+    open class func getPlayersReadinessWithRequestBuilder(gameId: String) -> RequestBuilder<PlayersReadinessResponse> {
+        var localVariablePath = "/v1/games/{game_id}/players/readiness"
+        let gameIdPreEscape = "\(APIHelper.mapValueToPathItem(gameId))"
+        let gameIdPostEscape = gameIdPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{game_id}", with: gameIdPostEscape, options: .literal, range: nil)
+        let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
+        let localVariableParameters: [String: Any]? = nil
+
+        let localVariableUrlComponents = URLComponents(string: localVariableURLString)
+
+        let localVariableNillableHeaders: [String: Any?] = [
+            :
+        ]
+
+        let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+
+        let localVariableRequestBuilder: RequestBuilder<PlayersReadinessResponse>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+
+        return localVariableRequestBuilder.init(method: "GET", URLString: (localVariableUrlComponents?.string ?? localVariableURLString), parameters: localVariableParameters, headers: localVariableHeaderParameters, requiresAuthentication: false)
+    }
+
+    /**
      Retrieves the Gaming Session's current Game.
      
      - parameter sessionId: (path) Session ID 

@@ -73,6 +73,14 @@ pub struct GamingSessionCreationResponse {
 }
 
 #[derive(Clone, Deserialize, Serialize, ToSchema)]
+/// Models the results of a call to the Get Players' Readiness end point
+pub struct PlayersReadinessResponse {
+    /// Indicates whether the Game's Players are ready.
+    pub all_players_are_ready: bool,
+}
+
+#[derive(Clone, Deserialize, Serialize, ToSchema)]
+/// Models the results of a call to the Get Latest Game Turn end point
 pub struct TurnResponse {
     /// Player who will take the next turn
     pub current_player: Option<PlayerInfo>,

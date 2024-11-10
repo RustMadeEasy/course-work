@@ -8,7 +8,7 @@ use function_name::named;
 use std::sync::{LazyLock, Mutex};
 use std::time::Duration;
 use tic_tac_toe_rust_client_sdk::apis::configuration::Configuration;
-use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetLatestGameTurnError;
+use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::{GetLatestGameTurnError, GetPlayersReadinessError};
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
 use tic_tac_toe_rust_client_sdk::models::{GamePiece, TurnResponse};
 
@@ -41,6 +41,29 @@ impl GameStateCache {
         }
     }
 
+    /// Returns the Game readiness of a specified Game. NOTE: This info is cached for immediate
+    /// access if setup_auto_update() is called whenever a new Game is started or joined.
+    pub(crate) fn get_latest_game_readiness(game_id: &str) -> Result<bool, Error<GetPlayersReadinessError>> {
+
+        // Try the mem cache
+        let info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
+        let result = info_mutex.players_ready.clone();
+        drop(info_mutex);
+
+        match result {
+            None => {
+                match Self::load_and_cache_players_readiness(game_id) {
+                    Ok(response) => Ok(response),
+                    Err(error) => Err(error),
+                }
+            }
+            Some(result) => {
+                // Cache hit, wooohooo!
+                Ok(result)
+            }
+        }
+    }
+
     fn load_and_cache_latest_game_turn(game_id: &str) -> Result<TurnResponse, Error<GetLatestGameTurnError>> {
         match tic_tac_toe_api::get_latest_game_turn(&SDK_CONFIG, game_id) {
             Ok(response) => {
@@ -49,6 +72,19 @@ impl GameStateCache {
                 info_mutex.latest_results = Some(response.clone());
                 drop(info_mutex);
                 Ok(response)
+            }
+            Err(error) => Err(error),
+        }
+    }
+
+    fn load_and_cache_players_readiness(game_id: &str) -> Result<bool, Error<GetPlayersReadinessError>> {
+        match tic_tac_toe_api::get_players_readiness(&SDK_CONFIG, game_id) {
+            Ok(response) => {
+                // Cache the result. We lock the mutex for only as long as it takes to write to it.
+                let mut info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
+                (*info_mutex).players_ready = Some(response.all_players_are_ready);
+                drop(info_mutex);
+                Ok(response.all_players_are_ready)
             }
             Err(error) => Err(error),
         }
@@ -99,11 +135,26 @@ impl GameStateCache {
                 let local_info = local_info_mutex.clone();
                 drop(local_info_mutex);
 
+                let info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
+                let players_ready = info_mutex.players_ready;
+                drop(info_mutex);
+
                 // Call the server for the latest state of the specified Game.
-                match GameStateCache::load_and_cache_latest_game_turn(&local_info.game_id) {
-                    Ok(_) => {}
-                    Err(error) => {
-                        error!("{} - Error encountered: {:?}", function_name!(), error);
+                if players_ready.is_none() || (players_ready.unwrap() == false) {
+
+                    match GameStateCache::load_and_cache_latest_game_turn(&local_info.game_id) {
+                        Ok(_) => {}
+                        Err(error) => {
+                            error!("{} - Error encountered: {:?}", function_name!(), error);
+                        }
+                    }
+                } else {
+
+                    match GameStateCache::load_and_cache_players_readiness(&local_info.game_id) {
+                        Ok(_) => {}
+                        Err(error) => {
+                            error!("{} - Error encountered: {:?}", function_name!(), error);
+                        }
                     }
                 }
 
@@ -129,6 +180,7 @@ pub(crate) struct AutoUpdateInfo {
     pub(crate) interval: Duration,
     pub(crate) is_running: bool,
     pub(crate) latest_results: Option<TurnResponse>,
+    pub(crate) players_ready: Option<bool>,
 }
 
 pub(crate) struct GamePieceHelper;

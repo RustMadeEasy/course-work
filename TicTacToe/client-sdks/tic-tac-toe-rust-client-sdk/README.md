@@ -34,6 +34,7 @@ Class | Method | HTTP request | Description
 *TicTacToeApi* | [**end_gaming_session**](docs/TicTacToeApi.md#end_gaming_session) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 *TicTacToeApi* | [**get_game_history**](docs/TicTacToeApi.md#get_game_history) | **GET** /v1/games/{game_id}/turns | Retrieves the history of Game States from the initial move (turn) to the current Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
 *TicTacToeApi* | [**get_latest_game_turn**](docs/TicTacToeApi.md#get_latest_game_turn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves the most recent Turn for the specified Game.
+*TicTacToeApi* | [**get_players_readiness**](docs/TicTacToeApi.md#get_players_readiness) | **GET** /v1/games/{game_id}/players/readiness | Retrieves the readiness of the Game's Players, answering the questions: Have all Players been added to the Game and setup?
 *TicTacToeApi* | [**get_session_current_game**](docs/TicTacToeApi.md#get_session_current_game) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Gaming Session's current Game.
 *TicTacToeApi* | [**join_current_game**](docs/TicTacToeApi.md#join_current_game) | **PUT** /v1/gaming-sessions/{session_id}/current_game/players/{player_id} | Adds a Player to the Session's Current Game.
 *TicTacToeApi* | [**join_gaming_session**](docs/TicTacToeApi.md#join_gaming_session) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
@@ -60,6 +61,7 @@ Class | Method | HTTP request | Description
  - [NewSinglePlayerGameParams](docs/NewSinglePlayerGameParams.md)
  - [PlayStatus](docs/PlayStatus.md)
  - [PlayerInfo](docs/PlayerInfo.md)
+ - [PlayersReadinessResponse](docs/PlayersReadinessResponse.md)
  - [TurnResponse](docs/TurnResponse.md)
 
 

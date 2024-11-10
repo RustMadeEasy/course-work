@@ -11,6 +11,7 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
+/// TurnResponse : Models the results of a call to the Get Latest Game Turn end point
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TurnResponse {
     /// Player who will take the next turn
@@ -28,6 +29,7 @@ pub struct TurnResponse {
 }
 
 impl TurnResponse {
+    /// Models the results of a call to the Get Latest Game Turn end point
     pub fn new(new_game_state: models::GameState) -> TurnResponse {
         TurnResponse {
             current_player: None,

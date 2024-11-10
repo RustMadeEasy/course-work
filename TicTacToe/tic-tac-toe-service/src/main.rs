@@ -63,6 +63,7 @@ async fn main() -> std::io::Result<()> {
                 .service(end_game)
                 .service(get_game_history)
                 .service(get_latest_game_turn)
+                .service(get_players_readiness)
                 .service(join_current_game)
                 .service(take_turn)
                 // *** Health & Docs API ***

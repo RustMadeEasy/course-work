@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**endGamingSession**](TicTacToeAPI.md#endgamingsession) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**getGameHistory**](TicTacToeAPI.md#getgamehistory) | **GET** /v1/games/{game_id}/turns | Retrieves the history of Game States from the initial move (turn) to the current Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
 [**getLatestGameTurn**](TicTacToeAPI.md#getlatestgameturn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves the most recent Turn for the specified Game.
+[**getPlayersReadiness**](TicTacToeAPI.md#getplayersreadiness) | **GET** /v1/games/{game_id}/players/readiness | Retrieves the readiness of the Game&#39;s Players, answering the questions: Have all Players been added to the Game and setup?
 [**getSessionCurrentGame**](TicTacToeAPI.md#getsessioncurrentgame) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Gaming Session&#39;s current Game.
 [**joinCurrentGame**](TicTacToeAPI.md#joincurrentgame) | **PUT** /v1/gaming-sessions/{session_id}/current_game/players/{player_id} | Adds a Player to the Session&#39;s Current Game.
 [**joinGamingSession**](TicTacToeAPI.md#joingamingsession) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
@@ -347,6 +348,54 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**TurnResponse**](TurnResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getPlayersReadiness**
+```swift
+    open class func getPlayersReadiness(gameId: String, completion: @escaping (_ data: PlayersReadinessResponse?, _ error: Error?) -> Void)
+```
+
+Retrieves the readiness of the Game's Players, answering the questions: Have all Players been added to the Game and setup?
+
+### Example
+```swift
+// The following code samples are still beta. For any issue, please report via http://github.com/OpenAPITools/openapi-generator/issues/new
+import OpenAPIClient
+
+let gameId = "gameId_example" // String | Game ID
+
+// Retrieves the readiness of the Game's Players, answering the questions: Have all Players been added to the Game and setup?
+TicTacToeAPI.getPlayersReadiness(gameId: gameId) { (response, error) in
+    guard error == nil else {
+        print(error)
+        return
+    }
+
+    if (response) {
+        dump(response)
+    }
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **gameId** | **String** | Game ID | 
+
+### Return type
+
+[**PlayersReadinessResponse**](PlayersReadinessResponse.md)
 
 ### Authorization
 

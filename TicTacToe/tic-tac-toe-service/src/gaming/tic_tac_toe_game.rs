@@ -132,10 +132,6 @@ impl GameTrait for TicTacToeGame {
         }
     }
 
-    fn get_player_count(&self) -> i8 {
-        self.players.len() as i8
-    }
-
     fn get_current_player(&self) -> Option<PlayerInfo> {
         self.current_player.clone()
     }
@@ -147,6 +143,10 @@ impl GameTrait for TicTacToeGame {
     /// Returns the ID of this Game.
     fn get_id(&self) -> String {
         self.id.clone()
+    }
+
+    fn get_player_count(&self) -> i8 {
+        self.players.len() as i8
     }
 
     /// Returns the Game Play History.
@@ -161,6 +161,10 @@ impl GameTrait for TicTacToeGame {
             None => Err(GameError::PlayerNotFound),
             Some(player) => Ok(player.clone()),
         }
+    }
+
+    fn get_players(&self) -> Vec<PlayerInfo> {
+        self.players.clone()
     }
 
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>> {
@@ -243,9 +247,5 @@ impl GameTrait for TicTacToeGame {
         self.current_player = Some(other_player.clone());
 
         Ok(final_board_state.clone())
-    }
-
-    fn get_players(&self) -> Vec<PlayerInfo> {
-        self.players.clone()
     }
 }

@@ -10,6 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
+/** Models the results of a call to the Get Latest Game Turn end point */
 public struct TurnResponse: Codable, JSONEncodable, Hashable {
 
     /** Player who will take the next turn */

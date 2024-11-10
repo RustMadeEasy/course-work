@@ -1,4 +1,5 @@
 .gitignore
+.openapi-generator-ignore
 .travis.yml
 Cargo.toml
 README.md
@@ -20,6 +21,7 @@ docs/NewGamingSessionParams.md
 docs/NewSinglePlayerGameParams.md
 docs/PlayStatus.md
 docs/PlayerInfo.md
+docs/PlayersReadinessResponse.md
 docs/TicTacToeApi.md
 docs/TurnResponse.md
 git_push.sh
@@ -46,4 +48,5 @@ src/models/new_gaming_session_params.rs
 src/models/new_single_player_game_params.rs
 src/models/play_status.rs
 src/models/player_info.rs
+src/models/players_readiness_response.rs
 src/models/turn_response.rs

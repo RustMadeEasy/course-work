@@ -16,7 +16,6 @@ use bevy::log::error;
 use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, OnEnter, OnExit, Plugin, Res, ResMut, Update};
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
-use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::JoinGamingSessionError;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
 use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GameCreationResponse, GamePiece, GameTurnParams, GamingSessionCreationResponse, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
 
@@ -152,6 +151,8 @@ impl LocalGamePlayPlugin {
     //
 
     fn create_two_player_game(app_state: &AppStateResource) -> Option<GameCreationResponse> {
+        //
+
         let new_game_state = match tic_tac_toe_api::create_two_player_game(&SDK_CONFIG, &app_state.gaming_session_id) {
             Ok(new_game_state) => new_game_state,
             Err(error) => {
@@ -215,7 +216,10 @@ impl LocalGamePlayPlugin {
             // *** Create a new Game ***
 
             let game_creation_function = match local_game_state.is_two_player_game {
-                true => Self::create_two_player_game,
+                true => {
+                    local_game_state.is_two_player_game = true;
+                    Self::create_two_player_game
+                }
                 false => Self::create_single_player_game,
             };
             if let Some(new_game_state) = game_creation_function(&app_state) {
@@ -223,7 +227,6 @@ impl LocalGamePlayPlugin {
                 local_game_state.reset();
                 local_game_state.game_id = new_game_state.game_info.game_id;
             }
-
         } else {
             //
 
@@ -233,7 +236,10 @@ impl LocalGamePlayPlugin {
             };
             gaming_session_info = match tic_tac_toe_api::join_gaming_session(&SDK_CONFIG, params) {
                 Ok(gaming_session_info) => gaming_session_info,
-                Err(error) => return,
+                Err(_error) => {
+                    // TODO: JD: finish
+                    return
+                }
             };
 
             *app_state = gaming_session_info.clone().into();
@@ -264,7 +270,6 @@ impl LocalGamePlayPlugin {
         local_game_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
         local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
         local_game_state.has_game_ended = (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInWin) || (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInStalemate);
-        local_game_state.has_game_started = game_creation_response.game_info.game_state.play_status != PlayStatus::NotStarted;
 
         // *** Begin listening for Game change events ***
 
@@ -283,85 +288,96 @@ impl LocalGamePlayPlugin {
     ) {
         //
 
-        // Exit early if the game is not in progress.
+        // Exit early if the game is no longer in progress.
         if local_game_state.game_id.is_empty() && local_game_state.has_game_ended {
             return;
         }
 
         let game_started_before_call = local_game_state.has_game_started;
 
-        // Grab the latest Turn info
-        let turn_response = match GameStateCache::get_latest_game_turn(&local_game_state.game_id) {
-            Ok(remote_game_info) => remote_game_info,
-            Err(error) => {
-                // TODO: JD: localize the text.
-                let message = match error {
-                    Error::ResponseError(error) => {
-                        match error.status {
-                            reqwest::StatusCode::NOT_FOUND => "Game not found.",
-                            reqwest::StatusCode::BAD_REQUEST => "Bad request - Game not started",
-                            reqwest::StatusCode::INTERNAL_SERVER_ERROR => "Internal server error",
-                            _ => "An unexpected error was returned from the TicTacToe server.",
+        if local_game_state.has_game_started {
+
+            // Grab the latest Turn info
+            let turn_response = match GameStateCache::get_latest_game_turn(&local_game_state.game_id) {
+                Ok(remote_game_info) => remote_game_info,
+                Err(error) => {
+                    // TODO: JD: localize the text.
+                    let message = match error {
+                        Error::ResponseError(error) => {
+                            match error.status {
+                                reqwest::StatusCode::NOT_FOUND => "Game not found.",
+                                reqwest::StatusCode::BAD_REQUEST => "Bad request - Game not started",
+                                reqwest::StatusCode::INTERNAL_SERVER_ERROR => "Internal server error",
+                                _ => "An unexpected error was returned from the TicTacToe server.",
+                            }
                         }
-                    }
-                    _ => "An unexpected error was returned from the TicTacToe server.",
-                };
-                event_writer.send(SetStatusTextEvent::new_with_duration(
-                    message,
-                    Duration::from_secs(5),
-                ));
-                return;
-            }
-        };
-
-        local_game_state.current_game_state = turn_response.new_game_state.clone();
-        local_game_state.current_player = turn_response.current_player.clone().unwrap_or_default();
-
-        // If the Game has ended, let the user know the results.
-        match local_game_state.current_game_state.play_status {
-            PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
-                let winning_player_name =
-                    if local_game_state.current_game_state.play_status == PlayStatus::EndedInWin {
-                        Some(
-                            if app_state.local_player.player_id
-                                == local_game_state.current_game_state.id_of_player_who_made_move.clone()
-                            {
-                                app_state.local_player.display_name.clone()
-                            } else {
-                                app_state.other_player.clone().unwrap_or_default().display_name
-                            },
-                        )
-                    } else {
-                        None
+                        _ => "An unexpected error was returned from the TicTacToe server.",
                     };
-                let game_results = local_game_state.generate_results_text(
-                    &turn_response,
-                    &app_state.local_player.display_name,
-                    &winning_player_name,
-                );
-                if !game_results.is_empty() {
                     event_writer.send(SetStatusTextEvent::new_with_duration(
-                        game_results,
+                        message,
+                        Duration::from_secs(5),
+                    ));
+                    return;
+                }
+            };
+
+            local_game_state.current_game_state = turn_response.new_game_state.clone();
+            local_game_state.current_player = turn_response.current_player.clone().unwrap_or_default();
+
+            // If the Game has ended, let the user know the results.
+            match local_game_state.current_game_state.play_status {
+                PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
+                    let winning_player_name =
+                        if local_game_state.current_game_state.play_status == PlayStatus::EndedInWin {
+                            Some(
+                                if app_state.local_player.player_id
+                                    == local_game_state.current_game_state.id_of_player_who_made_move.clone()
+                                {
+                                    app_state.local_player.display_name.clone()
+                                } else {
+                                    app_state.other_player.clone().unwrap_or_default().display_name
+                                },
+                            )
+                        } else {
+                            None
+                        };
+                    let game_results = local_game_state.generate_results_text(
+                        &turn_response,
+                        &app_state.local_player.display_name,
+                        &winning_player_name,
+                    );
+                    if !game_results.is_empty() {
+                        event_writer.send(SetStatusTextEvent::new_with_duration(
+                            game_results,
+                            Duration::from_secs(5),
+                        ));
+                    }
+                }
+                _ => {}
+            }
+        } else {
+            //
+
+            if GameStateCache::get_latest_game_readiness(&local_game_state.game_id).unwrap_or_else(|_| false) {
+                //
+
+                local_game_state.has_game_started = true;
+
+                // The other Player has just joined. So, note their info and also inform the local Player.
+                if app_state.local_player_initiated_gaming_session
+                    && !game_started_before_call
+                    && local_game_state.has_game_started
+                {
+                    let message = format!(
+                        "{} has joined! Let the game begin!",
+                        app_state.other_player.clone().unwrap_or_default().display_name
+                    );
+                    event_writer.send(SetStatusTextEvent::new_with_duration(
+                        message,
                         Duration::from_secs(5),
                     ));
                 }
             }
-            _ => {}
-        }
-
-        // If the other Player has just joined, note their info and also inform the local Player.
-        if app_state.local_player_initiated_gaming_session
-            && !game_started_before_call
-            && local_game_state.has_game_started
-        {
-            let message = format!(
-                "{} has joined! Let the game begin!",
-                app_state.other_player.clone().unwrap_or_default().display_name
-            );
-            event_writer.send(SetStatusTextEvent::new_with_duration(
-                message,
-                Duration::from_secs(5),
-            ));
         }
     }
 }

@@ -34,5 +34,7 @@ pub mod play_status;
 pub use self::play_status::PlayStatus;
 pub mod player_info;
 pub use self::player_info::PlayerInfo;
+pub mod players_readiness_response;
+pub use self::players_readiness_response::PlayersReadinessResponse;
 pub mod turn_response;
 pub use self::turn_response::TurnResponse;

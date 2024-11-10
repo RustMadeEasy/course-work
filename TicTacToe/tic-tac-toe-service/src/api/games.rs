@@ -13,14 +13,17 @@
  */
 
 use crate::errors::GameError;
+use crate::gaming::game_trait::GameTrait;
 use crate::gaming::gaming_sessions_manager::GamingSessionsManager;
 use crate::gaming::tic_tac_toe_game::TicTacToeGame;
 use crate::models::game_state::GameState;
+use crate::models::play_status::PlayStatus;
 use crate::models::player_info::PlayerInfo;
 use crate::models::requests::{EndGameParams, GameTurnParams, NewSinglePlayerGameParams, ID_LENGTH_MAX, ID_LENGTH_MIN};
-use crate::models::responses::{GameCreationResponse, GameInfoResponse, TurnResponse};
+use crate::models::responses::{GameCreationResponse, GameInfoResponse, PlayersReadinessResponse, TurnResponse};
 use actix_web::{delete, get, post, web, Error, HttpResponse};
 use log::debug;
+use std::time::Duration;
 use validator::Validate;
 
 
@@ -210,8 +213,7 @@ pub(crate) async fn get_latest_game_turn(
 
     let manager = manager.lock().await;
 
-    match manager.get_game_by_id(game_id.as_str()).await
-    {
+    match manager.get_game_by_id(game_id.as_str()).await {
         Ok(game) => {
             match game.latest_turn_result {
                 Some(result) => {
@@ -225,6 +227,73 @@ pub(crate) async fn get_latest_game_turn(
         }
         Err(error) => Err(error.into()),
     }
+}
+
+/// Retrieves the readiness of the Game's Players, answering the questions: Have all Players been
+/// added to the Game and setup?
+#[utoipa::path(
+    get,
+    tag = "TicTacToe",
+    path = "/v1/games/{game_id}/players/readiness",
+    params(("game_id" = String, Path, description = "Game ID"),),
+    responses(
+    (status = 200, description = "Latest Game Turn info retrieved successfully", body = PlayersReadinessResponse, content_type = "application/json"),
+    (status = 400, description = "Bad request - Malformed Game ID"),
+    (status = 404, description = "Game not found"),
+    (status = 500, description = "Internal server error")
+,), )]
+#[get("/games/{game_id}/players/readiness")]
+pub(crate) async fn get_players_readiness(
+    game_id: web::Path<String>,
+    manager: web::Data<tokio::sync::Mutex<GamingSessionsManager<TicTacToeGame>>>,
+) -> actix_web::Result<web::Json<PlayersReadinessResponse>> {
+    //
+
+    // *** Validate input params ***
+    validate_id_string(&game_id)?;
+
+    debug!("HTTP GET to /games/{}/players/readiness", game_id);
+
+    let mut response: PlayersReadinessResponse;
+    let long_poll_period_expired = true;
+    let sleep_interval_in_ms = 250;
+    let start_time = std::time::Instant::now();
+    let max_long_poll_duration = Duration::from_millis(30 * 1000);
+
+    loop {
+        response = {
+            let manager = manager.lock().await;
+            let response = match manager.get_game_by_id(game_id.as_str()).await {
+                Ok(game) => {
+                    match game.get_current_game_state().play_status {
+                        PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
+                            return Err(GameError::GameHasAlreadyEnded.into());
+                        }
+                        _ => {
+                            PlayersReadinessResponse {
+                                all_players_are_ready: game.get_current_game_state().play_status == PlayStatus::InProgress,
+                            }
+                        }
+                    }
+                }
+                Err(error) => {
+                    return Err(error.into())
+                }
+            };
+            drop(manager);
+            response
+        };
+        if response.all_players_are_ready || long_poll_period_expired {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(sleep_interval_in_ms)).await;
+        let current_time = std::time::Instant::now();
+        if (current_time - start_time) > max_long_poll_duration {
+            break;
+        }
+    }
+
+    Ok(web::Json(response))
 }
 
 /// Make a Game move (turn) for the specified Player. Returns the Turn Response.

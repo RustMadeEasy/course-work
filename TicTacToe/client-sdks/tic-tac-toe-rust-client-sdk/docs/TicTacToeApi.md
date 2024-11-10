@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**end_gaming_session**](TicTacToeApi.md#end_gaming_session) | **DELETE** /v1/gaming-sessions/{session_id} | Closes down the specified Gaming Session.
 [**get_game_history**](TicTacToeApi.md#get_game_history) | **GET** /v1/games/{game_id}/turns | Retrieves the history of Game States from the initial move (turn) to the current Game State. This can be used, for instance, to create an animated time-lapse of the Game play.
 [**get_latest_game_turn**](TicTacToeApi.md#get_latest_game_turn) | **GET** /v1/games/{game_id}/turns/latest | Retrieves the most recent Turn for the specified Game.
+[**get_players_readiness**](TicTacToeApi.md#get_players_readiness) | **GET** /v1/games/{game_id}/players/readiness | Retrieves the readiness of the Game's Players, answering the questions: Have all Players been added to the Game and setup?
 [**get_session_current_game**](TicTacToeApi.md#get_session_current_game) | **GET** /v1/gaming-sessions/{session_id}/current-game | Retrieves the Gaming Session's current Game.
 [**join_current_game**](TicTacToeApi.md#join_current_game) | **PUT** /v1/gaming-sessions/{session_id}/current_game/players/{player_id} | Adds a Player to the Session's Current Game.
 [**join_gaming_session**](TicTacToeApi.md#join_gaming_session) | **POST** /v1/gaming-sessions/players | Adds a Player to the Gaming Session.
@@ -204,6 +205,34 @@ Name | Type | Description  | Required | Notes
 ### Return type
 
 [**models::TurnResponse**](TurnResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+
+## get_players_readiness
+
+> models::PlayersReadinessResponse get_players_readiness(game_id)
+Retrieves the readiness of the Game's Players, answering the questions: Have all Players been added to the Game and setup?
+
+### Parameters
+
+
+Name | Type | Description  | Required | Notes
+------------- | ------------- | ------------- | ------------- | -------------
+**game_id** | **String** | Game ID | [required] |
+
+### Return type
+
+[**models::PlayersReadinessResponse**](PlayersReadinessResponse.md)
 
 ### Authorization
 

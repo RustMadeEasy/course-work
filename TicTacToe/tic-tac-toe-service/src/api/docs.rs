@@ -32,6 +32,7 @@ use crate::models::requests::NewSinglePlayerGameParams;
 use crate::models::responses::GameCreationResponse;
 use crate::models::responses::GameInfoResponse;
 use crate::models::responses::GamingSessionCreationResponse;
+use crate::models::responses::PlayersReadinessResponse;
 use crate::models::responses::TurnResponse;
 use actix_web::get;
 use log::debug;
@@ -50,6 +51,7 @@ use utoipa::OpenApi;
         end_gaming_session,
         get_game_history,
         get_latest_game_turn,
+        get_players_readiness,
         get_session_current_game,
         join_current_game,
         join_gaming_session,
@@ -73,6 +75,7 @@ use utoipa::OpenApi;
         NewGamingSessionParams,
         NewSinglePlayerGameParams,
         PlayerInfo,
+        PlayersReadinessResponse,
         PlayStatus,
         TurnResponse,
     ))
