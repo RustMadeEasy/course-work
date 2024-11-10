@@ -17,6 +17,7 @@ use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemC
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
+use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetSessionCurrentGameError;
 use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GameCreationResponse, GamePiece, GameTurnParams, GamingSessionCreationResponse, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
 
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
@@ -282,7 +283,7 @@ impl LocalGamePlayPlugin {
 
     /// Pulls the latest Game state from the GameStateCache.
     fn refresh_game_state(
-        app_state: ResMut<AppStateResource>,
+        mut app_state: ResMut<AppStateResource>,
         mut local_game_state: ResMut<GameStateResource>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
     ) {
@@ -361,7 +362,15 @@ impl LocalGamePlayPlugin {
             if GameStateCache::get_latest_game_readiness(&local_game_state.game_id).unwrap_or_else(|_| false) {
                 //
 
-                local_game_state.has_game_started = true;
+                match tic_tac_toe_api::get_session_current_game(&SDK_CONFIG, &app_state.gaming_session_id) {
+                    Ok(game_creation_response) => {
+                        app_state.other_player = game_creation_response.other_player.unwrap_or_default();
+                        local_game_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
+                        local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
+                        local_game_state.has_game_started = true;
+                    }
+                    Err(_) => {}
+                }
 
                 // The other Player has just joined. So, note their info and also inform the local Player.
                 if app_state.local_player_initiated_gaming_session

@@ -47,7 +47,7 @@ impl GameStateCache {
 
         // Try the mem cache
         let info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
-        let result = info_mutex.players_ready.clone();
+        let result = info_mutex.players_ready;
         drop(info_mutex);
 
         match result {
@@ -82,7 +82,7 @@ impl GameStateCache {
             Ok(response) => {
                 // Cache the result. We lock the mutex for only as long as it takes to write to it.
                 let mut info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
-                (*info_mutex).players_ready = Some(response.all_players_are_ready);
+                info_mutex.players_ready = Some(response.all_players_are_ready);
                 drop(info_mutex);
                 Ok(response.all_players_are_ready)
             }
@@ -140,17 +140,15 @@ impl GameStateCache {
                 drop(info_mutex);
 
                 // Call the server for the latest state of the specified Game.
-                if players_ready.is_none() || (players_ready.unwrap() == false) {
-
-                    match GameStateCache::load_and_cache_latest_game_turn(&local_info.game_id) {
+                if players_ready.is_none() || !players_ready.unwrap() {
+                    match GameStateCache::load_and_cache_players_readiness(&local_info.game_id) {
                         Ok(_) => {}
                         Err(error) => {
                             error!("{} - Error encountered: {:?}", function_name!(), error);
                         }
                     }
                 } else {
-
-                    match GameStateCache::load_and_cache_players_readiness(&local_info.game_id) {
+                    match GameStateCache::load_and_cache_latest_game_turn(&local_info.game_id) {
                         Ok(_) => {}
                         Err(error) => {
                             error!("{} - Error encountered: {:?}", function_name!(), error);
