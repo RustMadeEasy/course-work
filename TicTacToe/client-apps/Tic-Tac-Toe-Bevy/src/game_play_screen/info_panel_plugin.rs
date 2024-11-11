@@ -123,18 +123,20 @@ mod functionality {
                     );
                 } else {
                     text_sections.sections[0].value = format!("{} {}", app_state.local_player.display_name, GamePieceHelper::display_name(app_state.local_player.game_piece));
-                    if local_game_state.current_player.clone().unwrap().player_id != app_state.local_player.player_id {
-                        text_sections.sections[0].style = TextStyle {
-                            color: *BUTTON_COLOR_HOVERED,
-                            font: Default::default(),
-                            font_size: INFO_PANEL_FONT_SIZE_LABEL,
-                        };
-                    } else {
-                        text_sections.sections[0].style = TextStyle {
-                            color: *FOREGROUND_COLOR,
-                            font: Default::default(),
-                            font_size: INFO_PANEL_FONT_SIZE_LABEL,
-                        };
+                    if local_game_state.has_game_started {
+                        if local_game_state.current_player.clone().unwrap().player_id != app_state.local_player.player_id {
+                            text_sections.sections[0].style = TextStyle {
+                                color: *BUTTON_COLOR_HOVERED,
+                                font: Default::default(),
+                                font_size: INFO_PANEL_FONT_SIZE_LABEL,
+                            };
+                        } else {
+                            text_sections.sections[0].style = TextStyle {
+                                color: *FOREGROUND_COLOR,
+                                font: Default::default(),
+                                font_size: INFO_PANEL_FONT_SIZE_LABEL,
+                            };
+                        }
                     }
                 }
             }

@@ -17,7 +17,6 @@ use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemC
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
-use tic_tac_toe_rust_client_sdk::apis::tic_tac_toe_api::GetSessionCurrentGameError;
 use tic_tac_toe_rust_client_sdk::models::{AutomaticPlayerSkillLevel, GameCreationResponse, GamePiece, GameTurnParams, GamingSessionCreationResponse, JoinSessionParams, NewGamingSessionParams, NewSinglePlayerGameParams, PlayStatus};
 
 /// Provides the local, client-side logic that works with our TicTacToe Game Service.
@@ -244,10 +243,6 @@ impl LocalGamePlayPlugin {
             };
 
             *app_state = gaming_session_info.clone().into();
-            if !local_game_state.is_two_player_game {
-                app_state.invitation_code = "".to_string(); // Not needed for Single-Player Game.
-            }
-            app_state.local_player_initiated_gaming_session = true;
         };
 
         // *** Join the Game ***
