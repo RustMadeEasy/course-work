@@ -123,7 +123,7 @@ mod functionality {
                     );
                 } else {
                     text_sections.sections[0].value = format!("{} {}", app_state.local_player.display_name, GamePieceHelper::display_name(app_state.local_player.game_piece));
-                    if local_game_state.has_game_started {
+                    if local_game_state.has_game_started && local_game_state.current_player.is_some() {
                         if local_game_state.current_player.clone().unwrap().player_id != app_state.local_player.player_id {
                             text_sections.sections[0].style = TextStyle {
                                 color: *BUTTON_COLOR_HOVERED,
@@ -152,7 +152,7 @@ mod functionality {
         if local_game_state.is_changed() {
             if let Ok(mut text_sections) = bottom_text_query.get_single_mut() {
                 // Hide the other Player's section until the Game has started
-                if local_game_state.has_game_started {
+                if local_game_state.has_game_started && local_game_state.current_player.is_some() {
                     let other_player = app_state.other_player.clone().unwrap_or_default();
                     text_sections.sections[0].value = format!("{} {}", other_player.display_name, GamePieceHelper::display_name(other_player.game_piece));
                     if local_game_state.current_player.clone().unwrap().player_id != other_player.player_id {

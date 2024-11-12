@@ -209,26 +209,24 @@ impl LocalGamePlayPlugin {
                 }
             };
 
-            *app_state = gaming_session_info.clone().into();
-            if !local_game_state.is_two_player_game {
+            app_state.gaming_session_id = gaming_session_info.session_id.clone();
+            if local_game_state.is_two_player_game {
+                app_state.invitation_code = gaming_session_info.invitation_code;
+            } else {
                 app_state.invitation_code = "".to_string(); // Not needed for Single-Player Game.
             }
             app_state.local_player_initiated_gaming_session = true;
+            app_state.local_player = gaming_session_info.initiating_player.clone();
 
             // *** Create a new Game ***
 
             let game_creation_function = match local_game_state.is_two_player_game {
                 true => {
-                    local_game_state.is_two_player_game = true;
                     Self::create_two_player_game
                 }
                 false => Self::create_single_player_game,
             };
-            if let Some(new_game_state) = game_creation_function(&app_state) {
-                app_state.other_player = new_game_state.other_player.unwrap_or_default();
-                local_game_state.reset();
-                local_game_state.game_id = new_game_state.game_info.game_id;
-            }
+            let _ = game_creation_function(&app_state);
         } else {
             //
 
@@ -244,6 +242,7 @@ impl LocalGamePlayPlugin {
                 Ok(gaming_session_info) => gaming_session_info,
                 Err(error) => {
                     // TODO: JD: localize the text.
+                    error!("Error joining Gaming Session: {:?}", error);
                     let message = match error {
                         Error::ResponseError(error) => {
                             match error.status {
@@ -263,7 +262,12 @@ impl LocalGamePlayPlugin {
                 }
             };
 
-            *app_state = gaming_session_info.clone().into();
+            app_state.gaming_session_id = gaming_session_info.session_id.clone();
+            app_state.invitation_code = "".to_string(); // Not needed when accepting the invitation.
+            app_state.local_player = gaming_session_info.other_player.unwrap_or_default().unwrap_or_default();
+            app_state.local_player_initiated_gaming_session = false;
+
+            local_game_state.is_two_player_game = true;
         };
 
         // *** Join the Game ***
@@ -271,7 +275,7 @@ impl LocalGamePlayPlugin {
         let game_creation_response = match tic_tac_toe_api::join_current_game(&SDK_CONFIG, &gaming_session_info.session_id, &app_state.local_player.player_id) {
             Ok(response) => response,
             Err(error) => {
-                error!("Error joining gaming session: {:?}", error);
+                error!("Error joining Game: {:?}", error);
                 // TODO: JD: localize the text.
                 let message = match error {
                     Error::ResponseError(error) => {
@@ -292,6 +296,8 @@ impl LocalGamePlayPlugin {
                 return;
             }
         };
+        // app_state.other_player = game_creation_response.other_player.unwrap_or_default();
+        local_game_state.game_id = game_creation_response.game_info.game_id;
         if app_state.local_player_initiated_gaming_session {
             app_state.local_player = game_creation_response.initiating_player;
             app_state.other_player = game_creation_response.other_player.unwrap_or_default();
@@ -301,9 +307,8 @@ impl LocalGamePlayPlugin {
             }
             app_state.other_player = Some(game_creation_response.initiating_player);
         }
-        local_game_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
         local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
-        local_game_state.has_game_ended = (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInWin) || (game_creation_response.game_info.game_state.play_status == PlayStatus::EndedInStalemate);
+        local_game_state.has_game_ended = false;
 
         // *** Begin listening for Game change events ***
 
@@ -397,7 +402,9 @@ impl LocalGamePlayPlugin {
 
                 match tic_tac_toe_api::get_session_current_game(&SDK_CONFIG, &app_state.gaming_session_id) {
                     Ok(game_creation_response) => {
-                        app_state.other_player = game_creation_response.other_player.unwrap_or_default();
+                        if app_state.local_player_initiated_gaming_session {
+                            app_state.other_player = game_creation_response.other_player.unwrap_or_default();
+                        }
                         local_game_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
                         local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
                         local_game_state.has_game_started = true;

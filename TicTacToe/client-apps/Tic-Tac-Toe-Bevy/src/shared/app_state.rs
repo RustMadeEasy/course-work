@@ -4,7 +4,7 @@
 //  @author JoelDavisEngineering@Gmail.com
 
 use bevy::prelude::Resource;
-use tic_tac_toe_rust_client_sdk::models::{GamingSessionCreationResponse, PlayerInfo};
+use tic_tac_toe_rust_client_sdk::models::PlayerInfo;
 
 /// Houses the application state variables.
 #[derive(Default, Resource)]
@@ -63,17 +63,5 @@ impl AppStateResource {
     /// Clears all fields of this instance.
     pub(crate) fn reset(&mut self) {
         *self = Self::default()
-    }
-}
-
-impl From<GamingSessionCreationResponse> for AppStateResource {
-    fn from(value: GamingSessionCreationResponse) -> Self {
-        Self {
-            gaming_session_id: value.session_id,
-            invitation_code: value.invitation_code,
-            local_player_initiated_gaming_session: false,
-            local_player: value.initiating_player,
-            other_player: value.other_player.unwrap_or_default(),
-        }
     }
 }
