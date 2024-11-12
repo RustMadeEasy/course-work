@@ -13,7 +13,7 @@ use crate::shared::despawn;
 use crate::shared::game_state_resource::GameStateResource;
 use bevy::app::App;
 use bevy::log::error;
-use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, OnEnter, OnExit, Plugin, Res, ResMut, Update};
+use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, NextState, OnEnter, OnExit, Plugin, Res, ResMut, Update};
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
@@ -186,6 +186,8 @@ impl LocalGamePlayPlugin {
     fn join_or_begin_new_game(
         mut app_state: ResMut<AppStateResource>,
         mut local_game_state: ResMut<GameStateResource>,
+        mut event_writer: EventWriter<SetStatusTextEvent>,
+        mut next_state: ResMut<NextState<AppMode>>,
     ) {
         //
 
@@ -230,14 +232,33 @@ impl LocalGamePlayPlugin {
         } else {
             //
 
+            // Join an existing Gaming Session via Invitation Code
+
+            app_state.local_player_initiated_gaming_session = false;
+
             let params = JoinSessionParams {
                 game_invitation_code: app_state.invitation_code.clone(),
                 player_display_name: app_state.local_player.display_name.clone(),
             };
             gaming_session_info = match tic_tac_toe_api::join_gaming_session(&SDK_CONFIG, params) {
                 Ok(gaming_session_info) => gaming_session_info,
-                Err(_error) => {
-                    // TODO: JD: finish
+                Err(error) => {
+                    // TODO: JD: localize the text.
+                    let message = match error {
+                        Error::ResponseError(error) => {
+                            match error.status {
+                                reqwest::StatusCode::NOT_FOUND => "Gaming Session not found.",
+                                reqwest::StatusCode::INTERNAL_SERVER_ERROR => "Internal server error",
+                                _ => "An unexpected error was returned from the TicTacToe server.",
+                            }
+                        }
+                        _ => "An unexpected error was returned from the TicTacToe server.",
+                    };
+                    event_writer.send(SetStatusTextEvent::new_with_duration(
+                        message,
+                        Duration::from_secs(5),
+                    ));
+                    next_state.set(AppMode::StartMenu);
                     return
                 }
             };
@@ -251,6 +272,23 @@ impl LocalGamePlayPlugin {
             Ok(response) => response,
             Err(error) => {
                 error!("Error joining gaming session: {:?}", error);
+                // TODO: JD: localize the text.
+                let message = match error {
+                    Error::ResponseError(error) => {
+                        match error.status {
+                            reqwest::StatusCode::NOT_FOUND => "Game not found.",
+                            reqwest::StatusCode::BAD_REQUEST => "Bad request - Game not started",
+                            reqwest::StatusCode::INTERNAL_SERVER_ERROR => "Internal server error",
+                            _ => "An unexpected error was returned from the TicTacToe server.",
+                        }
+                    }
+                    _ => "An unexpected error was returned from the TicTacToe server.",
+                };
+                event_writer.send(SetStatusTextEvent::new_with_duration(
+                    message,
+                    Duration::from_secs(5),
+                ));
+                next_state.set(AppMode::StartMenu);
                 return;
             }
         };

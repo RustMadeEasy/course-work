@@ -132,7 +132,7 @@ impl TilesPlugin {
     ) {
         //
 
-        if !local_game_state.is_changed() || local_game_state.current_game_state.play_status == PlayStatus::NotStarted {
+        if !local_game_state.is_changed() || local_game_state.game_id.is_empty() || local_game_state.current_game_state.play_status == PlayStatus::NotStarted {
             return;
         }
 
