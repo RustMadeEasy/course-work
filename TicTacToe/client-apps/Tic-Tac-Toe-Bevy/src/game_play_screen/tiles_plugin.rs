@@ -8,7 +8,6 @@ use crate::game_play_screen::tile_components::{
 };
 use crate::game_play_screen::{OnGamePlayScreen, Point, TilePressedEvent, GRID_COLUMNS, GRID_ROWS};
 use crate::shared::app_mode::AppMode;
-use crate::shared::game_state_resource::GameStateResource;
 use crate::shared::{BACKGROUND_COLOR, FOREGROUND_COLOR};
 use bevy::a11y::accesskit::Size;
 use bevy::app::{App, FixedUpdate};
@@ -23,6 +22,7 @@ use bevy::text::{Text, Text2dBundle};
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
 use tic_tac_toe_rust_client_sdk::models::{BoardPosition, GamePiece, PlayStatus};
+use crate::shared::app_state_resource::AppStateResource;
 
 const TILE_FONT_SIZE: f32 = 44_f32;
 const TILE_SIDE: f32 = 100_f32;
@@ -104,7 +104,7 @@ impl TilesPlugin {
     /// Provides a backing visual flare (highlight) to the Tiles that represent the TicTacToe
     /// 3-in-a-row winning combination.
     fn highlight_winning_tiles(
-        local_game_state: Res<GameStateResource>,
+        app_state: Res<AppStateResource>,
         mut tile_highlights: Query<
             (&mut Visibility, &TileHighlightComponent),
             With<TileHighlightComponent>,
@@ -112,11 +112,11 @@ impl TilesPlugin {
     ) {
         //
 
-        if !local_game_state.is_changed() {
+        if !app_state.is_changed() {
             return;
         }
 
-        if let Some(winning_locations) = &local_game_state.winning_locations {
+        if let Some(winning_locations) = &app_state.winning_locations {
             for (mut visibility, tile_info) in tile_highlights.iter_mut() {
                 if winning_locations.contains(&tile_info.grid_position) {
                     *visibility = Visibility::Visible;
@@ -127,17 +127,17 @@ impl TilesPlugin {
 
     /// Updates each Tile's label with the visual representation of its Game Piece (if any).
     fn update_tiles(
-        local_game_state: Res<GameStateResource>,
+        app_state: Res<AppStateResource>,
         mut label_query: Query<(&mut Text, &TileLabelComponent), With<TileLabelComponent>>,
     ) {
         //
 
-        if !local_game_state.is_changed() || local_game_state.game_id.is_empty() || local_game_state.current_game_state.play_status == PlayStatus::NotStarted {
+        if !app_state.is_changed() || app_state.game_id.is_empty() || app_state.current_game_state.play_status == PlayStatus::NotStarted {
             return;
         }
 
         for (mut label, tile_info) in label_query.iter_mut() {
-            label.sections[0].value = match local_game_state.get_game_piece_at_placement(&tile_info.grid_position) {
+            label.sections[0].value = match app_state.get_game_piece_at_placement(&tile_info.grid_position) {
                 GamePiece::Unselected => "".to_string(),
                 GamePiece::X => "X".to_string(),
                 GamePiece::O => "O".to_string(),

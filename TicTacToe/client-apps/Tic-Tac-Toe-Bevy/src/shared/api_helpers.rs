@@ -127,37 +127,35 @@ impl GameStateCache {
         drop(info_mutex);
 
         std::thread::spawn(|| {
+            //
+
             loop {
                 // Get a local snapshot of the info to work from. We do this per loop so that
                 // these settings can be changed dynamically. NOTE: We don't want to keep the mutex
                 // locked for the duration of this call.
-                let local_info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
-                let local_info = local_info_mutex.clone();
-                drop(local_info_mutex);
-
-                let info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
-                let players_ready = info_mutex.players_ready;
-                drop(info_mutex);
+                let auto_update_info = AUTO_UPDATE_INFO.lock().unwrap();
+                let cloned_info = auto_update_info.clone();
+                drop(auto_update_info);
 
                 // Call the server for the latest state of the specified Game.
-                if players_ready.is_none() || !players_ready.unwrap() {
-                    match GameStateCache::load_and_cache_players_readiness(&local_info.game_id) {
+                if cloned_info.players_ready.is_none() || !cloned_info.players_ready.unwrap() {
+                    match GameStateCache::load_and_cache_players_readiness(&cloned_info.game_id) {
                         Ok(_) => {}
                         Err(error) => {
-                            error!("{} - Error encountered: {:?}", function_name!(), error);
+                            error!("{} - Error encountered calling load_and_cache_players_readiness(): {:?}", function_name!(), error);
                         }
                     }
                 } else {
-                    match GameStateCache::load_and_cache_latest_game_turn(&local_info.game_id) {
+                    match GameStateCache::load_and_cache_latest_game_turn(&cloned_info.game_id) {
                         Ok(_) => {}
                         Err(error) => {
-                            error!("{} - Error encountered: {:?}", function_name!(), error);
+                            error!("{} - Error encountered calling load_and_cache_latest_game_turn(): {:?}", function_name!(), error);
                         }
                     }
                 }
 
                 // Sleep for the interval.
-                std::thread::sleep(local_info.interval);
+                std::thread::sleep(cloned_info.interval);
             }
         });
     }

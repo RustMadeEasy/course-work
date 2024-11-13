@@ -53,7 +53,7 @@ mod functionality {
     };
     use crate::invitation_screen::ButtonPurpose;
     use crate::shared::app_mode::AppMode;
-    use crate::shared::app_state::AppStateResource;
+    use crate::shared::app_state_resource::AppStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
 
     /// Provides button functionality, including state changes as well as response when clicked.
@@ -160,7 +160,7 @@ mod ui {
 
     use crate::invitation_screen::invite_screen_plugin::InvitationCodeLabelComponent;
     use crate::invitation_screen::{ButtonPurpose, OnInvitationScreen};
-    use crate::shared::app_state::AppStateResource;
+    use crate::shared::app_state_resource::AppStateResource;
     use crate::shared::{BUTTON_COLOR_NORMAL, FONT_SIZE, TEXT_COLOR};
 
     pub(super) fn spawn_ui(

@@ -8,12 +8,11 @@ use std::time::Duration;
 use crate::game_play_screen::{OnGamePlayScreen, TilePressedEvent};
 use crate::shared::api_helpers::{GameStateCache, SDK_CONFIG};
 use crate::shared::app_mode::AppMode;
-use crate::shared::app_state::AppStateResource;
+use crate::shared::app_state_resource::AppStateResource;
 use crate::shared::despawn;
-use crate::shared::game_state_resource::GameStateResource;
 use bevy::app::App;
 use bevy::log::error;
-use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, NextState, OnEnter, OnExit, Plugin, Res, ResMut, Update};
+use bevy::prelude::{in_state, EventReader, EventWriter, FixedUpdate, IntoSystemConfigs, NextState, OnEnter, OnExit, Plugin, ResMut, Update};
 use bevy::time::common_conditions::on_timer;
 use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 use tic_tac_toe_rust_client_sdk::apis::{tic_tac_toe_api, Error};
@@ -50,10 +49,9 @@ impl LocalGamePlayPlugin {
 
     /// Handles the Tile Pressed event.
     fn handle_tile_pressed(
-        app_state: Res<AppStateResource>,
+        mut app_state: ResMut<AppStateResource>,
         mut event_reader: EventReader<TilePressedEvent>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
-        mut local_game_state: ResMut<GameStateResource>,
     ) {
         //
 
@@ -61,7 +59,7 @@ impl LocalGamePlayPlugin {
             //
 
             // Ignore clicks if the Game has yet to begin.
-            if !local_game_state.has_game_started {
+            if !app_state.has_game_started {
                 event_writer.send(SetStatusTextEvent::new_with_duration(
                     "Waiting for another player to join game. Please send out the invitation code.",
                     Duration::from_secs(10),
@@ -70,7 +68,7 @@ impl LocalGamePlayPlugin {
             }
 
             // Ignore clicks if the Game has already ended.
-            if local_game_state.has_game_ended {
+            if app_state.has_game_ended {
                 event_writer.send(SetStatusTextEvent::new_with_duration(
                     "Game has already ended.",
                     Duration::from_secs(30),
@@ -79,7 +77,7 @@ impl LocalGamePlayPlugin {
             }
 
             // Ignore clicks for Tiles on which pieces have already been placed.
-            if local_game_state.get_game_piece_at_placement(&event.grid_position)
+            if app_state.get_game_piece_at_placement(&event.grid_position)
                 != GamePiece::Unselected
             {
                 event_writer.send(SetStatusTextEvent::new_with_duration(
@@ -95,7 +93,7 @@ impl LocalGamePlayPlugin {
             );
 
             // Ignore clicks if it is not the local Player's turn.
-            if let Some(current_player) = local_game_state.current_player.clone() {
+            if let Some(current_player) = app_state.current_player.clone() {
                 if app_state.local_player.player_id != current_player.player_id {
                     event_writer.send(SetStatusTextEvent::new_with_duration(
                         not_local_player_turn,
@@ -112,7 +110,7 @@ impl LocalGamePlayPlugin {
             // with the proposed game move. The call to the service may fail or even be rejected,
             // e.g. the other Player has abandoned the Game, etc. However, it is better to support
             // the usual case.
-            local_game_state.current_game_state.game_board[event.grid_position.row as usize][event.grid_position.column as usize] =
+            app_state.current_game_state.game_board[event.grid_position.row as usize][event.grid_position.column as usize] =
                 app_state.local_player.game_piece;
 
             // Call our remote Game play server to take the turn.
@@ -123,7 +121,7 @@ impl LocalGamePlayPlugin {
             };
             match tic_tac_toe_api::take_turn(
                 &SDK_CONFIG,
-                &local_game_state.game_id,
+                &app_state.game_id,
                 params) {
                 Ok(_) => {}
                 Err(error) => {
@@ -185,7 +183,6 @@ impl LocalGamePlayPlugin {
     /// initiating the Game.
     fn join_or_begin_new_game(
         mut app_state: ResMut<AppStateResource>,
-        mut local_game_state: ResMut<GameStateResource>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
         mut next_state: ResMut<NextState<AppMode>>,
     ) {
@@ -210,7 +207,7 @@ impl LocalGamePlayPlugin {
             };
 
             app_state.gaming_session_id = gaming_session_info.session_id.clone();
-            if local_game_state.is_two_player_game {
+            if app_state.is_two_player_game {
                 app_state.invitation_code = gaming_session_info.invitation_code;
             } else {
                 app_state.invitation_code = "".to_string(); // Not needed for Single-Player Game.
@@ -220,7 +217,7 @@ impl LocalGamePlayPlugin {
 
             // *** Create a new Game ***
 
-            let game_creation_function = match local_game_state.is_two_player_game {
+            let game_creation_function = match app_state.is_two_player_game {
                 true => {
                     Self::create_two_player_game
                 }
@@ -267,7 +264,7 @@ impl LocalGamePlayPlugin {
             app_state.local_player = gaming_session_info.other_player.unwrap_or_default().unwrap_or_default();
             app_state.local_player_initiated_gaming_session = false;
 
-            local_game_state.is_two_player_game = true;
+            app_state.is_two_player_game = true;
         };
 
         // *** Join the Game ***
@@ -297,7 +294,7 @@ impl LocalGamePlayPlugin {
             }
         };
         // app_state.other_player = game_creation_response.other_player.unwrap_or_default();
-        local_game_state.game_id = game_creation_response.game_info.game_id;
+        app_state.game_id = game_creation_response.game_info.game_id;
         if app_state.local_player_initiated_gaming_session {
             app_state.local_player = game_creation_response.initiating_player;
             app_state.other_player = game_creation_response.other_player.unwrap_or_default();
@@ -307,14 +304,16 @@ impl LocalGamePlayPlugin {
             }
             app_state.other_player = Some(game_creation_response.initiating_player);
         }
-        local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
-        local_game_state.has_game_ended = false;
+        app_state.current_game_state = game_creation_response.game_info.game_state.clone();
+        app_state.has_game_ended = false;
 
         // *** Begin listening for Game change events ***
 
+        // TODO: JD: when the Game ends, we need to shut down the auto-update Task.
+
         // Point the background update thread to the new Game ID.
         GameStateCache::setup_auto_update(
-            &local_game_state.game_id,
+            &app_state.game_id,
             &Duration::from_millis(STATE_UPDATE_INTERVAL_IN_MS / 2),
         );
     }
@@ -322,22 +321,21 @@ impl LocalGamePlayPlugin {
     /// Pulls the latest Game state from the GameStateCache.
     fn refresh_game_state(
         mut app_state: ResMut<AppStateResource>,
-        mut local_game_state: ResMut<GameStateResource>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
     ) {
         //
 
         // Exit early if the game is no longer in progress.
-        if local_game_state.game_id.is_empty() && local_game_state.has_game_ended {
+        if app_state.game_id.is_empty() && app_state.has_game_ended {
             return;
         }
 
-        let game_started_before_call = local_game_state.has_game_started;
+        let game_started_before_call = app_state.has_game_started;
 
-        if local_game_state.has_game_started {
+        if app_state.has_game_started {
 
             // Grab the latest Turn info
-            let turn_response = match GameStateCache::get_latest_game_turn(&local_game_state.game_id) {
+            let turn_response = match GameStateCache::get_latest_game_turn(&app_state.game_id) {
                 Ok(remote_game_info) => remote_game_info,
                 Err(error) => {
                     // TODO: JD: localize the text.
@@ -360,17 +358,17 @@ impl LocalGamePlayPlugin {
                 }
             };
 
-            local_game_state.current_game_state = turn_response.new_game_state.clone();
-            local_game_state.current_player = turn_response.current_player.clone().unwrap_or_default();
+            app_state.current_game_state = turn_response.new_game_state.clone();
+            app_state.current_player = turn_response.current_player.clone().unwrap_or_default();
 
             // If the Game has ended, let the user know the results.
-            match local_game_state.current_game_state.play_status {
+            match app_state.current_game_state.play_status {
                 PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => {
                     let winning_player_name =
-                        if local_game_state.current_game_state.play_status == PlayStatus::EndedInWin {
+                        if app_state.current_game_state.play_status == PlayStatus::EndedInWin {
                             Some(
                                 if app_state.local_player.player_id
-                                    == local_game_state.current_game_state.id_of_player_who_made_move.clone()
+                                    == app_state.current_game_state.id_of_player_who_made_move.clone()
                                 {
                                     app_state.local_player.display_name.clone()
                                 } else {
@@ -380,7 +378,7 @@ impl LocalGamePlayPlugin {
                         } else {
                             None
                         };
-                    let game_results = local_game_state.generate_results_text(
+                    let game_results = app_state.generate_results_text(
                         &turn_response,
                         &app_state.local_player.display_name,
                         &winning_player_name,
@@ -397,7 +395,7 @@ impl LocalGamePlayPlugin {
         } else {
             //
 
-            if GameStateCache::get_latest_game_readiness(&local_game_state.game_id).unwrap_or_else(|_| false) {
+            if GameStateCache::get_latest_game_readiness(&app_state.game_id).unwrap_or_else(|_| false) {
                 //
 
                 match tic_tac_toe_api::get_session_current_game(&SDK_CONFIG, &app_state.gaming_session_id) {
@@ -405,9 +403,9 @@ impl LocalGamePlayPlugin {
                         if app_state.local_player_initiated_gaming_session {
                             app_state.other_player = game_creation_response.other_player.unwrap_or_default();
                         }
-                        local_game_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
-                        local_game_state.current_game_state = game_creation_response.game_info.game_state.clone();
-                        local_game_state.has_game_started = true;
+                        app_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
+                        app_state.current_game_state = game_creation_response.game_info.game_state.clone();
+                        app_state.has_game_started = true;
                     }
                     Err(_) => {}
                 }
@@ -415,7 +413,7 @@ impl LocalGamePlayPlugin {
                 // The other Player has just joined. So, note their info and also inform the local Player.
                 if app_state.local_player_initiated_gaming_session
                     && !game_started_before_call
-                    && local_game_state.has_game_started
+                    && app_state.has_game_started
                 {
                     let message = format!(
                         "{} has joined! Let the game begin!",

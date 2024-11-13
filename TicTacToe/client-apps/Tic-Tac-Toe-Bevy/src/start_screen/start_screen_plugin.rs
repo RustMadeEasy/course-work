@@ -57,8 +57,7 @@ mod functionality {
     use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 
     use crate::shared::app_mode::AppMode;
-    use crate::shared::app_state::AppStateResource;
-    use crate::shared::game_state_resource::GameStateResource;
+    use crate::shared::app_state_resource::AppStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED};
     use crate::start_screen::start_screen_plugin::{ButtonPurpose, PlayerNameLabelComponent};
 
@@ -66,7 +65,6 @@ mod functionality {
     #[allow(clippy::type_complexity)] // The query is complex by necessity.
     pub(super) fn button_interaction(
         mut app_state: ResMut<AppStateResource>,
-        mut game_state: ResMut<GameStateResource>,
         mut event_writer: EventWriter<SetStatusTextEvent>,
         mut interactions: Query<
             (
@@ -102,13 +100,13 @@ mod functionality {
                             ButtonPurpose::StartTwoPlayerGame => {
                                 // Reflect the fact that this local Player is the one who initiated the Game.
                                 app_state.local_player_initiated_gaming_session = true;
-                                game_state.is_two_player_game = true;
+                                app_state.is_two_player_game = true;
                                 next_state.set(AppMode::GamePlay);
                             }
                             ButtonPurpose::StartSinglePlayerGame => {
                                 // Reflect the fact that this local Player is the one who initiated the Game.
                                 app_state.local_player_initiated_gaming_session = true;
-                                game_state.is_two_player_game = false;
+                                app_state.is_two_player_game = false;
                                 next_state.set(AppMode::GamePlay);
                             }
                         }
@@ -128,7 +126,6 @@ mod functionality {
     /// Clears the relevant values of the local Game state.
     pub(super) fn reset_game_play(
         mut app_state: ResMut<AppStateResource>,
-        mut local_game_state: ResMut<GameStateResource>,
     ) {
         // Forget everything except for the local Player's chosen name.
         let local_player_name = app_state.local_player.display_name.clone();
@@ -138,7 +135,7 @@ mod functionality {
         // TODO: JD: BUG: in some cases, the winning game slots remain highlighted when starting a
         // new game.
 
-        local_game_state.reset();
+        app_state.reset();
     }
 
     /// Provides keyboard input and rudimentary editing for the Player display name text field.

@@ -6,9 +6,8 @@ use crate::camera_plugin::CameraPlugin;
 use crate::game_play_screen::GamePlayPluginGroup;
 use crate::invitation_screen::invite_screen_plugin::InvitationScreenPlugin;
 use crate::shared::app_mode::AppMode;
-use crate::shared::app_state::AppStateResource;
+use crate::shared::app_state_resource::AppStateResource;
 use crate::start_screen::start_screen_plugin::StartScreenPlugin;
-use shared::game_state_resource::GameStateResource;
 
 pub(crate) mod camera_plugin;
 mod game_play_screen;
@@ -37,7 +36,6 @@ fn main() {
 
     App::new()
         .insert_resource(AppStateResource::default())
-        .insert_resource(GameStateResource::default())
         .add_plugins(DefaultPlugins.set(window_plugin))
         .add_plugins(StatusTextPlugin::default())
         .add_plugins(GamePlayPluginGroup)

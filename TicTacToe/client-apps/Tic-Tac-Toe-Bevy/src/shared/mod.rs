@@ -7,8 +7,7 @@ use bevy::prelude::{Color, Commands, Component, Entity, Query, With};
 use std::sync::LazyLock;
 
 pub(crate) mod app_mode;
-pub(crate) mod app_state;
-pub(crate) mod game_state_resource;
+pub(crate) mod app_state_resource;
 pub(crate) mod api_helpers;
 
 pub(crate) static BACKGROUND_COLOR: LazyLock<Color> = LazyLock::new(|| { Color::hex("521c93").unwrap() });
