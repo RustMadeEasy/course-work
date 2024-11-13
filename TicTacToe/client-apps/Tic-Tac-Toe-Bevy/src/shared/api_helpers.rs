@@ -97,6 +97,7 @@ impl GameStateCache {
 
         let mut info_mutex = AUTO_UPDATE_INFO.lock().unwrap();
 
+        *info_mutex = Default::default();
         info_mutex.game_id = new_game_id.to_string();
         info_mutex.interval = *interval;
         let is_already_running = info_mutex.is_running;

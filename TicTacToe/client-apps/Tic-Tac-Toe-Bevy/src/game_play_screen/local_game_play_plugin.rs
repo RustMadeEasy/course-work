@@ -212,7 +212,6 @@ impl LocalGamePlayPlugin {
             } else {
                 app_state.invitation_code = "".to_string(); // Not needed for Single-Player Game.
             }
-            app_state.local_player_initiated_gaming_session = true;
             app_state.local_player = gaming_session_info.initiating_player.clone();
 
             // *** Create a new Game ***
