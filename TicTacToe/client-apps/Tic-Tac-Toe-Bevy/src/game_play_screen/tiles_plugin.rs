@@ -42,7 +42,7 @@ impl Plugin for TilesPlugin {
             .add_event::<TilePressedEvent>()
             .add_systems(OnEnter(AppMode::GamePlay), Self::spawn_tiles)
             .add_systems(
-                Update,
+                FixedUpdate,
                 (Self::update_tiles, Self::highlight_winning_tiles)
                     .run_if(in_state(AppMode::GamePlay)),
             )
