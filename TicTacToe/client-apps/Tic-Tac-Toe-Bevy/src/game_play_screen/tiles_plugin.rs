@@ -8,6 +8,7 @@ use crate::game_play_screen::tile_components::{
 };
 use crate::game_play_screen::{OnGamePlayScreen, Point, TilePressedEvent, GRID_COLUMNS, GRID_ROWS};
 use crate::shared::app_mode::AppMode;
+use crate::shared::app_state_resource::AppStateResource;
 use crate::shared::{BACKGROUND_COLOR, FOREGROUND_COLOR};
 use bevy::a11y::accesskit::Size;
 use bevy::app::{App, FixedUpdate};
@@ -22,7 +23,6 @@ use bevy::text::{Text, Text2dBundle};
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
 use tic_tac_toe_rust_client_sdk::models::{BoardPosition, GamePiece, PlayStatus};
-use crate::shared::app_state_resource::AppStateResource;
 
 const TILE_FONT_SIZE: f32 = 44_f32;
 const TILE_SIDE: f32 = 100_f32;

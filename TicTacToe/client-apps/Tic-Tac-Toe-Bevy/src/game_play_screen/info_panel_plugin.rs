@@ -60,10 +60,10 @@ mod functionality {
     use helpers_for_bevy::status_text::events::SetStatusTextEvent;
 
     use crate::game_play_screen::info_panel_plugin::{InfoPanelUiComponentBottom, InfoPanelUiComponentTop, INFO_PANEL_FONT_SIZE_LABEL};
+    use crate::shared::api_helpers::GamePieceHelper;
     use crate::shared::app_mode::AppMode;
     use crate::shared::app_state_resource::AppStateResource;
     use crate::shared::{BUTTON_COLOR_HOVERED, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED, FOREGROUND_COLOR};
-    use crate::shared::api_helpers::GamePieceHelper;
 
     /// Provides button functionality, including state changes as well as response to presses.
     #[allow(clippy::type_complexity)] // The query is complex by necessity.

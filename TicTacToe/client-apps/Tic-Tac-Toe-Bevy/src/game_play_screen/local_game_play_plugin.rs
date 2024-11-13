@@ -255,7 +255,7 @@ impl LocalGamePlayPlugin {
                         Duration::from_secs(5),
                     ));
                     next_state.set(AppMode::StartMenu);
-                    return
+                    return;
                 }
             };
 
@@ -395,19 +395,16 @@ impl LocalGamePlayPlugin {
         } else {
             //
 
-            if GameStateCache::get_latest_game_readiness(&app_state.game_id).unwrap_or_else(|_| false) {
+            if GameStateCache::get_latest_game_readiness(&app_state.game_id).unwrap_or_default() {
                 //
 
-                match tic_tac_toe_api::get_session_current_game(&SDK_CONFIG, &app_state.gaming_session_id) {
-                    Ok(game_creation_response) => {
-                        if app_state.local_player_initiated_gaming_session {
-                            app_state.other_player = game_creation_response.other_player.unwrap_or_default();
-                        }
-                        app_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
-                        app_state.current_game_state = game_creation_response.game_info.game_state.clone();
-                        app_state.has_game_started = true;
+                if let Ok(game_creation_response) = tic_tac_toe_api::get_session_current_game(&SDK_CONFIG, &app_state.gaming_session_id) {
+                    if app_state.local_player_initiated_gaming_session {
+                        app_state.other_player = game_creation_response.other_player.unwrap_or_default();
                     }
-                    Err(_) => {}
+                    app_state.current_player = game_creation_response.game_info.current_player.unwrap_or_default();
+                    app_state.current_game_state = game_creation_response.game_info.game_state.clone();
+                    app_state.has_game_started = true;
                 }
 
                 // The other Player has just joined. So, note their info and also inform the local Player.
