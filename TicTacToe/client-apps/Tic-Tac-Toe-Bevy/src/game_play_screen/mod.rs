@@ -13,7 +13,7 @@ use tic_tac_toe_rust_client_sdk::models::BoardPosition;
 
 pub(super) mod info_panel_plugin;
 pub(super) mod local_game_play_plugin;
-mod tile_components;
+mod tile_component;
 pub(super) mod tiles_plugin;
 
 pub(super) const GRID_ROWS: usize = 3;

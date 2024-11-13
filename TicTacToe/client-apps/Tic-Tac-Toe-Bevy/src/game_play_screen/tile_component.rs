@@ -13,25 +13,11 @@ use tic_tac_toe_rust_client_sdk::models::BoardPosition;
 #[derive(Component, Debug)]
 pub(in crate::game_play_screen) struct TileDetailsComponent {
     pub(super) grid_position: BoardPosition,
-    window_rect: Rect,
+    pub(super) window_rect: Rect,
 }
 
 impl TileDetailsComponent {
     //
-
-    /// Determines whether the specified location (point) is within the bounds of the
-    /// TileDetailsComponent instance.
-    pub(in crate::game_play_screen) fn hit_test(&self, hit_location: &Point) -> bool {
-        self.window_rect.contains((*hit_location).clone().into())
-    }
-
-    /// Determines the bounding box for a specified center-point and size.
-    fn determine_bounding_box(window_center: &Point, size: &Size) -> Rect {
-        Rect::from_center_size(
-            (*window_center).clone().into(),
-            Vec2::new(size.width as f32, size.height as f32),
-        )
-    }
 
     /// Creates a new TileDetailsComponent instance.
     pub(in crate::game_play_screen) fn new(
@@ -41,7 +27,7 @@ impl TileDetailsComponent {
     ) -> Self {
         Self {
             grid_position: grid_position.clone(),
-            window_rect: Self::determine_bounding_box(window_placement, size),
+            window_rect: determine_bounding_box(window_placement, size),
         }
     }
 }
@@ -70,9 +56,23 @@ pub(super) struct TileLabelComponent {
 }
 impl TileLabelComponent {
     /// Creates a new TileLabelComponent instance.
-    pub(super) fn new(grid_position: &BoardPosition) -> Self {
+    pub(in crate::game_play_screen) fn new(grid_position: &BoardPosition) -> Self {
         Self {
             grid_position: grid_position.clone(),
         }
     }
+}
+
+/// Determines whether the specified location (point) is within the bounds of the
+/// TileDetailsComponent instance.
+pub(in crate::game_play_screen) fn hit_test(window_rect: &Rect, hit_location: &Point) -> bool {
+    window_rect.contains((*hit_location).clone().into())
+}
+
+/// Determines the bounding box for a specified center-point and size.
+fn determine_bounding_box(window_center: &Point, size: &Size) -> Rect {
+    Rect::from_center_size(
+        (*window_center).clone().into(),
+        Vec2::new(size.width as f32, size.height as f32),
+    )
 }

@@ -3,9 +3,7 @@
 //  © 2024 Rust Made Easy. All rights reserved.
 //  @author JoelDavisEngineering@Gmail.com
 
-use crate::game_play_screen::tile_components::{
-    TileDetailsComponent, TileHighlightComponent, TileLabelComponent,
-};
+use crate::game_play_screen::tile_component::{hit_test, TileDetailsComponent, TileHighlightComponent, TileLabelComponent};
 use crate::game_play_screen::{OnGamePlayScreen, Point, TilePressedEvent, GRID_COLUMNS, GRID_ROWS};
 use crate::shared::app_mode::AppMode;
 use crate::shared::app_state_resource::AppStateResource;
@@ -49,7 +47,7 @@ impl Plugin for TilesPlugin {
                     .run_if(in_state(AppMode::GamePlay)),
             )
             .add_systems(
-                FixedUpdate,
+                Update,
                 Self::detect_tile_hit
                     .run_if(in_state(AppMode::GamePlay))
                     .run_if(input_pressed(MouseButton::Left)),
@@ -63,7 +61,7 @@ impl TilesPlugin {
 
     /// Detects when any game Tile is hit, posting a Tile Pressed Event.
     fn detect_tile_hit(
-        button: Res<ButtonInput<MouseButton>>,
+        button_input: Res<ButtonInput<MouseButton>>,
         camera_query: Query<(&Camera, &GlobalTransform)>,
         mut event_writer: EventWriter<TilePressedEvent>,
         tiles_query: Query<&TileDetailsComponent>,
@@ -71,7 +69,7 @@ impl TilesPlugin {
     ) {
         //
 
-        if !button.just_pressed(MouseButton::Left) {
+        if !button_input.just_pressed(MouseButton::Left) {
             return;
         }
 
@@ -88,18 +86,19 @@ impl TilesPlugin {
                     camera.viewport_to_world_2d(camera_transform, cursor_position)
                 {
                     // See if any Tile was pressed.
-                    for tile in &tiles_query {
-                        if tile.hit_test(&cursor_position.into()) {
+                    for label in &tiles_query {
+                        if hit_test(&label.window_rect, &cursor_position.into()) {
                             event_writer.send(TilePressedEvent {
-                                grid_position: tile.grid_position.clone(),
+                                grid_position: label.grid_position.clone(),
                             });
                             return;
                         }
                     }
-                };
-            }
+                }
+            };
         }
     }
+
 
     /// Provides a backing visual flare (highlight) to the Tiles that represent the TicTacToe
     /// 3-in-a-row winning combination.
