@@ -56,7 +56,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSession<T> {
         debug!("{} called", function_name!());
         Self {
             current_game: None,
-            event_plane_config: EventPlaneConfig::new(broker_address, broker_port, Uuid::new_v4().to_string()),
+            event_plane_config: EventPlaneConfig::new(broker_address, broker_port),
             session_id: Uuid::new_v4().to_string(),
             invitation_code: Self::generate_invitation_code(),
             participants: vec![session_owner.clone()],

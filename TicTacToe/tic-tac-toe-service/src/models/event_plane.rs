@@ -8,6 +8,7 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 /// Domain to use for the base of the topic prefix
 const DOMAIN_NAME: &str = "RustMadeEasy.com";
@@ -32,7 +33,8 @@ pub struct EventPlaneConfig {
 
 impl EventPlaneConfig {
     /// Creates a new instance
-    pub fn new(broker_address: String, broker_port: u16, channel_id: String) -> Self {
+    pub fn new(broker_address: String, broker_port: u16) -> Self {
+        let channel_id = Uuid::new_v4().to_string();
         Self {
             broker_address,
             channel_id: channel_id.clone(),
@@ -80,8 +82,7 @@ impl EventPlaneTopicNames {
     //
 
     /// Constructs a topic specific to the Channel ID
-    pub fn build(&self, event_channel_id: &str) -> String {
-        let topic_prefix = Self::build_topic_prefix(event_channel_id);
+    pub fn build(&self, topic_prefix: &str) -> String {
         match self {
             EventPlaneTopicNames::AllPlayersReady => format!("{topic_prefix}/{}", EventPlaneTopicNames::AllPlayersReady),
             EventPlaneTopicNames::GameDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameDeleted),

@@ -58,7 +58,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
 
         debug!("{} called for session {}", function_name!(), session.session_id);
 
-        let event_channel_id = session.session_id.as_str();
+        let event_channel_id = session.event_plane_config.topic_prefix.as_str();
 
         let topic = match state_change {
             GamingSessionStateChanges::GameDeleted => {
