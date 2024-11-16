@@ -58,19 +58,18 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
 
         debug!("{} called for session {}", function_name!(), session.session_id);
 
-        let topic_prefix = session.get_event_plane_config().topic_prefix;
-        let topic_prefix = topic_prefix.as_str();
+        let event_channel_id = session.session_id.as_str();
 
         let topic = match state_change {
             GamingSessionStateChanges::GameDeleted => {
-                EventPlaneTopicNames::GameDeleted.build(topic_prefix)
+                EventPlaneTopicNames::GameDeleted.build(event_channel_id)
             }
             GamingSessionStateChanges::GameTurnTaken => {
                 if let Some(game) = game {
                     match game.get_current_game_state().play_status {
-                        PlayStatus::EndedInStalemate => EventPlaneTopicNames::GameEndedInStalemate.build(topic_prefix),
-                        PlayStatus::EndedInWin => EventPlaneTopicNames::GameEndedInWin.build(topic_prefix),
-                        PlayStatus::InProgress => EventPlaneTopicNames::TurnTaken.build(topic_prefix),
+                        PlayStatus::EndedInStalemate => EventPlaneTopicNames::GameEndedInStalemate.build(event_channel_id),
+                        PlayStatus::EndedInWin => EventPlaneTopicNames::GameEndedInWin.build(event_channel_id),
+                        PlayStatus::InProgress => EventPlaneTopicNames::TurnTaken.build(event_channel_id),
                         PlayStatus::NotStarted => return, // Early return. Nothing to publish.
                     }
                 } else {
@@ -78,10 +77,10 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
                 }
             }
             GamingSessionStateChanges::GameIsReady => {
-                EventPlaneTopicNames::AllPlayersReady.build(topic_prefix)
+                EventPlaneTopicNames::AllPlayersReady.build(event_channel_id)
             }
             GamingSessionStateChanges::GamingSessionDeleted => {
-                EventPlaneTopicNames::SessionDeleted.build(topic_prefix)
+                EventPlaneTopicNames::SessionDeleted.build(event_channel_id)
             }
         };
 

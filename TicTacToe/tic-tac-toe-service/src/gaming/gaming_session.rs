@@ -50,13 +50,6 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSession<T> {
         VerificationCodeGenerator::generate()
     }
 
-    /// Returns the configuration that clients can use to subscribe to Game change events.
-    #[named]
-    pub(crate) fn get_event_plane_config(&self) -> EventPlaneConfig {
-        debug!("{} called", function_name!());
-        self.event_plane_config.clone()
-    }
-
     /// Creates a new instance.
     #[named]
     pub(crate) fn new(session_owner: PlayerInfo, broker_address: String, broker_port: u16) -> Self {

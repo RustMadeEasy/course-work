@@ -79,14 +79,15 @@ pub enum EventPlaneTopicNames {
 impl EventPlaneTopicNames {
     //
 
-    /// Constructs a topic specific to the Session ID
-    pub fn build(&self, topic_prefix: &str) -> String {
+    /// Constructs a topic specific to the Channel ID
+    pub fn build(&self, event_channel_id: &str) -> String {
+        let topic_prefix = Self::build_topic_prefix(event_channel_id);
         match self {
+            EventPlaneTopicNames::AllPlayersReady => format!("{topic_prefix}/{}", EventPlaneTopicNames::AllPlayersReady),
             EventPlaneTopicNames::GameDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameDeleted),
             EventPlaneTopicNames::GameEndedInStalemate => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInStalemate),
             EventPlaneTopicNames::GameEndedInWin => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameEndedInWin),
             EventPlaneTopicNames::GameStarted => format!("{topic_prefix}/{}", EventPlaneTopicNames::GameStarted),
-            EventPlaneTopicNames::AllPlayersReady => format!("{topic_prefix}/{}", EventPlaneTopicNames::AllPlayersReady),
             EventPlaneTopicNames::TurnTaken => format!("{topic_prefix}/{}", EventPlaneTopicNames::TurnTaken),
             EventPlaneTopicNames::SessionDeleted => format!("{topic_prefix}/{}", EventPlaneTopicNames::SessionDeleted),
         }
