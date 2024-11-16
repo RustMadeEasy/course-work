@@ -15,6 +15,7 @@ use crate::models::player_info::PlayerInfo;
 use crate::models::requests::GameTurnParams;
 use crate::models::responses::TurnResponse;
 use chrono::{DateTime, Utc};
+use function_name::named;
 use log::debug;
 use serde::Serialize;
 use uuid::Uuid;
@@ -54,10 +55,11 @@ impl TicTacToeGame {
     //
 
     /// Sets up the players for the first turn.
+    #[named]
     fn begin(&mut self) {
         //
 
-        debug!("TicTacToeGame::begin()");
+        debug!("{} called", function_name!());
 
         let mut player = self.players.first().unwrap().clone();
         let mut other_player = self.players.last().unwrap().clone();
@@ -93,9 +95,13 @@ impl GameTrait for TicTacToeGame {
 
     //
 
+    /// Adds a new Player to the Game.
+    #[named]
     fn add_player(&mut self, player: &PlayerInfo) -> Result<(), GameError> {
         //
 
+        debug!("{} called", function_name!());
+        
         if self.players.len() >= 2 {
             return Err(GameError::GameHasMaximumNumberOfPlayers);
         }
@@ -110,9 +116,12 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Returns the current state of the Game Board.
+    #[named]
     fn get_current_game_state(&self) -> GameState {
         //
 
+        debug!("{} called", function_name!());
+        
         if !self.play_history.is_empty() {
             self.play_history.last().unwrap().clone()
         } else {
@@ -132,30 +141,42 @@ impl GameTrait for TicTacToeGame {
         }
     }
 
+    #[named]
     fn get_current_player(&self) -> Option<PlayerInfo> {
+        debug!("{} called", function_name!());
         self.current_player.clone()
     }
 
+    #[named]
     fn get_game_mode(&self) -> GameMode {
+        debug!("{} called", function_name!());
         self.game_mode.clone()
     }
 
     /// Returns the ID of this Game.
+    #[named]
     fn get_id(&self) -> String {
+        debug!("{} called", function_name!());
         self.id.clone()
     }
 
+    #[named]
     fn get_player_count(&self) -> i8 {
+        debug!("{} called", function_name!());
         self.players.len() as i8
     }
 
     /// Returns the Game Play History.
+    #[named]
     fn get_play_history(&self) -> Vec<GameState> {
+        debug!("{} called", function_name!());
         self.play_history.clone()
     }
 
     /// Returns the specified Player.
+    #[named]
     fn get_player_info_by_id(&self, player_id: impl Into<String>) -> Result<PlayerInfo, GameError> {
+        debug!("{} called", function_name!());
         let player_id = player_id.into();
         match self.players.iter().find(|it| it.player_id == player_id) {
             None => Err(GameError::PlayerNotFound),
@@ -163,19 +184,24 @@ impl GameTrait for TicTacToeGame {
         }
     }
 
+    #[named]
     fn get_players(&self) -> Vec<PlayerInfo> {
+        debug!("{} called", function_name!());
         self.players.clone()
     }
 
+    #[named]
     fn get_time_of_latest_move(&self) -> Option<DateTime<Utc>> {
+        debug!("{} called", function_name!());
         self.play_history.last().map(|game_state| game_state.created_date)
     }
 
     /// Creates a new instance. Note that the begin() function must be called before game play can commence.
+    #[named]
     fn new(game_mode: GameMode, session_id: &str) -> Result<Self, GameError> {
         //
 
-        debug!("TicTacToeGame::new() Creating new game. Session ID: {:?}.", session_id);
+        debug!("{} called with Session ID: {}", function_name!(), session_id);
 
         let game = Self {
             current_player: None,
@@ -190,10 +216,11 @@ impl GameTrait for TicTacToeGame {
     }
 
     /// Make a Game move for the specified Player.
+    #[named]
     fn take_turn(&mut self, game_turn_info: &GameTurnParams) -> Result<TurnResponse, GameError> {
         //
 
-        debug!("TicTacToeGame: taking game turn. Params: {:?}", game_turn_info);
+        debug!("{} called with params: {:?}", function_name!(), game_turn_info);
 
         let board_state = self.get_current_game_state();
 

@@ -12,6 +12,7 @@ use crate::gaming::gaming_session_state_changes::GamingSessionStateChanges;
 use crate::models::event_plane::EventPlaneTopicNames;
 use crate::models::play_status::PlayStatus;
 use async_trait::async_trait;
+use function_name::named;
 use log::debug;
 use mqtt_publisher_lib::broker_info::{BrokerInfo, MqttProtocolVersion};
 use mqtt_publisher_lib::publisher::Publisher;
@@ -27,6 +28,7 @@ pub(crate) struct GameUpdatesPublisher {
     /// Provides MQTT message publishing functionality.
     event_publisher: Publisher,
 
+    /// Unique ID of this Publisher instance.
     unique_id: String,
 }
 
@@ -34,7 +36,9 @@ impl GameUpdatesPublisher {
     //
 
     /// Creates a new instance.
+    #[named]
     pub(crate) fn new(broker_address: String, broker_port: u16) -> Self {
+        debug!("{} called", function_name!());
         let config = BrokerInfo::new(broker_address,
                                      10,
                                      broker_port,
@@ -48,10 +52,11 @@ impl GameUpdatesPublisher {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T> for GameUpdatesPublisher {
     //
 
+    #[named]
     async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<T>) {
         //
 
-        debug!("GameUpdatesPublisher: received session_updated() for session {}", session.session_id);
+        debug!("{} called for session {}", function_name!(), session.session_id);
 
         let topic_prefix = session.get_event_plane_config().topic_prefix;
         let topic_prefix = topic_prefix.as_str();

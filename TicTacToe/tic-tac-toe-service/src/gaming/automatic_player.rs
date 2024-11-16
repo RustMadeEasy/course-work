@@ -17,6 +17,7 @@ use crate::models::play_status::PlayStatus;
 use crate::models::player_info::PlayerInfo;
 use crate::models::requests::GameTurnParams;
 use async_trait::async_trait;
+use function_name::named;
 use log::{debug, error, info};
 use std::marker::PhantomData;
 use tokio::time::{sleep, Duration};
@@ -161,8 +162,11 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
     //
 
     /// Determines the empty locations on the specified Game Board.
+    #[named]
     pub(crate) fn determine_empty_locations(grid: &GameBoard) -> Option<Vec<BoardPosition>> {
         //
+
+        debug!("{} called", function_name!());
 
         if grid.is_empty() {
             return None;
@@ -192,9 +196,12 @@ impl<T: GameTrait + Clone + Send + Sync> AutomaticPlayer<T> {
 impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T> for AutomaticPlayer<T> {
     //
 
+    #[named]
     async fn session_updated(&self, state_change: &GamingSessionStateChanges, session: &GamingSession<T>, game: Option<T>) {
         //
 
+        debug!("{} called", function_name!());
+        
         if let Some(game) = game {
             //
 

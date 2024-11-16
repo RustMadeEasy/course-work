@@ -10,6 +10,7 @@
  */
 
 use chrono::Utc;
+use function_name::named;
 use log::debug;
 
 
@@ -33,23 +34,31 @@ impl GameState {
 
     /// Returns the ID of the Player who made the move at this Game State.
     #[allow(dead_code)]
+    #[named]
     pub(crate) fn get_id_of_player_who_made_move(&self) -> String {
+        debug!("{} called", function_name!());
         self.id_of_player_who_made_move.clone()
     }
 
     /// Returns the Game Board.
+    #[named]
     pub(crate) fn get_game_board(&self) -> GameBoard {
+        debug!("{} called", function_name!());
         self.game_board.clone()
     }
 
     /// Returns the Play Status.
     #[cfg(test)]
+    #[named]
     pub(crate) fn get_play_status(&self) -> PlayStatus {
+        debug!("{} called", function_name!());
         self.play_status.clone()
     }
 
     /// Determines whether the Game has ended.
+    #[named]
     pub(crate) fn has_ended(&self) -> bool {
+        debug!("{} called", function_name!());
         match self.play_status {
             PlayStatus::EndedInStalemate | PlayStatus::EndedInWin => true,
             PlayStatus::InProgress | PlayStatus::NotStarted => false
@@ -62,6 +71,7 @@ impl GameState {
     //
 
     /// Places the Player's Game piece at the specified board position.
+    #[named]
     pub(crate) fn place_game_piece(
         self,
         position: &BoardPosition,
@@ -70,7 +80,7 @@ impl GameState {
     ) -> Result<TurnResponse, GameError> {
         //
 
-        debug!("place_game_piece position: {:?}", position);
+        debug!("{} called. Position: {:?}", function_name!(), position);
 
         // If the Game Pieces have not been chosen, then the Game has not started.
         if current_player.game_piece == GamePiece::Unselected || other_player.game_piece == GamePiece::Unselected {
@@ -138,6 +148,7 @@ impl GameState {
     /// move.
     ///
     /// Returns PlayOutcome.
+    #[named]
     fn determine_outcome_of_play(
         game_board: &GameBoard,
         current_player: &PlayerInfo,
@@ -146,7 +157,7 @@ impl GameState {
     ) -> PlayOutcome {
         //
 
-        debug!("determine_outcome_of_play called for game board: {:?}", game_board);
+        debug!("{} called for game board: {:?}", function_name!(), game_board);
 
         let as_binary = game_board::binary_representation_for_piece_placement(
             game_board,
@@ -200,7 +211,9 @@ impl GameState {
     }
 
     /// Determines whether the specified position is a valid for the Tic-Tac-Toe Game board.
+    #[named]
     pub(crate) fn is_valid_board_position(position: &BoardPosition) -> bool {
+        debug!("{} called", function_name!());
         if position.column > (MAX_BOARD_COLUMNS - 1) || position.row > (MAX_BOARD_ROWS - 1) {
             return false;
         }
@@ -209,10 +222,13 @@ impl GameState {
 
     /// If the specified binary representation connotes a winning board layout, this method converts
     /// the binary representation to a grid-based board layout.
+    #[named]
     fn winning_board_positions_from_binary(
         binary_representation: i16,
     ) -> Option<Vec<BoardPosition>> {
         //
+
+        debug!("{} called", function_name!());
 
         let result = if (binary_representation & BIN_THREE_ACROSS_HORIZONTAL_TOP)
             == BIN_THREE_ACROSS_HORIZONTAL_TOP

@@ -100,6 +100,7 @@ pub(crate) async fn end_gaming_session(
     }
 }
 
+
 /// Retrieves the Gaming Session's current Game.
 #[utoipa::path(
     get,
@@ -144,6 +145,7 @@ pub(crate) async fn get_session_current_game(
         }
     }
 }
+
 
 /// Adds a Player to the Session's Current Game.
 #[utoipa::path(
@@ -201,6 +203,7 @@ pub(crate) async fn join_current_game(
         Err(error) => Err(error.into()),
     }
 }
+
 
 /// Adds a Player to the Gaming Session.
 #[utoipa::path(

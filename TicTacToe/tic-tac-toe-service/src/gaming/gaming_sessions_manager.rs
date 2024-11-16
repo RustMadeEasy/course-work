@@ -182,16 +182,23 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Retrieves the Gaming Session by Invitation Code.
+    #[named]
     async fn get_session_by_invitation_code(&self, invitation_code: &str) -> Option<Box<GamingSession<T>>> {
+        debug!("{} called", function_name!());
         self.sessions.lock().await.get(invitation_code).cloned()
     }
 
     /// Retrieves the Gaming Session by ID.
+    #[named]
     pub(crate) async fn get_session_by_id(&self, session_id: &str) -> Option<Box<GamingSession<T>>> {
+        debug!("{} called", function_name!());
         self.sessions.lock().await.iter().find(|it| it.1.session_id.as_str() == session_id).map(|it| it.1.clone())
     }
 
+    /// Retrieves the Gaming Session that contains the specified Game.
+    #[named]
     async fn get_session_containing_game(&self, game_id: &str) -> Option<Box<GamingSession<T>>> {
+        debug!("{} called", function_name!());
         for session in self.sessions.lock().await.iter() {
             if let Some(game) = session.1.current_game.clone() {
                 if game.get_id().as_str() == game_id {
@@ -203,12 +210,16 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Removes a new Gaming Session.
+    #[named]
     async fn _remove_session(&mut self, invitation_code: &str) {
+        debug!("{} called", function_name!());
         self.sessions.lock().await.remove(invitation_code);
     }
 
     /// Upserts a Gaming Session.
+    #[named]
     async fn upsert_session(&mut self, session: &GamingSession<T>) {
+        debug!("{} called", function_name!());
         self.sessions.lock().await.insert(session.invitation_code.clone(), Box::new(session.clone()));
     }
 }
@@ -335,7 +346,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     }
 
     /// Retrieves the specified Game.
+    #[named]
     pub(crate) async fn get_game_by_id(&self, game_id: impl Into<String>) -> Result<T, GameError> {
+        debug!("{} called", function_name!());
         match self.get_session_containing_game(&game_id.into()).await {
             None => Err(GameError::GameNotFound),
             Some(session) => {
@@ -350,13 +363,17 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
     /// Retrieves the history of the Game States from the initial creation through to the current
     /// Game State. This can be used, for instance, the client could provide an animation that
     /// shows a time-lapse of the Game play.
+    #[named]
     pub(crate) async fn get_game_history(&self, game_id: &str) -> Result<Vec<GameState>, GameError> {
+        debug!("{} called", function_name!());
         let game = self.get_game_by_id(game_id).await?;
         Ok(game.get_play_history())
     }
 
     /// Retrieves the Game being played in the specified Gaming Session.
+    #[named]
     pub(crate) async fn get_game_in_session(&self, session_id: impl Into<String>) -> Result<(GamingSession<T>, T), GameError> {
+        debug!("{} called", function_name!());
         match self.get_session_by_id(&session_id.into()).await {
             None => Err(GameError::GamingSessionNotFound),
             Some(session) => {
@@ -414,7 +431,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
             // Release the session mutex before posting the GameIsReady event so that clients can 
             // access the latest Session and Game info to complete their Game setup.
             drop(session);
-            
+
             self.notify_observers_of_game_change(GamingSessionStateChanges::GameIsReady, &session_copy, &game).await;
 
             Ok((game.clone(), session_copy.participants))
@@ -423,7 +440,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         }
     }
 
+    #[named]
     async fn remove_game(&mut self, game_id: &str) -> bool {
+        debug!("{} called", function_name!());
         match self.get_session_containing_game(game_id).await {
             None => false,
             Some(mut session) => {
@@ -483,7 +502,9 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionsManager<T> {
         }
     }
 
+    #[named]
     async fn upsert_game(&mut self, gaming_session: &GamingSession<T>, game: &T) -> GamingSession<T> {
+        debug!("{} called", function_name!());
         let mut updated_gaming_session = gaming_session.clone();
         updated_gaming_session.current_game = Some(game.clone());
         self.upsert_session(&updated_gaming_session).await;

@@ -76,6 +76,7 @@ pub(crate) async fn create_single_player_game(
     }
 }
 
+
 /// Creates a new Two-Player Game. Returns Game Creation Response.
 #[utoipa::path(
     post,
@@ -95,7 +96,7 @@ pub(crate) async fn create_two_player_game(
     // *** Validate input params ***
     validate_id_string(&session_id)?;
 
-    debug!("HTTP POST to /gaming-session/two-player-games. Session-Id: {:?}", session_id);
+    debug!("HTTP POST to /gaming-session/{}/two-player-games", session_id);
 
     let mut manager = manager.lock().await;
 
@@ -119,6 +120,7 @@ pub(crate) async fn create_two_player_game(
         Err(error) => Err(error.into()),
     }
 }
+
 
 /// Closes down the specified Game.
 #[utoipa::path(
@@ -157,6 +159,7 @@ pub(crate) async fn end_game(
     }
 }
 
+
 /// Retrieves the history of Game States from the initial move (turn) to the current Game State. 
 /// This can be used, for instance, to create an animated time-lapse of the Game play.
 #[utoipa::path(
@@ -186,6 +189,7 @@ pub(crate) async fn get_game_history(
         Err(error) => Err(error.into()),
     }
 }
+
 
 /// Retrieves the most recent Turn for the specified Game.
 #[utoipa::path(
@@ -228,6 +232,7 @@ pub(crate) async fn get_latest_game_turn(
         Err(error) => Err(error.into()),
     }
 }
+
 
 /// Retrieves the readiness of the Game's Players, answering the questions: Have all Players been
 /// added to the Game and setup?
@@ -296,6 +301,7 @@ pub(crate) async fn get_players_readiness(
     Ok(web::Json(response))
 }
 
+
 /// Make a Game move (turn) for the specified Player. Returns the Turn Response.
 #[utoipa::path(
     post,
@@ -335,6 +341,7 @@ pub(crate) async fn take_turn(
         Err(error) => Err(error.into()),
     }
 }
+
 
 /// Verifies that the specified ID is of the correct length.
 pub(crate) fn validate_id_string(id: &str) -> actix_web::Result<()> {

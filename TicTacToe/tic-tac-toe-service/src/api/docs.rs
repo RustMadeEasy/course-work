@@ -82,6 +82,7 @@ use utoipa::OpenApi;
 )]
 pub(crate) struct ApiDoc;
 
+
 /// Responds with the OpenAPI specification of this Service. This can be used to create 
 /// PostMan Collections, Client SDKs, etc.
 #[get("/api-docs")]

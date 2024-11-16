@@ -8,6 +8,8 @@
 // @author JoelDavisEngineering@Gmail.com
 
 use crate::models::game_piece::GamePiece;
+use function_name::named;
+use log::debug;
 
 /* Tic-Tac-Toe is played on a 3-by-3 grid. */
 pub(crate) const MAX_BOARD_COLUMNS: usize = 3;
@@ -35,12 +37,15 @@ pub(crate) const BIN_THREE_ACROSS_DIAGONAL_2: i16 = 0b_001_010_100;
 /// Returns a tuple whose first element is the binary representation of placements for
 /// game_piece_one and the second element is the binary representation of placements for
 /// game_piece_two.
+#[named]
 pub(crate) fn binary_representation_for_piece_placement(
     grid: &GameBoard,
     game_piece_one: &GamePiece,
     game_piece_two: &GamePiece,
 ) -> (i16, i16) {
     //
+
+    debug!("{} called", function_name!());
 
     if grid.is_empty() {
         return (0, 0);
