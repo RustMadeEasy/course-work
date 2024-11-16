@@ -10,7 +10,7 @@ use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use derive_more::{Display, Error};
 
-/// Defines the errors used throughout the service.
+/// Defines the errors used throughout the service
 #[derive(Debug, Display, Error, PartialEq)]
 pub(crate) enum GameError {
     /// The specified board location is already occupied by another Game Piece
@@ -40,7 +40,7 @@ pub(crate) enum GameError {
 impl ResponseError for GameError {
     //
 
-    /// Converts each error variant into an HTTP status code.
+    /// Converts each error variant into an HTTP status code
     fn status_code(&self) -> StatusCode {
         match *self {
             GameError::GameNotStarted
@@ -61,7 +61,7 @@ impl ResponseError for GameError {
         }
     }
 
-    /// Converts a GameError instance to an HttpResponse instance.
+    /// Converts a GameError instance to an HttpResponse instance
     fn error_response(&self) -> HttpResponse {
         HttpResponse::build(self.status_code())
             .insert_header(ContentType::html())

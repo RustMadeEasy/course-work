@@ -8,17 +8,22 @@
 use serde::Deserialize;
 use utoipa::ToSchema;
 
-/// The skill level at which the Automatic Player is to play.
+/// The skill level at which the Automatic Player is to play
 #[derive(Clone, Debug, Default, Deserialize, ToSchema)]
 pub enum AutomaticPlayerSkillLevel {
-    /// Performs random moves.
+    //
+
+    /// Performs random moves
     #[default]
     Beginner,
-    /// Takes best tactical moves.
+
+    /// Takes best tactical moves
     Intermediate,
-    /// Takes the best strategic moves, looking several moves into the future.
+
+    /// Takes the best strategic moves, looking several moves into the future
     Expert,
+
     /// Expands on the expert level by also making moves that can trick the other player into making
-    /// wrong moves.
+    /// wrong moves
     Master,
 }

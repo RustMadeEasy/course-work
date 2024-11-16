@@ -201,7 +201,7 @@ impl<T: GameTrait + Clone + Send + Sync + 'static> GamingSessionObserverTrait<T>
         //
 
         debug!("{} called", function_name!());
-        
+
         if let Some(game) = game {
             //
 

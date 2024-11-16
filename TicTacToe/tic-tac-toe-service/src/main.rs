@@ -29,7 +29,7 @@ pub(crate) mod api;
 mod gaming;
 mod models;
 
-/// The HTTP port through which this service is accessed.
+/// The HTTP port through which this service is accessed
 const PORT: u16 = 50020;
 
 /// This is the entry point for the Service
@@ -40,7 +40,7 @@ async fn main() -> std::io::Result<()> {
     // Get the logger setup
     env_logger::init();
 
-    // Nothing wrong with a fun startup banner
+    // Let's show a fun startup banner
     print_startup_banner();
 
     info!("Launched on port: {PORT}");
@@ -80,17 +80,17 @@ async fn main() -> std::io::Result<()> {
         .await
 }
 
-/// Prints a cool startup banner to the logging facility.
+/// Prints a cool startup banner to the logging facility
 fn print_startup_banner() {
     info!(
-        "
-  _______ _   _______      _______                _____                 _
- |__   __(_) |__   __|    |__   __|              / ____|               (_)
-    | |   _  ___| | __ _  ___| | ___   ___      | (___   ___ _ ____   ___  ___ ___
-    | |  | |/ __| |/ _` |/ __| |/ _ \\ / _ \\      \\___ \\ / _ \\ '__\\ \\ / / |/ __/ _ \\
-    | |  | | (__| | (_| | (__| | (_) |  __/      ____) |  __/ |   \\ V /| | (_|  __/
-    |_|  |_|\\___|_|\\__,_|\\___|_|\\___/ \\___|     |_____/ \\___|_|    \\_/ |_|\\___\\___|\
-    \r\n
-    © {} Rust Made Easy. All rights reserved.\r\n
-", Utc::now().year() );
+    "
+      _______ _   _______      _______                _____                 _
+     |__   __(_) |__   __|    |__   __|              / ____|               (_)
+        | |   _  ___| | __ _  ___| | ___   ___      | (___   ___ _ ____   ___  ___ ___
+        | |  | |/ __| |/ _` |/ __| |/ _ \\ / _ \\      \\___ \\ / _ \\ '__\\ \\ / / |/ __/ _ \\
+        | |  | | (__| | (_| | (__| | (_) |  __/      ____) |  __/ |   \\ V /| | (_|  __/
+        |_|  |_|\\___|_|\\__,_|\\___|_|\\___/ \\___|     |_____/ \\___|_|    \\_/ |_|\\___\\___|\
+        \r\n
+        © {} Rust Made Easy. All rights reserved.\r\n
+    ", Utc::now().year() );
 }

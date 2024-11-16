@@ -101,7 +101,7 @@ impl GameTrait for TicTacToeGame {
         //
 
         debug!("{} called", function_name!());
-        
+
         if self.players.len() >= 2 {
             return Err(GameError::GameHasMaximumNumberOfPlayers);
         }
@@ -121,7 +121,7 @@ impl GameTrait for TicTacToeGame {
         //
 
         debug!("{} called", function_name!());
-        
+
         if !self.play_history.is_empty() {
             self.play_history.last().unwrap().clone()
         } else {
